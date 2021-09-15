@@ -6,6 +6,7 @@
     <TargetFramework>net45</TargetFramework>
     <OutputType>Library</OutputType>
     <LangVersion>6</LangVersion>
+    <DefineConstants>VAM_GT_1_20;VAM_GT_1_20_77_0</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Platform)' == 'Unity' ">
@@ -16,7 +17,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCpu' ">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
     <FileAlignment>4096</FileAlignment>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -62,7 +63,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="MyPlugin.cs" />
+    <!-- SourceFiles -->
+    <Compile Include="src\Balance.cs" />
+    <Compile Include="src\Walk.cs" />
+    <!-- /SourceFiles -->
   </ItemGroup>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

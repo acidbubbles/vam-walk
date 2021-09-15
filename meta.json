@@ -1,15 +1,17 @@
 { 
    "licenseType" : "CC BY-SA", 
-   "creatorName" : "Author", 
-   "packageName" : "MyPlugin", 
+   "creatorName" : "AcidBubbles", 
+   "packageName" : "Walk", 
    "includeVersionsInReferences" : "true", 
-   "description" : "v0.0.0 MyPlugin Description", 
+   "description" : "v0.0.0 Makes the model walk around, made for possession.", 
    "credits" : "", 
    "instructions" : "", 
-   "promotionalLink" : "https://github.com/Author/MyPlugin", 
-   "programVersion" : "1.19.0.5", 
+   "promotionalLink" : "https://github.com/acidbubbles/MyPlugin", 
+   "programVersion" : "1.20.1.0", 
    "contentList" : [ 
-      "Custom\\Scripts\\Author\\MyPlugin\\MyPlugin.cs"
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Balance.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Walk.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\Walk.cslist"
    ], 
    "dependencies" : { 
    }
