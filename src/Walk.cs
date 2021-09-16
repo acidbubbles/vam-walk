@@ -1,6 +1,6 @@
 public class Walk : MVRScript
 {
-    private WalkContext _context;
+    private BalanceContext _context;
 
     public override void Init()
     {
@@ -10,7 +10,7 @@ public class Walk : MVRScript
             enabled = false;
             return;
         }
-        _context = new WalkContext(this);
+        _context = new BalanceContext(this);
     }
 
     public void Update()

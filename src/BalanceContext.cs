@@ -1,17 +1,21 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-public class WalkContext
+public class BalanceContext
 {
     public IWalkState currentState
     {
         get { return _currentState; }
         set
         {
+            if (_currentState != null) _currentState.Leave();
             _currentState = value;
+            _currentState.Enter();
             SuperController.LogMessage($"Walk: State changed to {value}");
         }
     }
+
+    public readonly Atom containingAtom;
 
     public readonly IdleState idleState;
     public readonly MovingState movingState;
@@ -22,12 +26,14 @@ public class WalkContext
     private readonly FreeControllerV3 _lFootControl;
     private readonly FreeControllerV3 _rFootControl;
 
-    public WalkContext(MVRScript plugin)
+    public BalanceContext(MVRScript plugin)
     {
-        _headControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "headControl");
-        _hipControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "hipControl");
-        _lFootControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "lFootControl");
-        _rFootControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "rFootControl");
+        containingAtom = plugin.containingAtom;
+
+        _headControl = containingAtom.freeControllers.First(fc => fc.name == "headControl");
+        _hipControl = containingAtom.freeControllers.First(fc => fc.name == "hipControl");
+        _lFootControl = containingAtom.freeControllers.First(fc => fc.name == "lFootControl");
+        _rFootControl = containingAtom.freeControllers.First(fc => fc.name == "rFootControl");
 
         idleState = new IdleState(this);
         movingState = new MovingState(this);
@@ -35,23 +41,31 @@ public class WalkContext
         currentState = idleState;
     }
 
-    public bool IsBalanced()
+    public Vector3 GetFeetCenter()
     {
-        // TODO: Consider weighted average, and potentially more controls
+        // TODO: Verify the rigidbody position, not the control
         var lFootControlPosition = _lFootControl.control.position;
         var rFootControlPosition = _rFootControl.control.position;
-        var feetCenter = (lFootControlPosition + rFootControlPosition) / 2f;
-        // TODO: We might want to add an offset
-        var feetCenterStableRadius = rFootControlPosition.PlanarDistance(lFootControlPosition) / 2f;
+        return (lFootControlPosition + rFootControlPosition) / 2f;
+    }
 
+    public float GetFeetCenterRadius()
+    {
+        var lFootControlPosition = _lFootControl.control.position;
+        var rFootControlPosition = _rFootControl.control.position;
+        var feetCenterStableRadius = rFootControlPosition.PlanarDistance(lFootControlPosition) / 2f;
+        // TODO: We might want to add an offset
+        // TODO: We need to make an ellipse, more stable in feet direction, less perpendicular to the feet line
+        return feetCenterStableRadius;
+    }
+
+    public Vector3 GetWeightCenter()
+    {
+        // TODO: Consider weighted average, and potentially more controls
         var headControlPosition = _headControl.control.position;
         var hipControlPosition = _hipControl.control.position;
         var weightCenter = (headControlPosition + hipControlPosition) / 2f;
-
-        // TODO: We need to make an ellipse, more stable in feet direction, less perpendicular to the feet line
-        var distanceFromStable = feetCenter.PlanarDistance(weightCenter);
-
-        return distanceFromStable < feetCenterStableRadius;
+        return weightCenter;
     }
 
     public void Update()
