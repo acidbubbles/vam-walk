@@ -44,8 +44,6 @@ public class FootState
     {
         const float distanceEpsilon = 0.01f;
         const float rotationEpsilon = 0.8f;
-        SuperController.singleton.ClearMessages();
-        SuperController.LogMessage($"{Quaternion.Dot(controller.control.rotation, targetRotation)}");
         return
             Vector3.Distance(controller.control.position, targetPosition) < distanceEpsilon &&
             // TODO: Validate those epsilons

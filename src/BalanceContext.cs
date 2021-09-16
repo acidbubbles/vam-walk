@@ -11,7 +11,6 @@ public class BalanceContext
             if (_currentState != null) _currentState.Leave();
             _currentState = value;
             _currentState.Enter();
-            SuperController.LogMessage($"Walk: State changed to {value}");
         }
     }
 
