@@ -6,7 +6,7 @@ public class MovingState : IWalkState
     // TODO: This should be a setting
     const float footRightOffset = 0.12f;
     const float footUpOffset = 0.01f;
-    const float maxStepDistance = 0.8f;
+    const float maxStepDistance = 1.2f;
 
     private readonly BalanceContext _context;
     private readonly FreeControllerV3 _headControl;
