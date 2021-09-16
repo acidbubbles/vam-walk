@@ -6,6 +6,7 @@ public class MovingState : IWalkState
     // TODO: This should be a setting
     const float footRightOffset = 0.12f;
     const float footUpOffset = 0.01f;
+    const float maxStepDistance = 0.8f;
 
     private readonly BalanceContext _context;
     private readonly FreeControllerV3 _headControl;
@@ -14,6 +15,7 @@ public class MovingState : IWalkState
     private bool _doLastStep;
 
     private FootState _currentFootState;
+    private FootState _nonCurrentFootState => _currentFootState == _lFootState ? _rFootState : _lFootState;
 
     public MovingState(BalanceContext context)
     {
@@ -34,36 +36,26 @@ public class MovingState : IWalkState
 
     public void Enter()
     {
-        SelectFoot();
+        SelectCurrentFoot();
+        var weightCenter = _context.GetBodyCenter();
+        SetFootTarget(_lFootState, weightCenter);
+        SetFootTarget(_rFootState, weightCenter);
     }
 
-    private void SelectFoot()
+    private void SelectCurrentFoot()
     {
         var weightCenter = _context.GetBodyCenter();
         _currentFootState = _lFootState.controller.control.position.PlanarDistance(weightCenter) > _rFootState.controller.control.position.PlanarDistance(weightCenter)
             ? _lFootState
             : _rFootState;
-        // TODO: Should be an option
-        const float maxStepDistance = 0.8f;
-        // TODO: The y distance should never be considered
-        var target = weightCenter + _headControl.control.rotation * _currentFootState.footPositionOffset;
-        target.y = footUpOffset;
-        _currentFootState.SetTarget(Vector3.MoveTowards(
-                _currentFootState.controller.control.position,
-                target,
-                maxStepDistance
-            ),
-            Quaternion.LookRotation(Vector3.ProjectOnPlane(_headControl.control.forward, Vector3.up), Vector3.up)
-        );
     }
 
     public void Update()
     {
         _currentFootState.Update();
-
         if (!_currentFootState.OnTarget()) return;
 
-        if (IsBalancedPosition() && IsBalancedRotation())
+        if (_nonCurrentFootState.OnTarget())
         {
             if (_doLastStep)
             {
@@ -71,27 +63,31 @@ public class MovingState : IWalkState
                 _context.currentState = _context.idleState;
                 return;
             }
+            // TODO: Sometimes the last step doesn't seem to run?
             _doLastStep = true;
         }
 
-        SelectFoot();
-    }
-
-    private bool IsBalancedPosition()
-    {
-        const float distanceEpsilon = 0.01f;
-        return _context.GetFeetCenter().PlanarDistance(_context.GetBodyCenter()) < distanceEpsilon;
-    }
-
-    private bool IsBalancedRotation()
-    {
-        const float rotationEpsilon = 1f;
-        return Vector3.Angle(_context.GetFeetForward(), _context.GetBodyForward()) < rotationEpsilon;
+        SelectCurrentFoot();
+        SetFootTarget(_currentFootState, _context.GetBodyCenter());
     }
 
     public void Leave()
     {
         _doLastStep = false;
         _currentFootState = null;
+    }
+
+    private void SetFootTarget(FootState footState, Vector3 weightCenter)
+    {
+        // TODO: The y distance should never be considered
+        var target = weightCenter + _headControl.control.rotation * footState.footPositionOffset;
+        target.y = footUpOffset;
+        footState.SetTarget(Vector3.MoveTowards(
+                footState.controller.control.position,
+                target,
+                maxStepDistance
+            ),
+            Quaternion.LookRotation(Vector3.ProjectOnPlane(_headControl.control.forward, Vector3.up), Vector3.up)
+        );
     }
 }
