@@ -1,2 +1,5 @@
-src\Balance.cs
+src\IdleState.cs
+src\IWalkState.cs
+src\MovingState.cs
 src\Walk.cs
+src\WalkContext.cs

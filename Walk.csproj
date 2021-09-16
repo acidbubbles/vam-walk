@@ -64,8 +64,11 @@
 
   <ItemGroup>
     <!-- SourceFiles -->
-    <Compile Include="src\Balance.cs" />
+    <Compile Include="src\IdleState.cs" />
+    <Compile Include="src\IWalkState.cs" />
+    <Compile Include="src\MovingState.cs" />
     <Compile Include="src\Walk.cs" />
+    <Compile Include="src\WalkContext.cs" />
     <!-- /SourceFiles -->
   </ItemGroup>
 
