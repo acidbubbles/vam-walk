@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" 
-  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
@@ -67,6 +66,7 @@
     <Compile Include="src\IdleState.cs" />
     <Compile Include="src\IWalkState.cs" />
     <Compile Include="src\MovingState.cs" />
+    <Compile Include="src\Vector3Extensions.cs" />
     <Compile Include="src\Walk.cs" />
     <Compile Include="src\WalkContext.cs" />
     <!-- /SourceFiles -->

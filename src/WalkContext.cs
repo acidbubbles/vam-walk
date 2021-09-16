@@ -3,18 +3,31 @@ using UnityEngine;
 
 public class WalkContext
 {
-    public IWalkState currentState { get; set; }
+    public IWalkState currentState
+    {
+        get { return _currentState; }
+        set
+        {
+            _currentState = value;
+            SuperController.LogMessage($"Walk: State changed to {value}");
+        }
+    }
 
     public readonly IdleState idleState;
     public readonly MovingState movingState;
 
     private readonly FreeControllerV3 _headControl;
     private readonly FreeControllerV3 _hipControl;
+    private IWalkState _currentState;
+    private readonly FreeControllerV3 _lFootControl;
+    private readonly FreeControllerV3 _rFootControl;
 
     public WalkContext(MVRScript plugin)
     {
         _headControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "headControl");
         _hipControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "hipControl");
+        _lFootControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "lFootControl");
+        _rFootControl = plugin.containingAtom.freeControllers.First(fc => fc.name == "rFootControl");
 
         idleState = new IdleState(this);
         movingState = new MovingState(this);
@@ -24,7 +37,21 @@ public class WalkContext
 
     public bool IsBalanced()
     {
-        return true;
+        // TODO: Consider weighted average, and potentially more controls
+        var lFootControlPosition = _lFootControl.control.position;
+        var rFootControlPosition = _rFootControl.control.position;
+        var feetCenter = (lFootControlPosition + rFootControlPosition) / 2f;
+        // TODO: We might want to add an offset
+        var feetCenterStableRadius = rFootControlPosition.PlanarDistance(lFootControlPosition) / 2f;
+
+        var headControlPosition = _headControl.control.position;
+        var hipControlPosition = _hipControl.control.position;
+        var weightCenter = (headControlPosition + hipControlPosition) / 2f;
+
+        // TODO: We need to make an ellipse, more stable in feet direction, less perpendicular to the feet line
+        var distanceFromStable = feetCenter.PlanarDistance(weightCenter);
+
+        return distanceFromStable < feetCenterStableRadius;
     }
 
     public void Update()

@@ -1,5 +1,6 @@
 src\IdleState.cs
 src\IWalkState.cs
 src\MovingState.cs
+src\Vector3Extensions.cs
 src\Walk.cs
 src\WalkContext.cs
