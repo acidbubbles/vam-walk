@@ -59,7 +59,7 @@ public class BalanceContext
         return feetCenterStableRadius;
     }
 
-    public Vector3 GetWeightCenter()
+    public Vector3 GetBodyCenter()
     {
         // TODO: Consider weighted average, and potentially more controls
         var headControlPosition = _headControl.control.position;
@@ -85,5 +85,16 @@ public class BalanceContext
         var headControlPosition = _headControl.control.position;
         var hipControlPosition = _hipControl.control.position;
         _hipControl.control.position = new Vector3(headControlPosition.x, hipControlPosition.y, headControlPosition.z);
+    }
+
+    public Vector3 GetFeetForward()
+    {
+        // TODO: Cheap plane to get a perpendicular direction to the feet line, there is surely a better method
+        return Vector3.Cross(_rFootControl.control.position - _lFootControl.control.position, Vector3.up).normalized;
+    }
+
+    public Vector3 GetBodyForward()
+    {
+        return Quaternion.LookRotation(_hipControl.control.forward, Vector3.up) * Vector3.forward;
     }
 }
