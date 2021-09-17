@@ -13,7 +13,7 @@ public class IdleState : IWalkState
     {
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
         if (IsOffBalanceDistance() || IsOffBalanceRotation())
         {

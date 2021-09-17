@@ -4,9 +4,9 @@ using UnityEngine;
 public class MovingState : IWalkState
 {
     // TODO: This should be a setting
-    const float footRightOffset = 0.12f;
-    const float footUpOffset = 0.01f;
-    const float maxStepDistance = 1.5f;
+    const float footRightOffset = 0.09f;
+    const float footUpOffset = 0.05f;
+    const float maxStepDistance = 0.9f;
 
     private readonly BalanceContext _context;
     private readonly FreeControllerV3 _headControl;
@@ -20,15 +20,16 @@ public class MovingState : IWalkState
         _context = context;
         // TODO: Head or hip?
         _headControl = _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl");
+        // TODO: Comfortable y angle is 14.81f, reduce for walking
         _lFootState = new FootState(
             _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
             new Vector3(-footRightOffset, footUpOffset, 0f),
-            new Vector3(18.42f, -14.81f, -2.42f)
+            new Vector3(18.42f, -8.81f, 2.42f)
         );
         _rFootState = new FootState(
             _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
             new Vector3(footRightOffset, footUpOffset, 0f),
-            new Vector3(18.42f, 14.81f, 2.42f)
+            new Vector3(18.42f, 8.81f, -2.42f)
         );
     }
 
@@ -48,9 +49,9 @@ public class MovingState : IWalkState
             : _rFootState;
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
-        _currentFootState.Update();
+        _currentFootState.FixedUpdate();
         if (!_currentFootState.IsDone()) return;
 
         if (FeetAreStable())
@@ -59,7 +60,7 @@ public class MovingState : IWalkState
             return;
         }
 
-        SelectCurrentFoot();
+        _currentFootState = _currentFootState == _lFootState ? _rFootState : _lFootState;
         PlotFootCourse(_currentFootState, _context.GetBodyCenter());
     }
 
@@ -81,10 +82,9 @@ public class MovingState : IWalkState
 
     private void PlotFootCourse(FootState footState, Vector3 weightCenter)
     {
-        var target = GetFootFinalPosition(footState, weightCenter);
         footState.PlotCourse(Vector3.MoveTowards(
                 footState.controller.control.position,
-                target,
+                GetFootFinalPosition(footState, weightCenter),
                 maxStepDistance
             ),
             GetFootFinalRotation()
@@ -93,10 +93,14 @@ public class MovingState : IWalkState
 
     private Vector3 GetFootFinalPosition(FootState footState, Vector3 weightCenter)
     {
-        // TODO: The y distance should never be considered
-        var target = weightCenter + _headControl.control.rotation * footState.footPositionOffset;
+        var bodyRotation = _context.GetBodyRotation();
+        // TODO: Make configurable (bend forward distance)
+        var target = weightCenter + bodyRotation * footState.footPositionOffset + bodyRotation * (Vector3.back * 0.06f);
         target.y = footUpOffset;
-        return target;
+        var velocity = _context.GetBodyVelocity();
+        var planarVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
+        // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict
+        return target + planarVelocity * (0.7f * 0.9f);
     }
 
     private Quaternion GetFootFinalRotation()

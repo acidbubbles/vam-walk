@@ -13,8 +13,8 @@ public class Walk : MVRScript
         _context = new BalanceContext(this);
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
-        _context.Update();
+        _context.FixedUpdate();
     }
 }

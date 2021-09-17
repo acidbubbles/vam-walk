@@ -1,6 +1,6 @@
 ﻿public interface IWalkState
 {
     void Enter();
-    void Update();
+    void FixedUpdate();
     void Leave();
 }
