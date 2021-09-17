@@ -82,7 +82,7 @@ public class MovingState : IWalkState
         // TODO: The y distance should never be considered
         var target = weightCenter + _headControl.control.rotation * footState.footPositionOffset;
         target.y = footUpOffset;
-        footState.SetTarget(Vector3.MoveTowards(
+        footState.PlotCourse(Vector3.MoveTowards(
                 footState.controller.control.position,
                 target,
                 maxStepDistance
