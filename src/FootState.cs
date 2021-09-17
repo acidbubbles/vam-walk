@@ -112,9 +112,9 @@ public class FootState
         // TODO: Move quaternions as fields (configurable)
         // TODO: Reverse 1 and 2 if going backwards
         // TODO: Reduce to zero if going sideways
-        var toeOffRotation = Quaternion.Euler(30f * distanceRatio * forwardRatio, 0, 0) * currentRotation;
-        var midSwingRotation = Quaternion.Euler(10 * distanceRatio * forwardRatio, 0, 0) * rotation;
-        var heelStrikeRotation = Quaternion.Euler(-40 * distanceRatio * forwardRatio, 0, 0) * rotation;
+        var toeOffRotation = currentRotation * Quaternion.Euler(10f * distanceRatio * forwardRatio, 0, 0);
+        var midSwingRotation = rotation * Quaternion.Euler(10 * distanceRatio * forwardRatio, 0, 0);
+        var heelStrikeRotation = rotation * Quaternion.Euler(-20 * distanceRatio * forwardRatio, 0, 0);
 
         EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);

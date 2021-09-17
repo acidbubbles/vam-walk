@@ -26,6 +26,9 @@ public class BalanceContext
 
     private IWalkState _currentState;
     private Vector3 _lastBodyCenter;
+    // TODO: Determine how many frames based on the physics rate
+    private readonly Vector3[] _lastVelocities = new Vector3[90];
+    private int _currentVelocityIndex;
 
     public BalanceContext(MVRScript plugin)
     {
@@ -40,13 +43,18 @@ public class BalanceContext
         movingState = new MovingState(this);
 
         currentState = idleState;
+
+        _lastBodyCenter = GetBodyCenter();
     }
 
     public void FixedUpdate()
     {
         currentState.FixedUpdate();
         UpdateHips();
-        _lastBodyCenter = GetBodyCenter();
+        var bodyCenter = GetBodyCenter();
+        _lastVelocities[_currentVelocityIndex++] = bodyCenter - _lastBodyCenter;
+        if (_currentVelocityIndex == _lastVelocities.Length) _currentVelocityIndex = 0;
+        _lastBodyCenter = bodyCenter;
     }
 
     private void UpdateHips()
@@ -68,8 +76,10 @@ public class BalanceContext
 
     public Vector3 GetBodyVelocity()
     {
-        // TODO: This should be averaged against multiple frames, and we should take into account the delta time
-        return (GetBodyCenter() - _lastBodyCenter) / Time.deltaTime;
+        var sumVelocities = Vector3.zero;
+        for (var i = 0; i < _lastVelocities.Length; i++)
+            sumVelocities += _lastVelocities[i];
+        return sumVelocities / _lastVelocities.Length / Time.deltaTime;
     }
 
     public Vector3 GetFeetCenter()

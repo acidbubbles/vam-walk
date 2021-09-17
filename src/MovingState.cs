@@ -100,7 +100,7 @@ public class MovingState : IWalkState
         var velocity = _context.GetBodyVelocity();
         var planarVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
         // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict
-        return target + planarVelocity * (0.7f * 0.9f);
+        return target + planarVelocity * (0.7f * 0.6f);
     }
 
     private Quaternion GetFootFinalRotation()
