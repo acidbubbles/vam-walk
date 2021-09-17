@@ -6,9 +6,9 @@ public class FootState
     const float maxStepMoveSpeed = 0.01f;
     const float maxStepRotateSpeed = 5f;
     private const float stepTime = 0.5f;
-    private const float midStepTime = 0.25f;
+    // TODO: Make those percentage
     private const float stepHeight = 0.16f;
-    private const float third1StepTime = 0.15f;
+    private const float third1StepTime = 0.25f;
     private const float third2StepTime = 0.4f;
 
     public readonly FreeControllerV3 controller;
@@ -33,15 +33,14 @@ public class FootState
         this.controller = controller;
         this.footPositionOffset = footPositionOffset;
         this.footRotationOffset = Quaternion.Euler(footRotationOffset);
-        var emptyPositionKeys = new[]{new Keyframe(0, 0), new Keyframe(midStepTime, 0), new Keyframe(stepTime, 0)};
-        _xCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyPositionKeys };
-        _yCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyPositionKeys };
-        _zCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyPositionKeys };
-        var emptyRotationKeys = new[]{new Keyframe(0, 0), new Keyframe(third1StepTime, 0), new Keyframe(third2StepTime, 0), new Keyframe(stepTime, 0)};
-        _rotXCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyRotationKeys };
-        _rotYCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyRotationKeys };
-        _rotZCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyRotationKeys };
-        _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyRotationKeys };
+        var emptyKeys = new[]{new Keyframe(0, 0), new Keyframe(third1StepTime, 0), new Keyframe(third2StepTime, 0), new Keyframe(stepTime, 0)};
+        _xCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
+        _yCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
+        _zCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
+        _rotXCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
+        _rotYCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
+        _rotZCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
+        _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
     }
 
     public void PlotCourse(Vector3 position, Quaternion rotation)
@@ -49,6 +48,7 @@ public class FootState
         targetPosition = position;
         targetRotation = footRotationOffset * rotation;
         _startTime = Time.time;
+        // TODO: Adjust height and rotation based on percentage of distance
         PlotPosition(position);
         PlotRotation(rotation);
     }
@@ -56,29 +56,39 @@ public class FootState
     private void PlotPosition(Vector3 position)
     {
         var currentPosition = controller.control.position;
+        var third1Position = currentPosition * 0.8f + position * 0.2f + Vector3.up * stepHeight;
+        var third2Position = currentPosition * 0.3f + position * 0.7f + Vector3.up * stepHeight;
 
         _xCurve.MoveKey(0, new Keyframe(0, currentPosition.x));
-        _xCurve.MoveKey(1, new Keyframe(midStepTime, (currentPosition.x + position.x) / 2f));
-        _xCurve.MoveKey(2, new Keyframe(stepTime, position.x));
+        _xCurve.MoveKey(1, new Keyframe(third1StepTime, third1Position.x));
+        _xCurve.MoveKey(2, new Keyframe(third2StepTime, third2Position.x));
+        _xCurve.MoveKey(3, new Keyframe(stepTime, position.x));
         _xCurve.SmoothTangents(1, 1);
+        _xCurve.SmoothTangents(2, 1);
 
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         _yCurve.MoveKey(0, new Keyframe(0, currentPosition.y));
-        _yCurve.MoveKey(1, new Keyframe(midStepTime, (currentPosition.y + position.y) / 2f + stepHeight));
-        _yCurve.MoveKey(2, new Keyframe(stepTime, position.y));
+        _yCurve.MoveKey(1, new Keyframe(third1StepTime, third1Position.y));
+        _yCurve.MoveKey(2, new Keyframe(third2StepTime, third2Position.y));
+        _yCurve.MoveKey(3, new Keyframe(stepTime, position.y));
         _yCurve.SmoothTangents(1, 1);
+        _yCurve.SmoothTangents(2, 1);
 
         _zCurve.MoveKey(0, new Keyframe(0, currentPosition.z));
-        _zCurve.MoveKey(1, new Keyframe(midStepTime, (currentPosition.z + position.z) / 2f));
-        _zCurve.MoveKey(2, new Keyframe(stepTime, position.z));
+        _zCurve.MoveKey(1, new Keyframe(third1StepTime, third1Position.z));
+        _zCurve.MoveKey(2, new Keyframe(third2StepTime, third2Position.z));
+        _zCurve.MoveKey(3, new Keyframe(stepTime, position.z));
         _zCurve.SmoothTangents(1, 1);
+        _zCurve.SmoothTangents(2, 1);
     }
 
     private void PlotRotation(Quaternion rotation)
     {
         var currentRotation = controller.control.rotation;
-        var third1Rotation = rotation;
-        var third2Rotation = rotation;
+        // TODO: Move quaternions as fields (configurable)
+        // TODO: Reverse 1 and 2 if going backwards
+        var third1Rotation = Quaternion.Euler(50, 0, 0) * currentRotation;
+        var third2Rotation = Quaternion.Euler(-20, 0, 0) * rotation;
 
         _rotXCurve.MoveKey(0, new Keyframe(0, currentRotation.x));
         _rotXCurve.MoveKey(1, new Keyframe(third1StepTime, third1Rotation.x));
@@ -130,15 +140,9 @@ public class FootState
         );
     }
 
-    public bool OnTarget()
+    public bool IsDone()
     {
-        // TODO: Finish step and check for general balance, the step should just use time
-        #warning Invalid
-        const float distanceEpsilon = 0.01f;
-        const float rotationEpsilon = 0.8f;
-        return
-            Vector3.Distance(controller.control.position, targetPosition) < distanceEpsilon &&
-            // TODO: Validate those epsilons
-            Quaternion.Dot(controller.control.rotation, targetRotation) > rotationEpsilon;
+        // TODO: If the distance is to great we may have to re-plot the course or step down faster
+        return Time.time >= _startTime + stepTime;
     }
 }
