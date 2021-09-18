@@ -4,6 +4,7 @@ public class FootState : MonoBehaviour
 {
     public FreeControllerV3 controller;
     public FootConfig config;
+    private FootStateVisualizer _visualizer;
 
     public Vector3 position => controller.control.position; // TODO: - config.footFloorOffset;
 
@@ -53,10 +54,11 @@ public class FootState : MonoBehaviour
         _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
     }
 
-    public void Configure(FreeControllerV3 controller, FootConfig config)
+    public void Configure(FreeControllerV3 controller, FootConfig config, FootStateVisualizer visualizer)
     {
         this.controller = controller;
         this.config = config;
+        _visualizer = visualizer;
     }
 
     public void PlotCourse(Vector3 position, Quaternion rotation)
@@ -71,6 +73,7 @@ public class FootState : MonoBehaviour
         // TODO: We can animate the knee too
         PlotPosition(_targetPosition, distanceRatio);
         PlotRotation(_targetRotation, distanceRatio, forwardRatio);
+        _visualizer.Sync(_xCurve, _yCurve, _zCurve);
     }
 
     private void PlotPosition(Vector3 position, float distanceRatio)

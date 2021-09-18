@@ -37,19 +37,26 @@ public class Walk : MVRScript
 
     private void SetupDependencyTree(WalkStyle style)
     {
-        var lFoot = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
+        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { });
+
+        var lFootState = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
-            new FootConfig(style, -1)
+            new FootConfig(style, -1),
+            lFootStateVisualizer
         ));
-        var rFoot = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
+
+        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { });
+
+        var rFootState = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
-            new FootConfig(style, 1)
+            new FootConfig(style, 1),
+            rFootStateVisualizer
         ));
 
         var context = AddWalkComponent<WalkContext>("Context", c => c.Configure(
             this,
-            lFoot,
-            rFoot
+            lFootState,
+            rFootState
         ));
 
         var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { });

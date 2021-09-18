@@ -65,6 +65,7 @@
     <!-- SourceFiles -->
     <Compile Include="src\FootConfig.cs" />
     <Compile Include="src\FootState.cs" />
+    <Compile Include="src\FootStateVisualizer.cs" />
     <Compile Include="src\IdleState.cs" />
     <Compile Include="src\IdleStateVisualizer.cs" />
     <Compile Include="src\IWalkState.cs" />
