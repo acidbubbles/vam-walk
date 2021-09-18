@@ -15,6 +15,7 @@
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\IWalkState.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\MovingState.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\StateMachine.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\TransformExtensions.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Vector3Extensions.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Walk.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\WalkContext.cs",

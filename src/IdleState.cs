@@ -40,9 +40,7 @@ public class IdleState : MonoBehaviour, IWalkState
         // TODO: This distance is also in MovingState
         var feetCenter = (lFootControlPosition + rFootControlPosition) / 2f + _context.GetFeetForward() * 0.06f;
         var stableRadius = GetFeetCenterRadius();
-        _visualizer.bodyCenter = bodyCenter;
-        _visualizer.feetCenter = feetCenter;
-        _visualizer.stableRadius = new Vector2(stableRadius, stableRadius);
+        _visualizer.Sync(bodyCenter, feetCenter, new Vector2(stableRadius, stableRadius));
         return feetCenter.PlanarDistance(bodyCenter) >  stableRadius;
     }
 
@@ -65,43 +63,16 @@ public class IdleState : MonoBehaviour, IWalkState
 
 public class IdleStateVisualizer : MonoBehaviour
 {
-    public Vector3 bodyCenter;
-    public Vector3 feetCenter;
-    public Vector2 stableRadius;
     private LineRenderer _stableCircleLineRenderer;
     private LineRenderer _bodyCenterLineRenderer;
 
     public void Awake()
     {
-        // var shaders = Resources.FindObjectsOfTypeAll<Shader>();
-        // foreach(var s in shaders)
-        //     SuperController.LogMessage(s.name);
-        var stableCircleGO = new GameObject();
-        stableCircleGO.transform.SetParent(transform, false);
-        _stableCircleLineRenderer = stableCircleGO.AddComponent<LineRenderer>();
-        _stableCircleLineRenderer.useWorldSpace = true;
-        _stableCircleLineRenderer.material = new Material(Shader.Find("Battlehub/RTHandles/Grid"));
-        _stableCircleLineRenderer.colorGradient = new Gradient
-        {
-            colorKeys = new[] { new GradientColorKey(Color.green, 0f) }
-        };
-        _stableCircleLineRenderer.widthMultiplier = 0.005f;
-        _stableCircleLineRenderer.positionCount = 20;
-
-        var bodyCenterGO = new GameObject();
-        bodyCenterGO.transform.SetParent(transform, false);
-        _bodyCenterLineRenderer = bodyCenterGO.AddComponent<LineRenderer>();
-        _bodyCenterLineRenderer.useWorldSpace = true;
-        _bodyCenterLineRenderer.material = new Material(Shader.Find("Battlehub/RTHandles/Grid"));
-        _bodyCenterLineRenderer.colorGradient = new Gradient
-        {
-            colorKeys = new[] { new GradientColorKey(Color.blue, 0f), new GradientColorKey(Color.clear, 1f) }
-        };
-        _bodyCenterLineRenderer.widthMultiplier = 0.005f;
-        _bodyCenterLineRenderer.positionCount = 2;
+        _stableCircleLineRenderer = transform.CreateVisualizerLineRenderer(20, Color.green);
+        _bodyCenterLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.green);
     }
 
-    public void Update()
+    public void Sync(Vector3 bodyCenter, Vector3 feetCenter, Vector2 stableRadius)
     {
         for (var i = 0; i < _stableCircleLineRenderer.positionCount; i++)
         {
