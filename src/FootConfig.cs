@@ -6,6 +6,7 @@ public class FootConfig
 
     private readonly float _inverse;
 
+    public Vector3 footFloorOffset;
     public Vector3 footPositionOffset;
     public Quaternion footRotationOffset;
 
@@ -19,6 +20,7 @@ public class FootConfig
 
     private void Sync()
     {
+        footFloorOffset = new Vector3(0, -style.footUpOffset.val, 0f);
         footPositionOffset = new Vector3(style.footRightOffset.val * _inverse, style.footUpOffset.val, 0f);
         // TODO: Comfortable y angle is 14.81f, reduce for walking
         footRotationOffset = Quaternion.Euler(new Vector3(18.42f, 8.81f * _inverse, 2.42f * _inverse));

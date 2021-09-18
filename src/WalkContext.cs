@@ -4,25 +4,25 @@ using UnityEngine;
 public class WalkContext : MonoBehaviour
 {
     public Atom containingAtom { get; private set; }
+    public FootState rFootState { get; set; }
+    public FootState lFootState { get; set; }
 
     private FreeControllerV3 _headControl;
     private FreeControllerV3 _hipControl;
-    private FreeControllerV3 _lFootControl;
-    private FreeControllerV3 _rFootControl;
 
     private Vector3 _lastBodyCenter;
     // TODO: Determine how many frames based on the physics rate
     private readonly Vector3[] _lastVelocities = new Vector3[90];
     private int _currentVelocityIndex;
 
-    public void Configure(MVRScript plugin)
+    public void Configure(MVRScript plugin, FootState lFootState, FootState rFootState)
     {
         containingAtom = plugin.containingAtom;
+        this.lFootState = lFootState;
+        this.rFootState = rFootState;
 
         _headControl = containingAtom.freeControllers.First(fc => fc.name == "headControl");
         _hipControl = containingAtom.freeControllers.First(fc => fc.name == "hipControl");
-        _lFootControl = containingAtom.freeControllers.First(fc => fc.name == "lFootControl");
-        _rFootControl = containingAtom.freeControllers.First(fc => fc.name == "rFootControl");
 
         _lastBodyCenter = GetBodyCenter();
     }
@@ -44,7 +44,7 @@ public class WalkContext : MonoBehaviour
         _hipControl.control.rotation = Quaternion.Slerp(_headControl.control.rotation, Quaternion.LookRotation(GetFeetForward(), Vector3.up), 0.5f);
         var hipControlPosition = _hipControl.control.position;
         var headControlPosition = _headControl.control.position;
-        var feetCenterPosition = (_lFootControl.control.position + _rFootControl.control.position) / 2f;
+        var feetCenterPosition = (lFootState.controller.control.position + rFootState.controller.control.position) / 2f;
         // TODO: The height should be affected by legs.
         _hipControl.control.position = Vector3.Lerp(
             new Vector3(feetCenterPosition.x, hipControlPosition.y, feetCenterPosition.z),
@@ -64,15 +64,16 @@ public class WalkContext : MonoBehaviour
     public Vector3 GetFeetCenter()
     {
         // TODO: Verify the rigidbody position, not the control
-        var lFootControlPosition = _lFootControl.control.position;
-        var rFootControlPosition = _rFootControl.control.position;
+        var lFootControlPosition = lFootState.controller.control.position;
+        var rFootControlPosition = rFootState.controller.control.position;
         return (lFootControlPosition + rFootControlPosition) / 2f;
     }
 
     public Vector3 GetBodyCenter()
     {
         // TODO: The head is the only viable origin, but we can cancel sideways rotation and consider other factors
-        return _headControl.control.position;
+        var headPosition = _headControl.control.position;
+        return new Vector3(headPosition.x, 0, headPosition.z);
     }
 
     public Quaternion GetBodyRotation()
@@ -88,16 +89,6 @@ public class WalkContext : MonoBehaviour
     public Vector3 GetFeetForward()
     {
         // TODO: Cheap plane to get a perpendicular direction to the feet line, there is surely a better method
-        return Vector3.Cross(_rFootControl.control.position - _lFootControl.control.position, Vector3.up).normalized;
-    }
-
-    public float GetFeetCenterRadius()
-    {
-        var lFootControlPosition = _lFootControl.control.position;
-        var rFootControlPosition = _rFootControl.control.position;
-        var feetCenterStableRadius = rFootControlPosition.PlanarDistance(lFootControlPosition) / 2f;
-        // TODO: We might want to add an offset
-        // TODO: We need to make an ellipse, more stable in feet direction, less perpendicular to the feet line
-        return feetCenterStableRadius;
+        return Vector3.Cross(rFootState.controller.control.position - lFootState.controller.control.position, Vector3.up).normalized;
     }
 }

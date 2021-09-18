@@ -11,16 +11,14 @@ public class MovingState : MonoBehaviour, IWalkState
 
     private WalkContext _context;
     private FreeControllerV3 _headControl;
-    private FootState _lFootState;
-    private FootState _rFootState;
 
     private FootState _currentFootState;
+    private FootState lFootState => _context.lFootState;
+    private FootState rFootState => _context.rFootState;
 
-    public void Configure(WalkContext context, FootState lFootState, FootState rFootState)
+    public void Configure(WalkContext context)
     {
         _context = context;
-        _lFootState = lFootState;
-        _rFootState = rFootState;
         // TODO: Head or hip?
         _headControl = _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl");
     }
@@ -29,16 +27,16 @@ public class MovingState : MonoBehaviour, IWalkState
     {
         SelectCurrentFoot();
         var weightCenter = _context.GetBodyCenter();
-        PlotFootCourse(_lFootState, weightCenter);
-        PlotFootCourse(_rFootState, weightCenter);
+        PlotFootCourse(lFootState, weightCenter);
+        PlotFootCourse(rFootState, weightCenter);
     }
 
     private void SelectCurrentFoot()
     {
         var weightCenter = _context.GetBodyCenter();
-        _currentFootState = _lFootState.controller.control.position.PlanarDistance(weightCenter) > _rFootState.controller.control.position.PlanarDistance(weightCenter)
-            ? _lFootState
-            : _rFootState;
+        _currentFootState = lFootState.position.PlanarDistance(weightCenter) > rFootState.position.PlanarDistance(weightCenter)
+            ? lFootState
+            : rFootState;
     }
 
     public void FixedUpdate()
@@ -54,17 +52,17 @@ public class MovingState : MonoBehaviour, IWalkState
             return;
         }
 
-        _currentFootState = _currentFootState == _lFootState ? _rFootState : _lFootState;
+        _currentFootState = _currentFootState == lFootState ? rFootState : lFootState;
         PlotFootCourse(_currentFootState, _context.GetBodyCenter());
     }
 
     private bool FeetAreStable()
     {
         var weightCenter = _context.GetBodyCenter();
-        var lFootDistance = Vector3.Distance(_lFootState.controller.control.position, GetFootFinalPosition(_lFootState, weightCenter));
+        var lFootDistance = Vector3.Distance(lFootState.position, GetFootFinalPosition(lFootState, weightCenter));
         const float footDistanceEpsilon = 0.005f;
         if(lFootDistance > footDistanceEpsilon) return false;
-        var rFootDistance = Vector3.Distance(_rFootState.controller.control.position, GetFootFinalPosition(_rFootState, weightCenter));
+        var rFootDistance = Vector3.Distance(rFootState.position, GetFootFinalPosition(rFootState, weightCenter));
         if(rFootDistance > footDistanceEpsilon) return false;
         return true;
     }
@@ -77,7 +75,7 @@ public class MovingState : MonoBehaviour, IWalkState
     private void PlotFootCourse(FootState footState, Vector3 weightCenter)
     {
         footState.PlotCourse(Vector3.MoveTowards(
-                footState.controller.control.position,
+                footState.position,
                 GetFootFinalPosition(footState, weightCenter),
                 maxStepDistance
             ),

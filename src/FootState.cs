@@ -2,6 +2,11 @@
 
 public class FootState : MonoBehaviour
 {
+    public FreeControllerV3 controller;
+    public FootConfig config;
+
+    public Vector3 position => controller.control.position; // TODO: - config.footFloorOffset;
+
     // TODO: This should be an option
     private const float stepTime = 0.7f;
     private const float toeOffTimeRatio = 0.2f;
@@ -22,9 +27,6 @@ public class FootState : MonoBehaviour
     private const float heelStrikeHeight = stepHeight * heelStrikeHeightRatio;
     // TODO: This is a copy of MovingState
     private const float maxStepDistance = 0.8f;
-
-    public FreeControllerV3 controller;
-    public FootConfig config;
 
     private Vector3 _targetPosition;
     private Quaternion _targetRotation;
