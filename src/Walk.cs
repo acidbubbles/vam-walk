@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Walk : MVRScript
@@ -14,7 +15,40 @@ public class Walk : MVRScript
             enabled = false;
             return;
         }
-        var context = AddWalkComponent<BalanceContext>("Walk_LeftFoot", c => c.Configure(this));
+
+        var style = new WalkStyle
+        {
+            footRightOffset = 0.09f,
+            footUpOffset = 0.05f,
+        };
+
+        var context = AddWalkComponent<WalkContext>("Context", c => c.Configure(
+            this
+        ));
+
+        var lFoot = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
+            new FootConfig(style, -1).Sync()
+        ));
+        var rFoot = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
+            new FootConfig(style, 1).Sync()
+        ));
+
+        var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
+            context
+        ), false);
+
+        var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
+            context,
+            lFoot,
+            rFoot
+        ), false);
+
+        AddWalkComponent<StateMachine>("StateMachine", c => c.Configure(
+            idleState,
+            movingState
+        ));
     }
 
     public void OnEnable()
@@ -35,15 +69,15 @@ public class Walk : MVRScript
             Destroy(c);
     }
 
-    private T AddWalkComponent<T>(string goName, Action<T> configure) where T : MonoBehaviour
+    private T AddWalkComponent<T>(string goName, Action<T> configure, bool active = true) where T : MonoBehaviour
     {
-        var go = new GameObject(goName);
+        var go = new GameObject($"Walk_{goName}");
         go.SetActive(false);
         _walkComponents.Add(go);
         go.transform.SetParent(transform, false);
         var c = go.AddComponent<T>();
         configure(c);
-        go.SetActive(true);
+        if (active) go.SetActive(true);
         return c;
     }
 }

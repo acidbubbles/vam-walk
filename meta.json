@@ -9,13 +9,16 @@
    "promotionalLink" : "https://github.com/acidbubbles/MyPlugin", 
    "programVersion" : "1.20.1.0", 
    "contentList" : [ 
-    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\BalanceContext.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\FootConfig.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\FootState.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\IdleState.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\IWalkState.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\MovingState.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\StateMachine.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Vector3Extensions.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Walk.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\WalkContext.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\WalkStyle.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\Walk.cslist"
    ], 
    "dependencies" : { 

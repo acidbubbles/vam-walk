@@ -1,39 +1,31 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 
-public class MovingState : IWalkState
+public class MovingState : MonoBehaviour, IWalkState
 {
     // TODO: This should be a setting
-    const float footRightOffset = 0.09f;
-    const float footUpOffset = 0.05f;
     const float maxStepDistance = 0.9f;
 
-    private readonly BalanceContext _context;
-    private readonly FreeControllerV3 _headControl;
-    private readonly FootState _lFootState;
-    private readonly FootState _rFootState;
+    public StateMachine stateMachine { get; set; }
+
+    private WalkContext _context;
+    private FreeControllerV3 _headControl;
+    private FootState _lFootState;
+    private FootState _rFootState;
 
     private FootState _currentFootState;
 
-    public MovingState(BalanceContext context)
+    public void Configure(WalkContext context, FootState lFootState, FootState rFootState)
     {
         _context = context;
+        _lFootState = lFootState;
+        _rFootState = rFootState;
         // TODO: Head or hip?
         _headControl = _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl");
-        // TODO: Comfortable y angle is 14.81f, reduce for walking
-        _lFootState = new FootState(
-            _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
-            new Vector3(-footRightOffset, footUpOffset, 0f),
-            new Vector3(18.42f, -8.81f, 2.42f)
-        );
-        _rFootState = new FootState(
-            _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
-            new Vector3(footRightOffset, footUpOffset, 0f),
-            new Vector3(18.42f, 8.81f, -2.42f)
-        );
     }
 
-    public void Enter()
+    public void OnEnable()
     {
         SelectCurrentFoot();
         var weightCenter = _context.GetBodyCenter();
@@ -51,12 +43,14 @@ public class MovingState : IWalkState
 
     public void FixedUpdate()
     {
+        if (_currentFootState == null) throw new NullReferenceException(nameof(_currentFootState));
         _currentFootState.FixedUpdate();
         if (!_currentFootState.IsDone()) return;
 
         if (FeetAreStable())
         {
-            _context.currentState = _context.idleState;
+            if (stateMachine == null) throw new NullReferenceException(nameof(stateMachine));
+            stateMachine.currentState = stateMachine.idleState;
             return;
         }
 
@@ -75,7 +69,7 @@ public class MovingState : IWalkState
         return true;
     }
 
-    public void Leave()
+    public void OnDisable()
     {
         _currentFootState = null;
     }
@@ -95,8 +89,8 @@ public class MovingState : IWalkState
     {
         var bodyRotation = _context.GetBodyRotation();
         // TODO: Make configurable (bend forward distance)
-        var target = weightCenter + bodyRotation * footState.footPositionOffset + bodyRotation * (Vector3.back * 0.06f);
-        target.y = footUpOffset;
+        var target = weightCenter + bodyRotation * footState.config.footPositionOffset + bodyRotation * (Vector3.back * 0.06f);
+        target.y = footState.config.style.footUpOffset;
         var velocity = _context.GetBodyVelocity();
         var planarVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
         // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict

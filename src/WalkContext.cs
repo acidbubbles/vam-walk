@@ -1,29 +1,15 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-public class BalanceContext : MonoBehaviour
+public class WalkContext : MonoBehaviour
 {
-    public IWalkState currentState
-    {
-        get { return _currentState; }
-        set
-        {
-            _currentState?.Leave();
-            _currentState = value;
-            _currentState.Enter();
-        }
-    }
-
     public Atom containingAtom { get; private set; }
-    public IdleState idleState { get; private set; }
-    public MovingState movingState { get; private set; }
 
     private FreeControllerV3 _headControl;
     private FreeControllerV3 _hipControl;
     private FreeControllerV3 _lFootControl;
     private FreeControllerV3 _rFootControl;
 
-    private IWalkState _currentState;
     private Vector3 _lastBodyCenter;
     // TODO: Determine how many frames based on the physics rate
     private readonly Vector3[] _lastVelocities = new Vector3[90];
@@ -38,17 +24,11 @@ public class BalanceContext : MonoBehaviour
         _lFootControl = containingAtom.freeControllers.First(fc => fc.name == "lFootControl");
         _rFootControl = containingAtom.freeControllers.First(fc => fc.name == "rFootControl");
 
-        idleState = new IdleState(this);
-        movingState = new MovingState(this);
-
-        currentState = idleState;
-
         _lastBodyCenter = GetBodyCenter();
     }
 
     public void FixedUpdate()
     {
-        currentState.FixedUpdate();
         UpdateHips();
         var bodyCenter = GetBodyCenter();
         _lastVelocities[_currentVelocityIndex++] = bodyCenter - _lastBodyCenter;

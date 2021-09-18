@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class FootState
+public class FootState : MonoBehaviour
 {
     // TODO: This should be an option
     private const float stepTime = 0.7f;
@@ -23,12 +23,11 @@ public class FootState
     // TODO: This is a copy of MovingState
     private const float maxStepDistance = 0.8f;
 
-    public readonly FreeControllerV3 controller;
-    public readonly Vector3 footPositionOffset;
-    public readonly Quaternion footRotationOffset;
+    public FreeControllerV3 controller;
+    public FootConfig config;
 
-    public Vector3 targetPosition { get; private set; }
-    public Quaternion targetRotation { get; private set; }
+    private Vector3 _targetPosition;
+    private Quaternion _targetRotation;
 
     // TODO: Also animate the foot rotation (toes down first, toes up end)
     private readonly AnimationCurve _xCurve;
@@ -40,11 +39,8 @@ public class FootState
     private readonly AnimationCurve _rotWCurve;
     private float _startTime;
 
-    public FootState(FreeControllerV3 controller, Vector3 footPositionOffset, Vector3 footRotationOffset)
+    public FootState()
     {
-        this.controller = controller;
-        this.footPositionOffset = footPositionOffset;
-        this.footRotationOffset = Quaternion.Euler(footRotationOffset);
         var emptyKeys = new[] { new Keyframe(0, 0), new Keyframe(toeOffTime, 0), new Keyframe(midSwingTime, 0), new Keyframe(heelStrikeTime, 0), new Keyframe(stepTime, 0) };
         _xCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
         _yCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
@@ -55,18 +51,24 @@ public class FootState
         _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
     }
 
+    public void Configure(FreeControllerV3 controller, FootConfig config)
+    {
+        this.controller = controller;
+        this.config = config;
+    }
+
     public void PlotCourse(Vector3 position, Quaternion rotation)
     {
-        targetPosition = position;
-        targetRotation = rotation * footRotationOffset;
+        _targetPosition = position;
+        _targetRotation = rotation * config.footRotationOffset;
         _startTime = Time.time;
         // TODO: Adjust height and rotation based on percentage of distance
         var controlPosition = controller.control.position;
-        var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, targetPosition) / maxStepDistance);
-        var forwardRatio = Vector3.Dot(controlPosition, targetPosition);
+        var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, _targetPosition) / maxStepDistance);
+        var forwardRatio = Vector3.Dot(controlPosition, _targetPosition);
         // TODO: We can animate the knee too
-        PlotPosition(targetPosition, distanceRatio);
-        PlotRotation(targetRotation, distanceRatio, forwardRatio);
+        PlotPosition(_targetPosition, distanceRatio);
+        PlotRotation(_targetRotation, distanceRatio, forwardRatio);
     }
 
     private void PlotPosition(Vector3 position, float distanceRatio)

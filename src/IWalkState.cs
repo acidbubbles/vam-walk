@@ -1,6 +1,7 @@
-﻿public interface IWalkState
+﻿using UnityEngine;
+
+public interface IWalkState
 {
-    void Enter();
-    void FixedUpdate();
-    void Leave();
+    StateMachine stateMachine { get; set; }
+    GameObject gameObject { get; }
 }

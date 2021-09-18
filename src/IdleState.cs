@@ -1,23 +1,21 @@
 ﻿using UnityEngine;
 
-public class IdleState : IWalkState
+public class IdleState : MonoBehaviour, IWalkState
 {
-    private readonly BalanceContext _context;
+    public StateMachine stateMachine { get; set; }
 
-    public IdleState(BalanceContext context)
+    private WalkContext _context;
+
+    public void Configure(WalkContext context)
     {
         _context = context;
     }
 
-    public void Enter()
-    {
-    }
-
-    public void FixedUpdate()
+    public void Update()
     {
         if (IsOffBalanceDistance() || IsOffBalanceRotation())
         {
-            _context.currentState = _context.movingState;
+            stateMachine.currentState = stateMachine.movingState;
             return;
         }
 
@@ -34,9 +32,5 @@ public class IdleState : IWalkState
     {
         // TODO: Configure this
         return Vector3.Angle(_context.GetFeetForward(), _context.GetBodyForward()) > 50;
-    }
-
-    public void Leave()
-    {
     }
 }
