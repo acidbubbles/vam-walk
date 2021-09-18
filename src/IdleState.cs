@@ -34,11 +34,15 @@ public class IdleState : MonoBehaviour, IWalkState
     {
         // TODO: We should also check if forward has a 60 degrees angle from the feet line, and if so it's not balanced either.
         var bodyCenter = _context.GetBodyCenter();
-        var feetCenter = _context.GetFeetCenter();
+        // TODO: Verify the rigidbody position, not the control
+        var lFootControlPosition = _context.lFootState.controller.control.position;
+        var rFootControlPosition = _context.rFootState.controller.control.position;
+        // TODO: This distance is also in MovingState
+        var feetCenter = (lFootControlPosition + rFootControlPosition) / 2f + _context.GetFeetForward() * 0.06f;
         var stableRadius = GetFeetCenterRadius();
         _visualizer.bodyCenter = bodyCenter;
         _visualizer.feetCenter = feetCenter;
-        _visualizer.stableRadius = stableRadius;
+        _visualizer.stableRadius = new Vector2(stableRadius, stableRadius);
         return feetCenter.PlanarDistance(bodyCenter) >  stableRadius;
     }
 
@@ -63,7 +67,7 @@ public class IdleStateVisualizer : MonoBehaviour
 {
     public Vector3 bodyCenter;
     public Vector3 feetCenter;
-    public float stableRadius;
+    public Vector2 stableRadius;
     private LineRenderer _stableCircleLineRenderer;
     private LineRenderer _bodyCenterLineRenderer;
 
@@ -82,7 +86,7 @@ public class IdleStateVisualizer : MonoBehaviour
             colorKeys = new[] { new GradientColorKey(Color.green, 0f) }
         };
         _stableCircleLineRenderer.widthMultiplier = 0.005f;
-        _stableCircleLineRenderer.positionCount = 5;
+        _stableCircleLineRenderer.positionCount = 20;
 
         var bodyCenterGO = new GameObject();
         bodyCenterGO.transform.SetParent(transform, false);
@@ -97,25 +101,13 @@ public class IdleStateVisualizer : MonoBehaviour
         _bodyCenterLineRenderer.positionCount = 2;
     }
 
-    private Material CreateGizmoMaterial(Color color)
-    {
-        var material = new Material(Shader.Find("Battlehub/RTGizmos/Handles"));
-        material.SetFloat("_Offset", 1f);
-        material.SetFloat("_MinAlpha", 1f);
-        material.color = color;
-        return material;
-    }
-
     public void Update()
     {
-        _stableCircleLineRenderer.SetPositions(new[]
+        for (var i = 0; i < _stableCircleLineRenderer.positionCount; i++)
         {
-            feetCenter + new Vector3(-stableRadius, 0, -stableRadius),
-            feetCenter + new Vector3(-stableRadius, 0, stableRadius),
-            feetCenter + new Vector3(stableRadius, 0, stableRadius),
-            feetCenter + new Vector3(stableRadius, 0, -stableRadius),
-            feetCenter + new Vector3(-stableRadius, 0, -stableRadius)
-        });
+            var angle = i / (float) _stableCircleLineRenderer.positionCount * 2.0f * Mathf.PI;
+            _stableCircleLineRenderer.SetPosition(i, feetCenter + new Vector3( stableRadius.x * Mathf.Cos(angle), 0, stableRadius.y * Mathf.Sin(angle)));
+        }
 
         _bodyCenterLineRenderer.SetPositions(new[]
         {

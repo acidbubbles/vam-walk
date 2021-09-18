@@ -61,14 +61,6 @@ public class WalkContext : MonoBehaviour
         return sumVelocities / _lastVelocities.Length / Time.deltaTime;
     }
 
-    public Vector3 GetFeetCenter()
-    {
-        // TODO: Verify the rigidbody position, not the control
-        var lFootControlPosition = lFootState.controller.control.position;
-        var rFootControlPosition = rFootState.controller.control.position;
-        return (lFootControlPosition + rFootControlPosition) / 2f;
-    }
-
     public Vector3 GetBodyCenter()
     {
         // TODO: The head is the only viable origin, but we can cancel sideways rotation and consider other factors
