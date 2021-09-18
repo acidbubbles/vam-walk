@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-public class BalanceContext
+public class BalanceContext : MonoBehaviour
 {
     public IWalkState currentState
     {
@@ -14,15 +14,14 @@ public class BalanceContext
         }
     }
 
-    public readonly Atom containingAtom;
+    public Atom containingAtom { get; private set; }
+    public IdleState idleState { get; private set; }
+    public MovingState movingState { get; private set; }
 
-    public readonly IdleState idleState;
-    public readonly MovingState movingState;
-
-    private readonly FreeControllerV3 _headControl;
-    private readonly FreeControllerV3 _hipControl;
-    private readonly FreeControllerV3 _lFootControl;
-    private readonly FreeControllerV3 _rFootControl;
+    private FreeControllerV3 _headControl;
+    private FreeControllerV3 _hipControl;
+    private FreeControllerV3 _lFootControl;
+    private FreeControllerV3 _rFootControl;
 
     private IWalkState _currentState;
     private Vector3 _lastBodyCenter;
@@ -30,7 +29,7 @@ public class BalanceContext
     private readonly Vector3[] _lastVelocities = new Vector3[90];
     private int _currentVelocityIndex;
 
-    public BalanceContext(MVRScript plugin)
+    public void Configure(MVRScript plugin)
     {
         containingAtom = plugin.containingAtom;
 
