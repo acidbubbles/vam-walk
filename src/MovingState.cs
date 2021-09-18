@@ -10,15 +10,17 @@ public class MovingState : MonoBehaviour, IWalkState
     public StateMachine stateMachine { get; set; }
 
     private WalkContext _context;
+    private MovingStateVisualizer _visualizer;
     private FreeControllerV3 _headControl;
 
     private FootState _currentFootState;
     private FootState lFootState => _context.lFootState;
     private FootState rFootState => _context.rFootState;
 
-    public void Configure(WalkContext context)
+    public void Configure(WalkContext context, MovingStateVisualizer visualizer)
     {
         _context = context;
+        _visualizer = visualizer;
         // TODO: Head or hip?
         _headControl = _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl");
     }
@@ -92,7 +94,10 @@ public class MovingState : MonoBehaviour, IWalkState
         var velocity = _context.GetBodyVelocity();
         var planarVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
         // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict
-        return target + planarVelocity * (0.7f * 0.6f);
+        var finalPosition = target + planarVelocity * (0.7f * 0.6f);
+        // TODO: This is not right, this is for the foot, not the body center. Fix that.
+        _visualizer.Sync(weightCenter, finalPosition);
+        return finalPosition;
     }
 
     private Quaternion GetFootFinalRotation()

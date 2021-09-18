@@ -52,12 +52,18 @@ public class Walk : MVRScript
             rFoot
         ));
 
+        var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { });
+
         var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
-            context
+            context,
+            idleStateVisualizer
         ), false);
 
+        var movingStateVisualizer = AddWalkComponent<MovingStateVisualizer>("MovingStateVisualizer", c => { });
+
         var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
-            context
+            context,
+            movingStateVisualizer
         ), false);
 
         AddWalkComponent<StateMachine>("StateMachine", c => c.Configure(
