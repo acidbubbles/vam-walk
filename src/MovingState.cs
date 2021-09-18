@@ -90,7 +90,7 @@ public class MovingState : MonoBehaviour, IWalkState
         var bodyRotation = _context.GetBodyRotation();
         // TODO: Make configurable (bend forward distance)
         var target = weightCenter + bodyRotation * footState.config.footPositionOffset + bodyRotation * (Vector3.back * 0.06f);
-        target.y = footState.config.style.footUpOffset;
+        target.y = footState.config.style.footUpOffset.val;
         var velocity = _context.GetBodyVelocity();
         var planarVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
         // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict

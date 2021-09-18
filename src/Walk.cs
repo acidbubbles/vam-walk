@@ -16,23 +16,38 @@ public class Walk : MVRScript
             return;
         }
 
-        var style = new WalkStyle
-        {
-            footRightOffset = 0.09f,
-            footUpOffset = 0.05f,
-        };
+        var style = new WalkStyle();
 
+        SetupStorables(style);
+
+        SetupDependencyTree(style);
+    }
+
+    private void SetupStorables(WalkStyle style)
+    {
+        AddFloat(style.footRightOffset);
+        AddFloat(style.footUpOffset);
+    }
+
+    private void AddFloat(JSONStorableFloat jsf)
+    {
+        RegisterFloat(jsf);
+        CreateSlider(jsf);
+    }
+
+    private void SetupDependencyTree(WalkStyle style)
+    {
         var context = AddWalkComponent<WalkContext>("Context", c => c.Configure(
             this
         ));
 
         var lFoot = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
-            new FootConfig(style, -1).Sync()
+            new FootConfig(style, -1)
         ));
         var rFoot = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
-            new FootConfig(style, 1).Sync()
+            new FootConfig(style, 1)
         ));
 
         var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
