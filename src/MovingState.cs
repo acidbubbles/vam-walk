@@ -80,7 +80,7 @@ public class MovingState : MonoBehaviour, IWalkState
             GetFootFinalPosition(footState, weightCenter),
             _style.stepLength.val
         );
-        var rotation = GetFootFinalRotation(position);
+        var rotation = GetFootFinalRotation();
         footState.PlotCourse(position, rotation);
     }
 
@@ -98,8 +98,8 @@ public class MovingState : MonoBehaviour, IWalkState
         return finalPosition;
     }
 
-    private Quaternion GetFootFinalRotation(Vector3 targetPosition)
+    private Quaternion GetFootFinalRotation()
     {
-        return Quaternion.LookRotation(targetPosition - _currentFootState.controller.control.position, Vector3.up);
+        return Quaternion.LookRotation(_headControl.control.forward, Vector3.up);
     }
 }

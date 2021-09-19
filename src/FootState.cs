@@ -55,7 +55,7 @@ public class FootState : MonoBehaviour
         // TODO: Adjust height and rotation based on percentage of distance
         var controlPosition = controller.control.position;
         var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, _targetPosition) / _style.stepLength.val);
-        var forwardRatio = Vector3.Dot(controlPosition, _targetPosition);
+        var forwardRatio = Vector3.Dot(_targetPosition - controlPosition, controller.control.forward);
         // TODO: We can animate the knee too
         PlotPosition(_targetPosition, distanceRatio);
         PlotRotation(_targetRotation, distanceRatio, forwardRatio);
@@ -106,9 +106,9 @@ public class FootState : MonoBehaviour
         // TODO: Move quaternions as fields (configurable)
         // TODO: Reverse 1 and 2 if going backwards
         // TODO: Reduce to zero if going sideways
-        var toeOffRotation = currentRotation * Quaternion.Euler(10f * distanceRatio * forwardRatio, 0, 0);
-        var midSwingRotation = rotation * Quaternion.Euler(10 * distanceRatio * forwardRatio, 0, 0);
-        var heelStrikeRotation = rotation * Quaternion.Euler(-20 * distanceRatio * forwardRatio, 0, 0);
+        var toeOffRotation = Quaternion.Euler(10f * distanceRatio * forwardRatio, 0, 0) * currentRotation;
+        var heelStrikeRotation = Quaternion.Euler(-20 * distanceRatio * forwardRatio, 0, 0) * rotation;
+        var midSwingRotation = Quaternion.Euler(10 * distanceRatio * forwardRatio, 0, 0) * rotation;
 
         EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);
