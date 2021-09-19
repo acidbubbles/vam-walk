@@ -73,7 +73,7 @@ public class FootState : MonoBehaviour
         // TODO: We can animate the knee too
         PlotPosition(_targetPosition, distanceRatio);
         PlotRotation(_targetRotation, distanceRatio, forwardRatio);
-        _visualizer.Sync(_xCurve, _yCurve, _zCurve);
+        _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
     }
 
     private void PlotPosition(Vector3 position, float distanceRatio)
@@ -197,5 +197,15 @@ public class FootState : MonoBehaviour
         // TODO: If the distance is to great we may have to re-plot the course or step down faster
         // TODO: We can start the other foot before the end for feet to roll (run both feet)
         return Time.time >= _startTime + stepTime;
+    }
+
+    public void OnEnable()
+    {
+        _visualizer.gameObject.SetActive(true);
+    }
+
+    public void OnDisable()
+    {
+        _visualizer.gameObject.SetActive(false);
     }
 }

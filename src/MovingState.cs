@@ -31,6 +31,13 @@ public class MovingState : MonoBehaviour, IWalkState
         var weightCenter = _context.GetBodyCenter();
         PlotFootCourse(lFootState, weightCenter);
         PlotFootCourse(rFootState, weightCenter);
+        _visualizer.gameObject.SetActive(true);
+    }
+
+    public void OnDisable()
+    {
+        _currentFootState = null;
+        _visualizer.gameObject.SetActive(false);
     }
 
     private void SelectCurrentFoot()
@@ -67,11 +74,6 @@ public class MovingState : MonoBehaviour, IWalkState
         var rFootDistance = Vector3.Distance(rFootState.position, GetFootFinalPosition(rFootState, weightCenter));
         if(rFootDistance > footDistanceEpsilon) return false;
         return true;
-    }
-
-    public void OnDisable()
-    {
-        _currentFootState = null;
     }
 
     private void PlotFootCourse(FootState footState, Vector3 weightCenter)

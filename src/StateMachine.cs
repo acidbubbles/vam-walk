@@ -25,7 +25,10 @@ public class StateMachine : MonoBehaviour
 
         movingState.stateMachine = this;
         this.movingState = movingState;
+    }
 
+    public void Awake()
+    {
         currentState = idleState;
     }
 }

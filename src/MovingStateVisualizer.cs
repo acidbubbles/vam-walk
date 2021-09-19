@@ -1,19 +1,28 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class MovingStateVisualizer : MonoBehaviour
 {
-    private LineRenderer _projectedPositionLineRenderer;
+    private readonly LineRenderer _unstableCircleLineRenderer;
+    private readonly LineRenderer _projectedPositionLineRenderer;
 
-    public void Awake()
+    public MovingStateVisualizer()
     {
-        _projectedPositionLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.blue);
+        _unstableCircleLineRenderer = transform.CreateVisualizerLineRenderer(20, Color.red);
+        _projectedPositionLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.magenta);
     }
 
     public void Sync(Vector3 bodyCenter, Vector3 projectedCenter)
     {
+        for (var i = 0; i < _unstableCircleLineRenderer.positionCount; i++)
+        {
+            var angle = i / (float) _unstableCircleLineRenderer.positionCount * 2.0f * Mathf.PI;
+            _unstableCircleLineRenderer.SetPosition(i, projectedCenter + new Vector3( 0.1f * Mathf.Cos(angle), 0, 0.1f * Mathf.Sin(angle)));
+        }
+
         _projectedPositionLineRenderer.SetPositions(new[]
         {
-            bodyCenter,
+            projectedCenter,
             bodyCenter + Vector3.up * 0.1f
         });
     }

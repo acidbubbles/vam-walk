@@ -53,4 +53,14 @@ public class IdleState : MonoBehaviour, IWalkState
         // TODO: Configure this
         return Vector3.Angle(_context.GetFeetForward(), _context.GetBodyForward()) > 50;
     }
+
+    public void OnEnable()
+    {
+        _visualizer.gameObject.SetActive(true);
+    }
+
+    public void OnDisable()
+    {
+        _visualizer.gameObject.SetActive(false);
+    }
 }

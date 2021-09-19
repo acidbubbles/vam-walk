@@ -37,7 +37,7 @@ public class Walk : MVRScript
 
     private void SetupDependencyTree(WalkStyle style)
     {
-        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { });
+        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { }, false);
 
         var lFootState = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
@@ -45,7 +45,7 @@ public class Walk : MVRScript
             lFootStateVisualizer
         ));
 
-        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { });
+        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { }, false);
 
         var rFootState = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
@@ -59,14 +59,14 @@ public class Walk : MVRScript
             rFootState
         ));
 
-        var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { });
+        var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { }, false);
 
         var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
             context,
             idleStateVisualizer
         ), false);
 
-        var movingStateVisualizer = AddWalkComponent<MovingStateVisualizer>("MovingStateVisualizer", c => { });
+        var movingStateVisualizer = AddWalkComponent<MovingStateVisualizer>("MovingStateVisualizer", c => { }, false);
 
         var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
             context,

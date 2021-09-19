@@ -2,10 +2,10 @@
 
 public class IdleStateVisualizer : MonoBehaviour
 {
-    private LineRenderer _stableCircleLineRenderer;
-    private LineRenderer _bodyCenterLineRenderer;
+    private readonly LineRenderer _stableCircleLineRenderer;
+    private readonly LineRenderer _bodyCenterLineRenderer;
 
-    public void Awake()
+    public IdleStateVisualizer()
     {
         _stableCircleLineRenderer = transform.CreateVisualizerLineRenderer(20, Color.green);
         _bodyCenterLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.green);
@@ -22,7 +22,7 @@ public class IdleStateVisualizer : MonoBehaviour
         _bodyCenterLineRenderer.SetPositions(new[]
         {
             bodyCenter,
-            bodyCenter + Vector3.up * 0.1f
+            bodyCenter + Vector3.up * 0.2f
         });
     }
 }
