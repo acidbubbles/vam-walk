@@ -44,7 +44,7 @@ public class WalkContext : MonoBehaviour
         _hipControl.control.rotation = Quaternion.Slerp(_headControl.control.rotation, Quaternion.LookRotation(GetFeetForward(), Vector3.up), 0.5f);
         var hipControlPosition = _hipControl.control.position;
         var headControlPosition = _headControl.control.position;
-        var feetCenterPosition = (lFootState.controller.control.position + rFootState.controller.control.position) / 2f;
+        var feetCenterPosition = (lFootState.footControl.control.position + rFootState.footControl.control.position) / 2f;
         // TODO: The height should be affected by legs.
         _hipControl.control.position = Vector3.Lerp(
             new Vector3(feetCenterPosition.x, hipControlPosition.y, feetCenterPosition.z),
@@ -81,6 +81,6 @@ public class WalkContext : MonoBehaviour
     public Vector3 GetFeetForward()
     {
         // TODO: Cheap plane to get a perpendicular direction to the feet line, there is surely a better method
-        return Vector3.Cross(rFootState.controller.control.position - lFootState.controller.control.position, Vector3.up).normalized;
+        return Vector3.Cross(rFootState.footControl.control.position - lFootState.footControl.control.position, Vector3.up).normalized;
     }
 }

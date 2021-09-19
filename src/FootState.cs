@@ -3,11 +3,12 @@
 public class FootState : MonoBehaviour
 {
     private WalkStyle _style;
-    public FreeControllerV3 controller;
+    public FreeControllerV3 footControl;
+    public FreeControllerV3 kneeControl;
     public FootConfig config;
     private FootStateVisualizer _visualizer;
 
-    public Vector3 position => controller.control.position; // TODO: - config.footFloorOffset;
+    public Vector3 position => footControl.control.position; // TODO: - config.footFloorOffset;
 
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
@@ -30,10 +31,11 @@ public class FootState : MonoBehaviour
     private AnimationCurve _rotWCurve;
     private float _startTime;
 
-    public void Configure(WalkStyle style, FreeControllerV3 controller, FootConfig config, FootStateVisualizer visualizer)
+    public void Configure(WalkStyle style, FreeControllerV3 footControl, FreeControllerV3 kneeControl, FootConfig config, FootStateVisualizer visualizer)
     {
         _style = style;
-        this.controller = controller;
+        this.footControl = footControl;
+        this.kneeControl = kneeControl;
         this.config = config;
         _visualizer = visualizer;
 
@@ -53,9 +55,9 @@ public class FootState : MonoBehaviour
         _targetRotation = rotation * config.footRotationOffset;
         _startTime = Time.time;
         // TODO: Adjust height and rotation based on percentage of distance
-        var controlPosition = controller.control.position;
+        var controlPosition = footControl.control.position;
         var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, _targetPosition) / _style.stepLength.val);
-        var forwardRatio = Vector3.Dot(_targetPosition - controlPosition, controller.control.forward);
+        var forwardRatio = Vector3.Dot(_targetPosition - controlPosition, footControl.control.forward);
         // TODO: We can animate the knee too
         PlotPosition(_targetPosition, distanceRatio);
         PlotRotation(_targetRotation, distanceRatio, forwardRatio);
@@ -66,7 +68,7 @@ public class FootState : MonoBehaviour
     private void PlotPosition(Vector3 position, float distanceRatio)
     {
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
-        var currentPosition = controller.control.position;
+        var currentPosition = footControl.control.position;
         var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.3f, 1f);
         var toeOffPosition = Vector3.Lerp(currentPosition, position, _style.toeOffDistanceRatio.val) + up * toeOffHeight;
         var midSwingPosition = Vector3.Lerp(currentPosition, position, _style.midSwingDistanceRatio.val) + up * midSwingHeight;
@@ -102,7 +104,7 @@ public class FootState : MonoBehaviour
 
     private void PlotRotation(Quaternion rotation, float distanceRatio, float forwardRatio)
     {
-        var currentRotation = controller.control.rotation;
+        var currentRotation = footControl.control.rotation;
         // TODO: Move quaternions as fields (configurable)
         // TODO: Reverse 1 and 2 if going backwards
         // TODO: Reduce to zero if going sideways
@@ -166,17 +168,21 @@ public class FootState : MonoBehaviour
         // TODO: Moving up and down should be synchronized with hip, but maybe physics will be enough?
         // controller.control.position = Vector3.MoveTowards(controller.control.position, targetPosition, maxStepMoveSpeed);
         var t = Time.time - _startTime;
-        controller.control.position = new Vector3(
+        var footPosition = new Vector3(
             _xCurve.Evaluate(t),
             _yCurve.Evaluate(t),
             _zCurve.Evaluate(t)
         );
-        controller.control.rotation = new Quaternion(
+        var footRotation = new Quaternion(
             _rotXCurve.Evaluate(t),
             _rotYCurve.Evaluate(t),
             _rotZCurve.Evaluate(t),
             _rotWCurve.Evaluate(t)
         );
+        footControl.control.position = footPosition;
+        footControl.control.rotation = footRotation;
+        var footForward = footControl.control.forward;
+        kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val);
     }
 
     public bool IsDone()

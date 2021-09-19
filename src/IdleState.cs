@@ -31,8 +31,8 @@ public class IdleState : MonoBehaviour, IWalkState
         // TODO: We should also check if forward has a 60 degrees angle from the feet line, and if so it's not balanced either.
         var bodyCenter = _context.GetBodyCenter();
         // TODO: Verify the rigidbody position, not the control
-        var lFootControlPosition = _context.lFootState.controller.control.position;
-        var rFootControlPosition = _context.rFootState.controller.control.position;
+        var lFootControlPosition = _context.lFootState.footControl.control.position;
+        var rFootControlPosition = _context.rFootState.footControl.control.position;
         var feetCenter = (lFootControlPosition + rFootControlPosition) / 2f + _context.GetFeetForward() * _style.footBackOffset.val;
         var stableRadius = GetFeetCenterRadius();
         _visualizer.Sync(bodyCenter, feetCenter, new Vector2(stableRadius, stableRadius));
