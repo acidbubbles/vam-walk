@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class MovingState : MonoBehaviour, IWalkState
 {
-    // TODO: This should be a setting
-    const float maxStepDistance = 0.9f;
-
     public StateMachine stateMachine { get; set; }
 
+    private WalkStyle _style;
     private WalkContext _context;
     private MovingStateVisualizer _visualizer;
     private FreeControllerV3 _headControl;
@@ -17,8 +15,9 @@ public class MovingState : MonoBehaviour, IWalkState
     private FootState lFootState => _context.lFootState;
     private FootState rFootState => _context.rFootState;
 
-    public void Configure(WalkContext context, MovingStateVisualizer visualizer)
+    public void Configure(WalkStyle style, WalkContext context, MovingStateVisualizer visualizer)
     {
+        _style = style;
         _context = context;
         _visualizer = visualizer;
         // TODO: Head or hip?
@@ -81,7 +80,7 @@ public class MovingState : MonoBehaviour, IWalkState
         footState.PlotCourse(Vector3.MoveTowards(
                 footState.position,
                 GetFootFinalPosition(footState, weightCenter),
-                maxStepDistance
+                _style.stepLength.val
             ),
             GetFootFinalRotation()
         );
@@ -90,8 +89,7 @@ public class MovingState : MonoBehaviour, IWalkState
     private Vector3 GetFootFinalPosition(FootState footState, Vector3 weightCenter)
     {
         var bodyRotation = _context.GetBodyRotation();
-        // TODO: Make configurable (bend forward distance)
-        var target = weightCenter + bodyRotation * footState.config.footPositionOffset + bodyRotation * (Vector3.back * 0.06f);
+        var target = weightCenter + bodyRotation * footState.config.footPositionOffset + bodyRotation * (Vector3.back * _style.footBackOffset.val);
         target.y = footState.config.style.footUpOffset.val;
         var velocity = _context.GetBodyVelocity();
         var planarVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);

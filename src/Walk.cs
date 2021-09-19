@@ -20,7 +20,15 @@ public class Walk : MVRScript
 
         style.SetupStorables(this);
 
-        SetupDependencyTree(style);
+        try
+        {
+            SetupDependencyTree(style);
+        }
+        catch (Exception exc)
+        {
+            gameObject.SetActive(false);
+            SuperController.LogError($"Walk: {exc}");
+        }
     }
 
     private void SetupDependencyTree(WalkStyle style)
@@ -28,6 +36,7 @@ public class Walk : MVRScript
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { }, false);
 
         var lFootState = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
+            style,
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
             new FootConfig(style, -1),
             lFootStateVisualizer
@@ -36,6 +45,7 @@ public class Walk : MVRScript
         var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { }, false);
 
         var rFootState = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
+            style,
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
             new FootConfig(style, 1),
             rFootStateVisualizer
@@ -50,6 +60,7 @@ public class Walk : MVRScript
         var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { }, false);
 
         var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
+            style,
             context,
             idleStateVisualizer
         ), false);
@@ -57,6 +68,7 @@ public class Walk : MVRScript
         var movingStateVisualizer = AddWalkComponent<MovingStateVisualizer>("MovingStateVisualizer", c => { }, false);
 
         var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
+            style,
             context,
             movingStateVisualizer
         ), false);

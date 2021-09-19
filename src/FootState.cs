@@ -2,48 +2,41 @@
 
 public class FootState : MonoBehaviour
 {
+    private WalkStyle _style;
     public FreeControllerV3 controller;
     public FootConfig config;
     private FootStateVisualizer _visualizer;
 
     public Vector3 position => controller.control.position; // TODO: - config.footFloorOffset;
 
-    // TODO: This should be an option
-    private const float stepTime = 0.7f;
-    private const float toeOffTimeRatio = 0.2f;
-    private const float midSwingTimeRatio = 0.55f;
-    private const float heelStrikeTimeRatio = 0.76f;
-    private const float toeOffHeightRatio = 0.3f;
-    private const float midSwingHeightRatio = 1f;
-    private const float heelStrikeHeightRatio = 0.4f;
-    private const float toeOffDistanceRatio = 0.05f;
-    private const float midSwingDistanceRatio = 0.4f;
-    private const float heelStrikeDistanceRatio = 0.7f;
-    private const float toeOffTime = stepTime * toeOffTimeRatio;
-    private const float midSwingTime = stepTime * midSwingTimeRatio;
-    private const float heelStrikeTime = stepTime * heelStrikeTimeRatio;
-    private const float stepHeight = 0.12f;
-    private const float toeOffHeight = stepHeight * toeOffHeightRatio;
-    private const float midSwingHeight = stepHeight * midSwingHeightRatio;
-    private const float heelStrikeHeight = stepHeight * heelStrikeHeightRatio;
-    // TODO: This is a copy of MovingState
-    private const float maxStepDistance = 0.8f;
+    private float stepTime => _style.stepDuration.val;
+    private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
+    private float midSwingTime => _style.stepDuration.val * _style.midSwingTimeRatio.val;
+    private float heelStrikeTime => _style.stepDuration.val * _style.heelStrikeTimeRatio.val;
+    private float toeOffHeight => _style.stepHeight.val * _style.toeOffHeightRatio.val;
+    private float midSwingHeight => _style.stepHeight.val * _style.midSwingHeightRatio.val;
+    private float heelStrikeHeight => _style.stepHeight.val * _style.heelStrikeHeightRatio.val;
 
     private Vector3 _targetPosition;
     private Quaternion _targetRotation;
 
     // TODO: Also animate the foot rotation (toes down first, toes up end)
-    private readonly AnimationCurve _xCurve;
-    private readonly AnimationCurve _yCurve;
-    private readonly AnimationCurve _zCurve;
-    private readonly AnimationCurve _rotXCurve;
-    private readonly AnimationCurve _rotYCurve;
-    private readonly AnimationCurve _rotZCurve;
-    private readonly AnimationCurve _rotWCurve;
+    private AnimationCurve _xCurve;
+    private AnimationCurve _yCurve;
+    private AnimationCurve _zCurve;
+    private AnimationCurve _rotXCurve;
+    private AnimationCurve _rotYCurve;
+    private AnimationCurve _rotZCurve;
+    private AnimationCurve _rotWCurve;
     private float _startTime;
 
-    public FootState()
+    public void Configure(WalkStyle style, FreeControllerV3 controller, FootConfig config, FootStateVisualizer visualizer)
     {
+        _style = style;
+        this.controller = controller;
+        this.config = config;
+        _visualizer = visualizer;
+
         var emptyKeys = new[] { new Keyframe(0, 0), new Keyframe(toeOffTime, 0), new Keyframe(midSwingTime, 0), new Keyframe(heelStrikeTime, 0), new Keyframe(stepTime, 0) };
         _xCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
         _yCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
@@ -54,13 +47,6 @@ public class FootState : MonoBehaviour
         _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
     }
 
-    public void Configure(FreeControllerV3 controller, FootConfig config, FootStateVisualizer visualizer)
-    {
-        this.controller = controller;
-        this.config = config;
-        _visualizer = visualizer;
-    }
-
     public void PlotCourse(Vector3 position, Quaternion rotation)
     {
         _targetPosition = position;
@@ -68,7 +54,7 @@ public class FootState : MonoBehaviour
         _startTime = Time.time;
         // TODO: Adjust height and rotation based on percentage of distance
         var controlPosition = controller.control.position;
-        var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, _targetPosition) / maxStepDistance);
+        var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, _targetPosition) / _style.stepLength.val);
         var forwardRatio = Vector3.Dot(controlPosition, _targetPosition);
         // TODO: We can animate the knee too
         PlotPosition(_targetPosition, distanceRatio);
@@ -81,9 +67,9 @@ public class FootState : MonoBehaviour
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = controller.control.position;
         var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.3f, 1f);
-        var toeOffPosition = Vector3.Lerp(currentPosition, position, toeOffDistanceRatio) + up * toeOffHeight;
-        var midSwingPosition = Vector3.Lerp(currentPosition, position, midSwingDistanceRatio) + up * midSwingHeight;
-        var heelStrikePosition = Vector3.Lerp(currentPosition, position, heelStrikeDistanceRatio) + up * heelStrikeHeight;
+        var toeOffPosition = Vector3.Lerp(currentPosition, position, _style.toeOffDistanceRatio.val) + up * toeOffHeight;
+        var midSwingPosition = Vector3.Lerp(currentPosition, position, _style.midSwingDistanceRatio.val) + up * midSwingHeight;
+        var heelStrikePosition = Vector3.Lerp(currentPosition, position, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight;
 
         _xCurve.MoveKey(0, new Keyframe(0, currentPosition.x));
         _xCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffPosition.x));

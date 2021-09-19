@@ -4,11 +4,13 @@ public class IdleState : MonoBehaviour, IWalkState
 {
     public StateMachine stateMachine { get; set; }
 
-    private IdleStateVisualizer _visualizer;
+    private WalkStyle _style;
     private WalkContext _context;
+    private IdleStateVisualizer _visualizer;
 
-    public void Configure(WalkContext context, IdleStateVisualizer visualizer)
+    public void Configure(WalkStyle style, WalkContext context, IdleStateVisualizer visualizer)
     {
+        _style = style;
         _context = context;
         _visualizer = visualizer;
     }
@@ -31,8 +33,7 @@ public class IdleState : MonoBehaviour, IWalkState
         // TODO: Verify the rigidbody position, not the control
         var lFootControlPosition = _context.lFootState.controller.control.position;
         var rFootControlPosition = _context.rFootState.controller.control.position;
-        // TODO: This distance is also in MovingState
-        var feetCenter = (lFootControlPosition + rFootControlPosition) / 2f + _context.GetFeetForward() * 0.06f;
+        var feetCenter = (lFootControlPosition + rFootControlPosition) / 2f + _context.GetFeetForward() * _style.footBackOffset.val;
         var stableRadius = GetFeetCenterRadius();
         _visualizer.Sync(bodyCenter, feetCenter, new Vector2(stableRadius, stableRadius));
         return feetCenter.PlanarDistance(bodyCenter) >  stableRadius;
