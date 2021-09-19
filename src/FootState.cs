@@ -106,12 +106,9 @@ public class FootState : MonoBehaviour
     private void PlotRotation(Quaternion rotation, float distanceRatio, float forwardRatio)
     {
         var currentRotation = footControl.control.rotation;
-        // TODO: Move quaternions as fields (configurable)
-        // TODO: Reverse 1 and 2 if going backwards
-        // TODO: Reduce to zero if going sideways
         var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * distanceRatio * forwardRatio, 0, 0) * currentRotation;
         var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * distanceRatio * forwardRatio, 0, 0) * rotation;
-        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * distanceRatio * forwardRatio, 0, 0) * rotation;
+        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * distanceRatio * Mathf.Clamp01(forwardRatio), 0, 0) * rotation;
 
         EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);
