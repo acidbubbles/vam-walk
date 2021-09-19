@@ -46,6 +46,12 @@ public class MovingState : MonoBehaviour, IWalkState
             : rFootState;
     }
 
+    public void Update()
+    {
+        var bodyCenter = _context.GetBodyCenter();
+        _visualizer.Sync(bodyCenter, GetProjectedPosition(bodyCenter));
+    }
+
     public void FixedUpdate()
     {
         _currentFootState.FixedUpdate();
@@ -84,18 +90,24 @@ public class MovingState : MonoBehaviour, IWalkState
         footState.PlotCourse(position, rotation);
     }
 
-    private Vector3 GetFootFinalPosition(FootState footState, Vector3 weightCenter)
+    private Vector3 GetProjectedPosition(Vector3 weightCenter)
     {
         var bodyRotation = _context.GetBodyRotation();
-        var target = weightCenter + bodyRotation * footState.config.footPositionOffset + bodyRotation * (Vector3.back * _style.footBackOffset.val);
-        target.y = footState.config.style.footUpOffset.val;
+        var target = weightCenter + bodyRotation * (Vector3.back * _style.footBackOffset.val);
         var velocity = _context.GetBodyVelocity();
         var planarVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
         // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict
         var finalPosition = target + planarVelocity * (0.7f * 0.6f);
-        // TODO: This is not right, this is for the foot, not the body center. Fix that.
-        _visualizer.Sync(weightCenter, finalPosition);
         return finalPosition;
+    }
+
+    private Vector3 GetFootFinalPosition(FootState footState, Vector3 weightCenter)
+    {
+        var target = GetProjectedPosition(weightCenter);
+        var bodyRotation = _context.GetBodyRotation();
+        target += bodyRotation * footState.config.footPositionOffset;
+        target.y = footState.config.style.footUpOffset.val;
+        return target;
     }
 
     private Quaternion GetFootFinalRotation()

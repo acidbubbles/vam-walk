@@ -162,11 +162,6 @@ public class FootState : MonoBehaviour
 
     public void FixedUpdate()
     {
-        // TODO: Make a visual indication and an easy way to debug the result
-        // controller.control.SetPositionAndRotation(targetPosition, targetRotation); return;
-        // TODO: This should be in FixedUpdate
-        // TODO: Moving up and down should be synchronized with hip, but maybe physics will be enough?
-        // controller.control.position = Vector3.MoveTowards(controller.control.position, targetPosition, maxStepMoveSpeed);
         var t = Time.time - _startTime;
         var footPosition = new Vector3(
             _xCurve.Evaluate(t),
