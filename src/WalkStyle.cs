@@ -19,13 +19,17 @@ public class WalkStyle
     public readonly JSONStorableFloat midSwingTimeRatio = new JSONStorableFloat("MidSwingTimeRatio", 0.55f, 0f, 1f, true);
     public readonly JSONStorableFloat heelStrikeTimeRatio = new JSONStorableFloat("HeelStrikeTimeRatio", 0.76f, 0f, 1f, true);
 
-    public readonly JSONStorableFloat toeOffHeightRatio = new JSONStorableFloat("ToeOffHeightRatio", 0.3f, 0f, 1f, true);
+    public readonly JSONStorableFloat toeOffHeightRatio = new JSONStorableFloat("ToeOffHeightRatio", 0.45f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingHeightRatio = new JSONStorableFloat("MidSwingHeightRatio", 1f, 0f, 1f, true);
-    public readonly JSONStorableFloat heelStrikeHeightRatio = new JSONStorableFloat("HeelStrikeHeightRatio", 0.4f, 0f, 1f, true);
+    public readonly JSONStorableFloat heelStrikeHeightRatio = new JSONStorableFloat("HeelStrikeHeightRatio", 0.5f, 0f, 1f, true);
 
     public readonly JSONStorableFloat toeOffDistanceRatio = new JSONStorableFloat("ToeOffDistanceRatio", 0.05f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingDistanceRatio = new JSONStorableFloat("MidSwingDistanceRatio", 0.4f, 0f, 1f, true);
     public readonly JSONStorableFloat heelStrikeDistanceRatio = new JSONStorableFloat("HeelStrikeDistanceRatio", 0.7f, 0f, 1f, true);
+
+    public readonly JSONStorableFloat toeOffPitch = new JSONStorableFloat("ToeOffPitch", 40f, -90, 90, true);
+    public readonly JSONStorableFloat midSwingPitch = new JSONStorableFloat("MidSwingPitch", 20f, -90, 90, true);
+    public readonly JSONStorableFloat heelStrikePitch = new JSONStorableFloat("HeelStrikePitch", -30f, -90, 90, true);
 
     public readonly UnityEvent valueUpdated = new UnityEvent();
 
@@ -83,15 +87,25 @@ public class WalkStyle
         AddFloat(plugin, stepHeight);
         AddFloat(plugin, stepLength);
 
+        AddFloat(plugin, kneeForwardForce);
+
+        AddFloat(plugin, passingDistance);
+
         AddFloat(plugin, toeOffTimeRatio, true);
         AddFloat(plugin, midSwingTimeRatio, true);
         AddFloat(plugin, heelStrikeTimeRatio, true);
+
         AddFloat(plugin, toeOffHeightRatio, true);
         AddFloat(plugin, midSwingHeightRatio, true);
         AddFloat(plugin, heelStrikeHeightRatio, true);
+
         AddFloat(plugin, toeOffDistanceRatio, true);
         AddFloat(plugin, midSwingDistanceRatio, true);
         AddFloat(plugin, heelStrikeDistanceRatio, true);
+
+        AddFloat(plugin, toeOffPitch, true);
+        AddFloat(plugin, midSwingPitch, true);
+        AddFloat(plugin, heelStrikePitch, true);
     }
 
     private static void AddFloat(MVRScript plugin, JSONStorableFloat jsf, bool rightSide = false)

@@ -69,7 +69,7 @@ public class FootState : MonoBehaviour
     {
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = footControl.control.position;
-        var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.3f, 1f);
+        var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.1f, 1f);
         var passingDistance = footControl.control.right * config.inverse * _style.passingDistance.val * distanceRatio;
         var toeOffPosition = Vector3.Lerp(currentPosition, position, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingDistance * _style.toeOffTimeRatio.val;
         var midSwingPosition = Vector3.Lerp(currentPosition, position, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingDistance * _style.midSwingTimeRatio.val;
@@ -109,9 +109,9 @@ public class FootState : MonoBehaviour
         // TODO: Move quaternions as fields (configurable)
         // TODO: Reverse 1 and 2 if going backwards
         // TODO: Reduce to zero if going sideways
-        var toeOffRotation = Quaternion.Euler(10f * distanceRatio * forwardRatio, 0, 0) * currentRotation;
-        var heelStrikeRotation = Quaternion.Euler(-20 * distanceRatio * forwardRatio, 0, 0) * rotation;
-        var midSwingRotation = Quaternion.Euler(10 * distanceRatio * forwardRatio, 0, 0) * rotation;
+        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * distanceRatio * forwardRatio, 0, 0) * currentRotation;
+        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * distanceRatio * forwardRatio, 0, 0) * rotation;
+        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * distanceRatio * forwardRatio, 0, 0) * rotation;
 
         EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);
