@@ -75,13 +75,13 @@ public class MovingState : MonoBehaviour, IWalkState
 
     private void PlotFootCourse(FootState footState, Vector3 weightCenter)
     {
-        footState.PlotCourse(Vector3.MoveTowards(
-                footState.position,
-                GetFootFinalPosition(footState, weightCenter),
-                _style.stepLength.val
-            ),
-            GetFootFinalRotation()
+        var position = Vector3.MoveTowards(
+            footState.position,
+            GetFootFinalPosition(footState, weightCenter),
+            _style.stepLength.val
         );
+        var rotation = GetFootFinalRotation(position);
+        footState.PlotCourse(position, rotation);
     }
 
     private Vector3 GetFootFinalPosition(FootState footState, Vector3 weightCenter)
@@ -98,8 +98,8 @@ public class MovingState : MonoBehaviour, IWalkState
         return finalPosition;
     }
 
-    private Quaternion GetFootFinalRotation()
+    private Quaternion GetFootFinalRotation(Vector3 targetPosition)
     {
-        return Quaternion.LookRotation(Vector3.ProjectOnPlane(_headControl.control.forward, Vector3.up), Vector3.up);
+        return Quaternion.LookRotation(targetPosition - _currentFootState.controller.control.position, Vector3.up);
     }
 }
