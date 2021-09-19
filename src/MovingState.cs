@@ -28,8 +28,7 @@ public class MovingState : MonoBehaviour, IWalkState
     {
         SelectCurrentFoot();
         var weightCenter = _context.GetBodyCenter();
-        PlotFootCourse(lFootState, weightCenter);
-        PlotFootCourse(rFootState, weightCenter);
+        PlotFootCourse(_currentFootState, weightCenter);
         _visualizer.gameObject.SetActive(true);
     }
 
@@ -49,13 +48,12 @@ public class MovingState : MonoBehaviour, IWalkState
 
     public void FixedUpdate()
     {
-        if (_currentFootState == null) throw new NullReferenceException(nameof(_currentFootState));
         _currentFootState.FixedUpdate();
         if (!_currentFootState.IsDone()) return;
 
         if (FeetAreStable())
         {
-            if (stateMachine == null) throw new NullReferenceException(nameof(stateMachine));
+            // TODO: If the feet distance is too far away, move to another state that'll do instant catchup
             stateMachine.currentState = stateMachine.idleState;
             return;
         }
