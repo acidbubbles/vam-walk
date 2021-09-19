@@ -13,6 +13,8 @@ public class WalkStyle
     public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.2f, 0f, 1f, false);
     public readonly JSONStorableFloat stepLength = new JSONStorableFloat("Step Length", 0.8f, 0f, 1f, false);
 
+    public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.05f, -0.1f, 0.5f, false);
+
     public readonly JSONStorableFloat toeOffTimeRatio = new JSONStorableFloat("ToeOffTimeRatio", 0.2f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingTimeRatio = new JSONStorableFloat("MidSwingTimeRatio", 0.55f, 0f, 1f, true);
     public readonly JSONStorableFloat heelStrikeTimeRatio = new JSONStorableFloat("HeelStrikeTimeRatio", 0.76f, 0f, 1f, true);

@@ -69,6 +69,7 @@ public class Walk : MVRScript
 
         var movingStateVisualizer = AddWalkComponent<MovingStateVisualizer>("MovingStateVisualizer", c => { }, false);
 
+        // TODO: Separate the moving state (feet close, forward) and the standing state (separate feet, rotate out)
         var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
             style,
             context,

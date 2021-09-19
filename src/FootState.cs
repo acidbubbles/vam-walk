@@ -70,9 +70,10 @@ public class FootState : MonoBehaviour
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = footControl.control.position;
         var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.3f, 1f);
-        var toeOffPosition = Vector3.Lerp(currentPosition, position, _style.toeOffDistanceRatio.val) + up * toeOffHeight;
-        var midSwingPosition = Vector3.Lerp(currentPosition, position, _style.midSwingDistanceRatio.val) + up * midSwingHeight;
-        var heelStrikePosition = Vector3.Lerp(currentPosition, position, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight;
+        var passingDistance = footControl.control.right * config.inverse * _style.passingDistance.val * distanceRatio;
+        var toeOffPosition = Vector3.Lerp(currentPosition, position, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingDistance * _style.toeOffTimeRatio.val;
+        var midSwingPosition = Vector3.Lerp(currentPosition, position, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingDistance * _style.midSwingTimeRatio.val;
+        var heelStrikePosition = Vector3.Lerp(currentPosition, position, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + passingDistance * _style.heelStrikeTimeRatio.val;
 
         _xCurve.MoveKey(0, new Keyframe(0, currentPosition.x));
         _xCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffPosition.x));
