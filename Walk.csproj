@@ -63,6 +63,7 @@
 
   <ItemGroup>
     <!-- SourceFiles -->
+    <Compile Include="src\BodyPostureVisualizer.cs" />
     <Compile Include="src\FootConfig.cs" />
     <Compile Include="src\FootState.cs" />
     <Compile Include="src\FootStateVisualizer.cs" />

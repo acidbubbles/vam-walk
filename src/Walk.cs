@@ -77,6 +77,10 @@ public class Walk : MVRScript
             idleState,
             movingState
         ));
+
+        AddWalkComponent<BodyPostureVisualizer>("BodyPostureVisualizer", c => c.Configure(
+            containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
+        ));
     }
 
     public void OnEnable()
