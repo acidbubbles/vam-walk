@@ -18,21 +18,9 @@ public class Walk : MVRScript
 
         var style = new WalkStyle();
 
-        SetupStorables(style);
+        style.SetupStorables(this);
 
         SetupDependencyTree(style);
-    }
-
-    private void SetupStorables(WalkStyle style)
-    {
-        AddFloat(style.footRightOffset);
-        AddFloat(style.footUpOffset);
-    }
-
-    private void AddFloat(JSONStorableFloat jsf)
-    {
-        RegisterFloat(jsf);
-        CreateSlider(jsf);
     }
 
     private void SetupDependencyTree(WalkStyle style)
