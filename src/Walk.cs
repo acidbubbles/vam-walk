@@ -40,7 +40,7 @@ public class Walk : MVRScript
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
             new FootConfig(style, -1),
             lFootStateVisualizer
-        ));
+        ), false);
 
         var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { }, false);
 
@@ -49,7 +49,7 @@ public class Walk : MVRScript
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
             new FootConfig(style, 1),
             rFootStateVisualizer
-        ));
+        ), false);
 
         var context = AddWalkComponent<WalkContext>("Context", c => c.Configure(
             this,

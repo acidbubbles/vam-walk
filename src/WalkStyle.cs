@@ -74,23 +74,25 @@ public class WalkStyle
         AddFloat(plugin, footOutOffset);
         AddFloat(plugin, footUpOffset);
         AddFloat(plugin, footBackOffset);
+
         AddFloat(plugin, stepDuration);
-        AddFloat(plugin, toeOffTimeRatio);
-        AddFloat(plugin, midSwingTimeRatio);
-        AddFloat(plugin, heelStrikeTimeRatio);
-        AddFloat(plugin, toeOffHeightRatio);
-        AddFloat(plugin, midSwingHeightRatio);
-        AddFloat(plugin, heelStrikeHeightRatio);
-        AddFloat(plugin, toeOffDistanceRatio);
-        AddFloat(plugin, midSwingDistanceRatio);
-        AddFloat(plugin, heelStrikeDistanceRatio);
         AddFloat(plugin, stepHeight);
         AddFloat(plugin, stepLength);
+
+        AddFloat(plugin, toeOffTimeRatio, true);
+        AddFloat(plugin, midSwingTimeRatio, true);
+        AddFloat(plugin, heelStrikeTimeRatio, true);
+        AddFloat(plugin, toeOffHeightRatio, true);
+        AddFloat(plugin, midSwingHeightRatio, true);
+        AddFloat(plugin, heelStrikeHeightRatio, true);
+        AddFloat(plugin, toeOffDistanceRatio, true);
+        AddFloat(plugin, midSwingDistanceRatio, true);
+        AddFloat(plugin, heelStrikeDistanceRatio, true);
     }
 
-    private static void AddFloat(MVRScript plugin, JSONStorableFloat jsf)
+    private static void AddFloat(MVRScript plugin, JSONStorableFloat jsf, bool rightSide = false)
     {
         plugin.RegisterFloat(jsf);
-        plugin.CreateSlider(jsf);
+        plugin.CreateSlider(jsf, rightSide);
     }
 }
