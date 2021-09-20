@@ -59,6 +59,15 @@ public class Walk : MVRScript
             rFootState
         ));
 
+        var gaitVisualizer = AddWalkComponent<GaitVisualizer>("BodyPostureVisualizer", c => c.Configure(
+            containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
+        ));
+
+        var gait = AddWalkComponent<GaitController>("Gait", c => c.Configure(
+            context,
+            gaitVisualizer
+        ));
+
         var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { }, false);
 
         var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
@@ -73,16 +82,13 @@ public class Walk : MVRScript
         var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
             style,
             context,
+            gait,
             movingStateVisualizer
         ), false);
 
         AddWalkComponent<StateMachine>("StateMachine", c => c.Configure(
             idleState,
             movingState
-        ));
-
-        AddWalkComponent<BodyPostureVisualizer>("BodyPostureVisualizer", c => c.Configure(
-            containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
         ));
     }
 

@@ -1,7 +1,8 @@
-src\BodyPostureVisualizer.cs
 src\FootConfig.cs
 src\FootState.cs
 src\FootStateVisualizer.cs
+src\GaitController.cs
+src\GaitVisualizer.cs
 src\IdleState.cs
 src\IdleStateVisualizer.cs
 src\IWalkState.cs

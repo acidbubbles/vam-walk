@@ -63,10 +63,11 @@
 
   <ItemGroup>
     <!-- SourceFiles -->
-    <Compile Include="src\BodyPostureVisualizer.cs" />
     <Compile Include="src\FootConfig.cs" />
     <Compile Include="src\FootState.cs" />
     <Compile Include="src\FootStateVisualizer.cs" />
+    <Compile Include="src\GaitController.cs" />
+    <Compile Include="src\GaitVisualizer.cs" />
     <Compile Include="src\IdleState.cs" />
     <Compile Include="src\IdleStateVisualizer.cs" />
     <Compile Include="src\IWalkState.cs" />

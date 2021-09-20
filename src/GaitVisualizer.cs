@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 
-public class BodyPostureVisualizer : MonoBehaviour
+public class GaitVisualizer : MonoBehaviour
 {
     private readonly LineRenderer _hipLineRenderer;
     private Rigidbody _hipRB;
 
-    public BodyPostureVisualizer()
+    public GaitVisualizer()
     {
         _hipLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.white);
     }

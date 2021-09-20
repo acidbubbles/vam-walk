@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 public class MovingState : MonoBehaviour, IWalkState
@@ -8,17 +7,16 @@ public class MovingState : MonoBehaviour, IWalkState
 
     private WalkStyle _style;
     private WalkContext _context;
+    private GaitController _gait;
     private MovingStateVisualizer _visualizer;
     private FreeControllerV3 _headControl;
 
-    private FootState _currentFootState;
-    private FootState lFootState => _context.lFootState;
-    private FootState rFootState => _context.rFootState;
 
-    public void Configure(WalkStyle style, WalkContext context, MovingStateVisualizer visualizer)
+    public void Configure(WalkStyle style, WalkContext context, GaitController gait, MovingStateVisualizer visualizer)
     {
         _style = style;
         _context = context;
+        _gait = gait;
         _visualizer = visualizer;
         // TODO: Head or hip?
         _headControl = _context.containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl");
@@ -26,36 +24,23 @@ public class MovingState : MonoBehaviour, IWalkState
 
     public void OnEnable()
     {
-        SelectCurrentFoot();
+        _gait.SelectClosestFoot(_context.GetBodyCenter());
         var weightCenter = _context.GetBodyCenter();
-        PlotFootCourse(_currentFootState, weightCenter);
+        PlotFootCourse(weightCenter);
         _visualizer.gameObject.SetActive(true);
     }
 
     public void OnDisable()
     {
-        _currentFootState = null;
         _visualizer.gameObject.SetActive(false);
-    }
-
-    private void SelectCurrentFoot()
-    {
-        var weightCenter = _context.GetBodyCenter();
-        _currentFootState = lFootState.position.PlanarDistance(weightCenter) > rFootState.position.PlanarDistance(weightCenter)
-            ? lFootState
-            : rFootState;
     }
 
     public void Update()
     {
         var bodyCenter = _context.GetBodyCenter();
         _visualizer.Sync(bodyCenter, GetProjectedPosition(bodyCenter));
-    }
 
-    public void FixedUpdate()
-    {
-        _currentFootState.FixedUpdate();
-        if (!_currentFootState.IsDone()) return;
+        if (!_gait.currentFootState.IsDone()) return;
 
         if (FeetAreStable())
         {
@@ -64,30 +49,42 @@ public class MovingState : MonoBehaviour, IWalkState
             return;
         }
 
-        _currentFootState = _currentFootState == lFootState ? rFootState : lFootState;
-        PlotFootCourse(_currentFootState, _context.GetBodyCenter());
+        _gait.SelectOtherFoot();
+        PlotFootCourse(bodyCenter);
     }
 
     private bool FeetAreStable()
     {
         var weightCenter = _context.GetBodyCenter();
-        var lFootDistance = Vector3.Distance(lFootState.position, GetFootFinalPosition(lFootState, weightCenter));
+        var lFootDistance = Vector3.Distance(_gait.lFootState.position, GetFootPositionRelativeToBody(_gait.lFootState, GetProjectedPosition(weightCenter)));
         const float footDistanceEpsilon = 0.005f;
         if(lFootDistance > footDistanceEpsilon) return false;
-        var rFootDistance = Vector3.Distance(rFootState.position, GetFootFinalPosition(rFootState, weightCenter));
+        var rFootDistance = Vector3.Distance(_gait.rFootState.position, GetFootPositionRelativeToBody(_gait.rFootState, GetProjectedPosition(weightCenter)));
         if(rFootDistance > footDistanceEpsilon) return false;
         return true;
     }
 
-    private void PlotFootCourse(FootState footState, Vector3 weightCenter)
+    private void PlotFootCourse(Vector3 weightCenter)
     {
-        var position = Vector3.MoveTowards(
-            footState.position,
-            GetFootFinalPosition(footState, weightCenter),
+        var foot = _gait.currentFootState;
+
+        var position = GetFootPositionRelativeToBody(foot, GetProjectedPosition(weightCenter));
+        position = Vector3.MoveTowards(
+            foot.position,
+            position,
             _style.stepLength.val
         );
-        var rotation = GetFootFinalRotation();
-        footState.PlotCourse(position, rotation);
+
+        var rotation = Quaternion.LookRotation(_headControl.control.forward, Vector3.up);
+
+        _gait.currentFootState.PlotCourse(position, rotation);
+    }
+
+    private Vector3 GetFootPositionRelativeToBody(FootState foot, Vector3 position)
+    {
+        position += _context.GetBodyRotation() * foot.config.footPositionOffset;
+        position.y = foot.config.style.footUpOffset.val;
+        return position;
     }
 
     private Vector3 GetProjectedPosition(Vector3 weightCenter)
@@ -99,19 +96,5 @@ public class MovingState : MonoBehaviour, IWalkState
         // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict
         var finalPosition = target + planarVelocity * (0.7f * 0.6f);
         return finalPosition;
-    }
-
-    private Vector3 GetFootFinalPosition(FootState footState, Vector3 weightCenter)
-    {
-        var target = GetProjectedPosition(weightCenter);
-        var bodyRotation = _context.GetBodyRotation();
-        target += bodyRotation * footState.config.footPositionOffset;
-        target.y = footState.config.style.footUpOffset.val;
-        return target;
-    }
-
-    private Quaternion GetFootFinalRotation()
-    {
-        return Quaternion.LookRotation(_headControl.control.forward, Vector3.up);
     }
 }
