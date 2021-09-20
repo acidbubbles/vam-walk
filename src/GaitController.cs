@@ -27,25 +27,35 @@ public class GaitController : MonoBehaviour
     {
         var headPosition = _headRB.position;
         var headRotation = _headRB.rotation;
-        var hipPosition = GetFloorFeetCenter() + new Vector3(0, headPosition.y * 0.66f, 0);
-        // TODO: Check both arms and head direction to determine what forward should be, then only move hips if there is enough tension.
-        // TODO: Should we preserve the x rotation? The z rotation should be affected by legs.
+        var feetCenter = GetFloorFeetCenter();
+        // TODO: Compute this from bones instead
+        var hipPosition = feetCenter + new Vector3(0, headPosition.y * 0.65f, 0);
+        var lFootY = lFoot.position.y;
+        var lFootHeightRatio = lFootY / _style.stepHeight.val;
+        var rFootY = rFoot.position.y;
+        var rFootHeightRatio = rFootY / _style.stepHeight.val;
+        var lrRatio = -lFootHeightRatio + rFootHeightRatio;
         // TODO: Make the hip catch up speed configurable, and consider other approaches. We want the hip to stay straight, so maybe it should be part of the moving state?
-        _hipControl.control.rotation = Quaternion.Slerp(headRotation, Quaternion.LookRotation(GetFeetForward(), Vector3.up), 0.5f);
-        var feetCenterPosition = (lFoot.footControl.control.position + rFoot.footControl.control.position) / 2f;
-        // TODO: The height should be affected by legs.
-        _hipControl.control.position = Vector3.Lerp(
-            new Vector3(feetCenterPosition.x, hipPosition.y, feetCenterPosition.z),
+        // TODO: The hip should track passing, not leg height.
+        // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
+        _hipControl.control.rotation = Quaternion.Euler(0, lrRatio * -35f, lrRatio * -28f) * headRotation;
+        var bodyCenter = Vector3.Lerp(
+            new Vector3(feetCenter.x, hipPosition.y, feetCenter.z),
             new Vector3(headPosition.x, hipPosition.y, headPosition.z),
-            0.7f
+            0.9f
         );
+        // SuperController.singleton.ClearMessages();
+        // SuperController.LogMessage($"{(lFoot.position - Vector3.up * _style.footUpOffset.val).y}");
+        // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
+        var hipRaise = Mathf.Max(lFootY, rFootY) * 0.3f;
+        _hipControl.control.position = bodyCenter + new Vector3(0, hipRaise, 0);
         // TODO: Adjust hip rotation
     }
 
     public void SelectClosestFoot(Vector3 position)
     {
         var bodyCenter = _heading.GetFloorCenter();
-        currentFoot = lFoot.position.PlanarDistance(bodyCenter) > rFoot.position.PlanarDistance(bodyCenter)
+        currentFoot = lFoot.floorPosition.PlanarDistance(bodyCenter) > rFoot.floorPosition.PlanarDistance(bodyCenter)
             ? lFoot
             : rFoot;
     }

@@ -54,7 +54,7 @@ public class MovingState : MonoBehaviour, IWalkState
         var projectedPosition = GetProjectedPosition(bodyCenter);
         var bodyRotation = _heading.GetPlanarRotation();
         var lFootDistance = Vector3.Distance(_gait.lFoot.position, _gait.lFoot.GetFootPositionRelativeToBodyWalking(projectedPosition, bodyRotation));
-        const float footDistanceEpsilon = 0.005f;
+        const float footDistanceEpsilon = 0.01f;
         if(lFootDistance > footDistanceEpsilon) return false;
         var rFootDistance = Vector3.Distance(_gait.rFoot.position, _gait.rFoot.GetFootPositionRelativeToBodyWalking(projectedPosition, bodyRotation));
         if(rFootDistance > footDistanceEpsilon) return false;
@@ -67,7 +67,7 @@ public class MovingState : MonoBehaviour, IWalkState
 
         var position = foot.GetFootPositionRelativeToBodyWalking(GetProjectedPosition(bodyCenter), _heading.GetPlanarRotation());
         position = Vector3.MoveTowards(
-            foot.position,
+            foot.floorPosition,
             position,
             _style.stepLength.val
         );

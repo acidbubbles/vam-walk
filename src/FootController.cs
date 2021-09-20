@@ -9,7 +9,12 @@ public class FootController : MonoBehaviour
     private GaitFootStyle _footStyle;
     private FootStateVisualizer _visualizer;
 
-    public Vector3 position => footControl.control.position; // TODO: - config.footFloorOffset;
+    public Vector3 position => footControl.control.position;
+
+    public Vector3 floorPosition
+    {
+        get { var footPosition = footControl.control.position; return new Vector3(footPosition.x, 0, footPosition.z); }
+    }
 
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;

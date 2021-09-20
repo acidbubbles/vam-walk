@@ -40,8 +40,8 @@ public class IdleState : MonoBehaviour, IWalkState
 
     private float GetFeetCenterRadius()
     {
-        var lFootControlPosition = _gait.lFoot.position;
-        var rFootControlPosition = _gait.rFoot.position;
+        var lFootControlPosition = _gait.lFoot.floorPosition;
+        var rFootControlPosition = _gait.rFoot.floorPosition;
         var feetCenterStableRadius = rFootControlPosition.PlanarDistance(lFootControlPosition) / 2f;
         // TODO: We might want to add an offset
         // TODO: We need to make an ellipse, more stable in feet direction, less perpendicular to the feet line
