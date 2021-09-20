@@ -36,7 +36,7 @@ public class MovingState : MonoBehaviour, IWalkState
         var bodyCenter = _heading.GetFloorCenter();
         _visualizer.Sync(bodyCenter, GetProjectedPosition(bodyCenter));
 
-        if (!_gait.currentFoot.IsDone()) return;
+        if (!_gait.currentFoot.FloorContact()) return;
 
         if (FeetAreStable(bodyCenter))
         {

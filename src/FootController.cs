@@ -31,6 +31,7 @@ public class FootController : MonoBehaviour
     private AnimationCurve _rotZCurve;
     private AnimationCurve _rotWCurve;
     private float _startTime;
+    private float _floorTime;
 
     public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, FootStateVisualizer visualizer)
     {
@@ -69,6 +70,7 @@ public class FootController : MonoBehaviour
         // TODO: We can animate the knee too
         PlotPosition(_targetPosition, distanceRatio);
         PlotRotation(_targetRotation, distanceRatio, forwardRatio);
+        _floorTime = _startTime + (stepTime + heelStrikeTime) / 2f;
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         gameObject.SetActive(true);
         _visualizer.gameObject.SetActive(true);
@@ -187,13 +189,12 @@ public class FootController : MonoBehaviour
         kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val);
     }
 
-    public bool IsDone()
+    public bool FloorContact()
     {
         // TODO: If the distance is to great we may have to re-plot the course or step down faster
-        // TODO: We can start the other foot before the end for feet to roll (run both feet)
-        var done = Time.time >= _startTime + stepTime;
-        if(done) _visualizer.gameObject.SetActive(false);
-        return done;
+        var contact = Time.time >= _floorTime;
+        if(contact) _visualizer.gameObject.SetActive(false);
+        return contact;
     }
 
     public void OnDisable()
