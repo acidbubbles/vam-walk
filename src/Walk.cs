@@ -35,7 +35,7 @@ public class Walk : MVRScript
     {
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { }, false);
 
-        var lFootController = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
+        var lFootController = AddWalkComponent<FootController>("LeftFoot", c => c.Configure(
             style,
             new GaitFootStyle(style, -1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"), containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
@@ -44,17 +44,15 @@ public class Walk : MVRScript
 
         var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { }, false);
 
-        var rFootController = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
+        var rFootController = AddWalkComponent<FootController>("RightFoot", c => c.Configure(
             style,
             new GaitFootStyle(style, 1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"), containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
             rFootStateVisualizer
         ), false);
 
-        var context = AddWalkComponent<WalkContext>("Context", c => c.Configure(
-            this,
-            lFootController,
-            rFootController
+        var heading = AddWalkComponent<HeadingTracker>("HeadingTracker", c => c.Configure(
+            containingAtom.freeControllers.First(fc => fc.name == "headControl")
         ));
 
         var gaitVisualizer = AddWalkComponent<GaitVisualizer>("BodyPostureVisualizer", c => c.Configure(
@@ -62,7 +60,12 @@ public class Walk : MVRScript
         ));
 
         var gait = AddWalkComponent<GaitController>("Gait", c => c.Configure(
-            context,
+            heading,
+            lFootController,
+            rFootController,
+            style,
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "hipControl"),
+            containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "head"),
             gaitVisualizer
         ));
 
@@ -70,7 +73,8 @@ public class Walk : MVRScript
 
         var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
             style,
-            context,
+            gait,
+            heading,
             idleStateVisualizer
         ), false);
 
@@ -79,7 +83,7 @@ public class Walk : MVRScript
         // TODO: Separate the moving state (feet close, forward) and the standing state (separate feet, rotate out)
         var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
             style,
-            context,
+            heading,
             gait,
             movingStateVisualizer
         ), false);

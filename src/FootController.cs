@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class FootState : MonoBehaviour
+public class FootController : MonoBehaviour
 {
     public FreeControllerV3 footControl;
     public FreeControllerV3 kneeControl;

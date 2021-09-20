@@ -4,6 +4,7 @@ src\GaitController.cs
 src\GaitFootStyle.cs
 src\GaitStyle.cs
 src\GaitVisualizer.cs
+src\HeadingTracker.cs
 src\IdleState.cs
 src\IdleStateVisualizer.cs
 src\IWalkState.cs
@@ -13,4 +14,3 @@ src\StateMachine.cs
 src\TransformExtensions.cs
 src\Vector3Extensions.cs
 src\Walk.cs
-src\WalkContext.cs
