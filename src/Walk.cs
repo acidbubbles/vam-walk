@@ -52,6 +52,7 @@ public class Walk : MVRScript
         ), false);
 
         var heading = AddWalkComponent<HeadingTracker>("HeadingTracker", c => c.Configure(
+            style,
             containingAtom.freeControllers.First(fc => fc.name == "headControl")
         ));
 

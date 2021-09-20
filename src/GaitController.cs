@@ -27,16 +27,16 @@ public class GaitController : MonoBehaviour
     {
         var headPosition = _headRB.position;
         var headRotation = _headRB.rotation;
+        var hipPosition = GetFloorFeetCenter() + new Vector3(0, headPosition.y * 0.66f, 0);
         // TODO: Check both arms and head direction to determine what forward should be, then only move hips if there is enough tension.
         // TODO: Should we preserve the x rotation? The z rotation should be affected by legs.
         // TODO: Make the hip catch up speed configurable, and consider other approaches. We want the hip to stay straight, so maybe it should be part of the moving state?
         _hipControl.control.rotation = Quaternion.Slerp(headRotation, Quaternion.LookRotation(GetFeetForward(), Vector3.up), 0.5f);
-        var hipControlPosition = _hipControl.control.position;
         var feetCenterPosition = (lFoot.footControl.control.position + rFoot.footControl.control.position) / 2f;
         // TODO: The height should be affected by legs.
         _hipControl.control.position = Vector3.Lerp(
-            new Vector3(feetCenterPosition.x, hipControlPosition.y, feetCenterPosition.z),
-            new Vector3(headPosition.x, hipControlPosition.y, headPosition.z),
+            new Vector3(feetCenterPosition.x, hipPosition.y, feetCenterPosition.z),
+            new Vector3(headPosition.x, hipPosition.y, headPosition.z),
             0.7f
         );
         // TODO: Adjust hip rotation

@@ -20,8 +20,8 @@ public class MovingState : MonoBehaviour, IWalkState
 
     public void OnEnable()
     {
-        _gait.SelectClosestFoot(_heading.GetFloorCenter());
         var bodyCenter = _heading.GetFloorCenter();
+        _gait.SelectClosestFoot(bodyCenter);
         PlotFootCourse(bodyCenter);
         _visualizer.gameObject.SetActive(true);
     }
@@ -38,7 +38,7 @@ public class MovingState : MonoBehaviour, IWalkState
 
         if (!_gait.currentFoot.IsDone()) return;
 
-        if (FeetAreStable())
+        if (FeetAreStable(bodyCenter))
         {
             // TODO: If the feet distance is too far away, move to another state that'll do instant catchup
             stateMachine.currentState = stateMachine.idleState;
@@ -49,9 +49,9 @@ public class MovingState : MonoBehaviour, IWalkState
         PlotFootCourse(bodyCenter);
     }
 
-    private bool FeetAreStable()
+    private bool FeetAreStable(Vector3 bodyCenter)
     {
-        var projectedPosition = GetProjectedPosition(_heading.GetFloorCenter());
+        var projectedPosition = GetProjectedPosition(bodyCenter);
         var bodyRotation = _heading.GetPlanarRotation();
         var lFootDistance = Vector3.Distance(_gait.lFoot.position, _gait.lFoot.GetFootPositionRelativeToBodyWalking(projectedPosition, bodyRotation));
         const float footDistanceEpsilon = 0.005f;

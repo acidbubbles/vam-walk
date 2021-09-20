@@ -2,15 +2,17 @@
 
 public class HeadingTracker : MonoBehaviour
 {
+    private GaitStyle _style;
     private FreeControllerV3 _headControl;
 
     private Vector3 _lastBodyCenter;
     // TODO: Determine how many frames based on the physics rate
-    private readonly Vector3[] _lastVelocities = new Vector3[90];
+    private readonly Vector3[] _lastVelocities = new Vector3[30];
     private int _currentVelocityIndex;
 
-    public void Configure(FreeControllerV3 headControl)
+    public void Configure(GaitStyle style, FreeControllerV3 headControl)
     {
+        _style = style;
         _headControl = headControl;
         _lastBodyCenter = GetFloorCenter();
     }
@@ -36,7 +38,8 @@ public class HeadingTracker : MonoBehaviour
     {
         // TODO: The head is the only viable origin, but we can cancel sideways rotation and consider other factors
         var headPosition = _headControl.control.position;
-        return new Vector3(headPosition.x, 0, headPosition.z);
+        headPosition = new Vector3(headPosition.x, 0, headPosition.z);
+        return headPosition + GetBodyForward() * -_style.footBackOffset.val;
     }
 
     public Quaternion GetPlanarRotation()
