@@ -51,7 +51,9 @@ public class IdleState : MonoBehaviour, IWalkState
     private bool IsOffBalanceRotation()
     {
         // TODO: Configure this
-        return Vector3.Angle(_gait.GetFeetForward(), _heading.GetBodyForward()) > 50;
+        SuperController.singleton.ClearMessages();
+        SuperController.LogMessage($"{_gait.GetFeetForward()} <> {_heading.GetBodyForward()} = {Vector3.Angle(_gait.GetFeetForward(), _heading.GetBodyForward())}");
+        return Vector3.Angle(_gait.GetFeetForward(), _heading.GetBodyForward()) > 60;
     }
 
     public void OnEnable()

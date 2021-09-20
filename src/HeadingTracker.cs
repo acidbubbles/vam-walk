@@ -55,8 +55,7 @@ public class HeadingTracker : MonoBehaviour
 
     public Vector3 GetBodyForward()
     {
-        // TODO: Validate if this is right
-        return Quaternion.LookRotation(_headRB.transform.forward, Vector3.up) * Vector3.forward;
+        return Vector3.ProjectOnPlane(_headRB.transform.forward, Vector3.up).normalized;
     }
 
     public Vector3 GetHeadPosition()
