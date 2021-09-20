@@ -81,7 +81,7 @@ public class MovingState : MonoBehaviour, IWalkState
     {
         var velocity = _heading.GetPlanarVelocity();
         // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict
-        var finalPosition = headingCenter + velocity * (0.7f * 0.6f);
+        var finalPosition = headingCenter + velocity * (_style.stepDuration.val * 1.2f);
         return finalPosition;
     }
 }
