@@ -64,15 +64,16 @@ public class MovingState : MonoBehaviour, IWalkState
     private void PlotFootCourse(Vector3 bodyCenter)
     {
         var foot = _gait.currentFoot;
+        var toRotation = _heading.GetPlanarRotation();
 
-        var position = foot.GetFootPositionRelativeToBodyWalking(GetProjectedPosition(bodyCenter), _heading.GetPlanarRotation());
+        var position = foot.GetFootPositionRelativeToBodyWalking(GetProjectedPosition(bodyCenter),  toRotation);
         position = Vector3.MoveTowards(
             foot.floorPosition,
             position,
             _style.stepLength.val
         );
 
-        var rotation = Quaternion.LookRotation(_heading.GetBodyForward(), Vector3.up);
+        var rotation = foot.GetFootRotationRelativeToBodyWalking(toRotation);
 
         _gait.currentFoot.PlotCourse(position, rotation);
     }
@@ -80,8 +81,8 @@ public class MovingState : MonoBehaviour, IWalkState
     private Vector3 GetProjectedPosition(Vector3 headingCenter)
     {
         var velocity = _heading.GetPlanarVelocity();
-        // TODO: 0.5f is the step time, 0.8f is how much of this time should be predict
-        var finalPosition = headingCenter + velocity * (_style.stepDuration.val * 1.2f);
+        // TODO: Make this an option, how much of the velocity is used for prediction
+        var finalPosition = headingCenter + velocity * (_style.stepDuration.val * 0.9f);
         return finalPosition;
     }
 }

@@ -24,9 +24,6 @@ public class FootController : MonoBehaviour
     private float midSwingHeight => _style.stepHeight.val * _style.midSwingHeightRatio.val;
     private float heelStrikeHeight => _style.stepHeight.val * _style.heelStrikeHeightRatio.val;
 
-    private Vector3 _targetPosition;
-    private Quaternion _targetRotation;
-
     // TODO: Also animate the foot rotation (toes down first, toes up end)
     private AnimationCurve _xCurve;
     private AnimationCurve _yCurve;
@@ -63,18 +60,21 @@ public class FootController : MonoBehaviour
         return toPosition;
     }
 
+    public Quaternion GetFootRotationRelativeToBodyWalking(Quaternion toRotation)
+    {
+        return toRotation * _footStyle.footWalkingRotationOffset;
+    }
+
     public void PlotCourse(Vector3 toPosition, Quaternion toRotation)
     {
-        _targetPosition = toPosition;
-        _targetRotation = toRotation * _footStyle.footWalkingRotationOffset;
         _startTime = Time.time;
         // TODO: Adjust height and rotation based on percentage of distance
         var controlPosition = footControl.control.position;
-        var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, _targetPosition) / _style.stepLength.val);
-        var forwardRatio = Vector3.Dot(_targetPosition - controlPosition, footControl.control.forward);
+        var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, toPosition) / _style.stepLength.val);
+        var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
         // TODO: We can animate the knee too
-        PlotPosition(_targetPosition, distanceRatio);
-        PlotRotation(_targetRotation, distanceRatio, forwardRatio);
+        PlotPosition(toPosition, distanceRatio);
+        PlotRotation(toRotation, distanceRatio, forwardRatio);
         _floorTime = _startTime + (stepTime + heelStrikeTime) / 2f;
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         gameObject.SetActive(true);
@@ -174,8 +174,16 @@ public class FootController : MonoBehaviour
             target = new Quaternion(-reference.x, -reference.y, -reference.z, -reference.w);
     }
 
+    public void CancelCourse()
+    {
+        // TODO: Clear the curves data and mark it as dirty to avoid future errors
+        gameObject.SetActive(false);
+    }
+
     public void FixedUpdate()
     {
+        // TODO: Skip if the animation is complete
+        // TODO: Increment the time to allow accelerating if the distance is greater than the step length
         var t = Time.time - _startTime;
         var footPosition = new Vector3(
             _xCurve.Evaluate(t),

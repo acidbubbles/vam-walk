@@ -5,30 +5,29 @@ public class GaitController : MonoBehaviour
     private HeadingTracker _heading;
     private GaitStyle _style;
     private FreeControllerV3 _hipControl;
-    private Rigidbody _headRB;
     private GaitVisualizer _visualizer;
 
     public FootController currentFoot { get; private set; }
     public FootController rFoot { get; set; }
     public FootController lFoot { get; set; }
 
-    public void Configure(HeadingTracker heading, FootController lFoot, FootController rFoot, GaitStyle style, FreeControllerV3 hipControl, Rigidbody headRB, GaitVisualizer visualizer)
+    public void Configure(HeadingTracker heading, FootController lFoot, FootController rFoot, GaitStyle style, FreeControllerV3 hipControl, GaitVisualizer visualizer)
     {
         _heading = heading;
         this.lFoot = lFoot;
         this.rFoot = rFoot;
         _style = style;
         _hipControl = hipControl;
-        _headRB = headRB;
         _visualizer = visualizer;
     }
 
     public void FixedUpdate()
     {
-        var headPosition = _headRB.position;
-        var headRotation = _headRB.rotation;
+        var headPosition = _heading.GetHeadPosition();
+        var headRotation = _heading.GetPlanarRotation();
         var feetCenter = GetFloorFeetCenter();
         // TODO: Compute this from bones instead
+        // TODO: Deal with when bending down, the hip should stay back (rely on the hip-to-head angle)
         var hipPosition = feetCenter + new Vector3(0, headPosition.y * 0.65f, 0);
         var lFootY = lFoot.position.y;
         var lFootHeightRatio = lFootY / _style.stepHeight.val;
@@ -38,7 +37,7 @@ public class GaitController : MonoBehaviour
         // TODO: Make the hip catch up speed configurable, and consider other approaches. We want the hip to stay straight, so maybe it should be part of the moving state?
         // TODO: The hip should track passing, not leg height.
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
-        _hipControl.control.rotation = Quaternion.Euler(0, lrRatio * -35f, lrRatio * -18f) * headRotation;
+        _hipControl.control.rotation = Quaternion.Euler(20, lrRatio * -35f, lrRatio * -18f) * headRotation;
         var bodyCenter = Vector3.Lerp(
             new Vector3(feetCenter.x, hipPosition.y, feetCenter.z),
             new Vector3(headPosition.x, hipPosition.y, headPosition.z),

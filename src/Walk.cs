@@ -33,12 +33,15 @@ public class Walk : MVRScript
 
     private void SetupDependencyTree(GaitStyle style)
     {
+        var bones = containingAtom.transform.Find("rescale2").GetComponentsInChildren<DAZBone>();
+
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { }, false);
 
         var lFootController = AddWalkComponent<FootController>("LeftFoot", c => c.Configure(
             style,
             new GaitFootStyle(style, -1),
-            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"), containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
             lFootStateVisualizer
         ), false);
 
@@ -47,13 +50,15 @@ public class Walk : MVRScript
         var rFootController = AddWalkComponent<FootController>("RightFoot", c => c.Configure(
             style,
             new GaitFootStyle(style, 1),
-            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"), containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
             rFootStateVisualizer
         ), false);
 
         var heading = AddWalkComponent<HeadingTracker>("HeadingTracker", c => c.Configure(
             style,
-            containingAtom.freeControllers.First(fc => fc.name == "headControl")
+            containingAtom.rigidbodies.FirstOrDefault(fc => fc.name == "head"),
+            bones.FirstOrDefault(fc => fc.name == "head")
         ));
 
         var gaitVisualizer = AddWalkComponent<GaitVisualizer>("BodyPostureVisualizer", c => c.Configure(
@@ -66,7 +71,6 @@ public class Walk : MVRScript
             rFootController,
             style,
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "hipControl"),
-            containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "head"),
             gaitVisualizer
         ));
 
@@ -89,9 +93,15 @@ public class Walk : MVRScript
             movingStateVisualizer
         ), false);
 
+        var teleportState = AddWalkComponent<TeleportState>("TeleportState", c => c.Configure(
+            gait,
+            heading
+        ), false);
+
         AddWalkComponent<StateMachine>("StateMachine", c => c.Configure(
             idleState,
-            movingState
+            movingState,
+            teleportState
         ));
     }
 

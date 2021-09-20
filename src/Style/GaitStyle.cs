@@ -4,7 +4,7 @@ using UnityEngine.Events;
 public class GaitStyle
 {
     public readonly JSONStorableFloat footUpOffset = new JSONStorableFloat("Foot Offset Up", 0.05f, 0f, 0.2f, false);
-    public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Offset Back", 0.06f, 0f, 1f, false);
+    public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Offset Back", 0.07f, -0.1f, 0.1f, false);
 
     public readonly JSONStorableFloat footWalkingOutOffset = new JSONStorableFloat("Foot Walking Offset Out", 0.09f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footWalkingPitch = new JSONStorableFloat("Foot Walking Pitch", 18.42f, -45f, 45f, false);

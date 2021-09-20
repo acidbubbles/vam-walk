@@ -3,26 +3,30 @@
 public class HeadingTracker : MonoBehaviour
 {
     private GaitStyle _style;
-    private FreeControllerV3 _headControl;
+    private Rigidbody _headRB;
+    private DAZBone _headBone;
+    private DAZBone _neckBone;
 
-    private Vector3 _lastBodyCenter;
+    private Vector3 _lastVelocityMeasurePoint;
     // TODO: Determine how many frames based on the physics rate
     private readonly Vector3[] _lastVelocities = new Vector3[30];
     private int _currentVelocityIndex;
 
-    public void Configure(GaitStyle style, FreeControllerV3 headControl)
+    public void Configure(GaitStyle style, Rigidbody headRB, DAZBone headBone)
     {
         _style = style;
-        _headControl = headControl;
-        _lastBodyCenter = GetFloorCenter();
+        _headRB = headRB;
+        _headBone = headBone;
+        _neckBone = headBone.parentBone;
+        _lastVelocityMeasurePoint = _neckBone.transform.position;
     }
 
     public void FixedUpdate()
     {
-        var bodyCenter = GetFloorCenter();
-        _lastVelocities[_currentVelocityIndex++] = bodyCenter - _lastBodyCenter;
+        var velocityMeasurePoint = _neckBone.transform.position;
+        _lastVelocities[_currentVelocityIndex++] = velocityMeasurePoint - _lastVelocityMeasurePoint;
         if (_currentVelocityIndex == _lastVelocities.Length) _currentVelocityIndex = 0;
-        _lastBodyCenter = bodyCenter;
+        _lastVelocityMeasurePoint = velocityMeasurePoint;
     }
 
     public Vector3 GetPlanarVelocity()
@@ -36,21 +40,27 @@ public class HeadingTracker : MonoBehaviour
 
     public Vector3 GetFloorCenter()
     {
-        // TODO: The head is the only viable origin, but we can cancel sideways rotation and consider other factors
-        var headPosition = _headControl.control.position;
+        var headPosition = _neckBone.transform.position;
+        // Find the floor level
         headPosition = new Vector3(headPosition.x, 0, headPosition.z);
+        // Offset for expected feet position
         return headPosition + GetBodyForward() * -_style.footBackOffset.val;
     }
 
     public Quaternion GetPlanarRotation()
     {
         // TODO: Validate if this works while looking sideways
-        return Quaternion.Euler(0, _headControl.control.eulerAngles.y, 0);
+        return Quaternion.Euler(0, _headRB.transform.eulerAngles.y, 0);
     }
 
     public Vector3 GetBodyForward()
     {
         // TODO: Validate if this is right
-        return Quaternion.LookRotation(_headControl.control.forward, Vector3.up) * Vector3.forward;
+        return Quaternion.LookRotation(_headRB.transform.forward, Vector3.up) * Vector3.forward;
+    }
+
+    public Vector3 GetHeadPosition()
+    {
+        return _headBone.transform.position;
     }
 }
