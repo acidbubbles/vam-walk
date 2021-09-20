@@ -63,10 +63,11 @@
 
   <ItemGroup>
     <!-- SourceFiles -->
-    <Compile Include="src\FootConfig.cs" />
-    <Compile Include="src\FootState.cs" />
-    <Compile Include="src\FootStateVisualizer.cs" />
+    <Compile Include="src\FootController.cs" />
+    <Compile Include="src\FootVisualizer.cs" />
     <Compile Include="src\GaitController.cs" />
+    <Compile Include="src\GaitFootStyle.cs" />
+    <Compile Include="src\GaitStyle.cs" />
     <Compile Include="src\GaitVisualizer.cs" />
     <Compile Include="src\IdleState.cs" />
     <Compile Include="src\IdleStateVisualizer.cs" />
@@ -78,7 +79,6 @@
     <Compile Include="src\Vector3Extensions.cs" />
     <Compile Include="src\Walk.cs" />
     <Compile Include="src\WalkContext.cs" />
-    <Compile Include="src\WalkStyle.cs" />
     <!-- /SourceFiles -->
   </ItemGroup>
 

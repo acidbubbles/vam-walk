@@ -5,9 +5,9 @@ public class GaitController : MonoBehaviour
     private WalkContext _context;
     private GaitVisualizer _visualizer;
 
-    public FootState currentFootState { get; private set; }
-    public FootState lFootState => _context.lFootState;
-    public FootState rFootState => _context.rFootState;
+    public FootState currentFoot { get; private set; }
+    public FootState lFoot => _context.lFootState;
+    public FootState rFoot => _context.rFootState;
 
     public void Configure(WalkContext context, GaitVisualizer visualizer)
     {
@@ -18,19 +18,14 @@ public class GaitController : MonoBehaviour
     public void SelectClosestFoot(Vector3 position)
     {
         var weightCenter = _context.GetBodyCenter();
-        currentFootState = lFootState.position.PlanarDistance(weightCenter) > rFootState.position.PlanarDistance(weightCenter)
-            ? lFootState
-            : rFootState;
+        currentFoot = lFoot.position.PlanarDistance(weightCenter) > rFoot.position.PlanarDistance(weightCenter)
+            ? lFoot
+            : rFoot;
     }
 
     public void SelectOtherFoot()
     {
-        currentFootState = currentFootState == lFootState ? rFootState : lFootState;
-    }
-
-    public void PlotFootCourse(Vector3 position, Quaternion rotation)
-    {
-        currentFootState.PlotCourse(position, rotation);
+        currentFoot = currentFoot == lFoot ? rFoot : lFoot;
     }
 
     public void OnEnable()

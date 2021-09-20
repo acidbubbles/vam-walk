@@ -4,11 +4,11 @@ public class IdleState : MonoBehaviour, IWalkState
 {
     public StateMachine stateMachine { get; set; }
 
-    private WalkStyle _style;
+    private GaitStyle _style;
     private WalkContext _context;
     private IdleStateVisualizer _visualizer;
 
-    public void Configure(WalkStyle style, WalkContext context, IdleStateVisualizer visualizer)
+    public void Configure(GaitStyle style, WalkContext context, IdleStateVisualizer visualizer)
     {
         _style = style;
         _context = context;

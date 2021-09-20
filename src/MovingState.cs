@@ -5,14 +5,14 @@ public class MovingState : MonoBehaviour, IWalkState
 {
     public StateMachine stateMachine { get; set; }
 
-    private WalkStyle _style;
+    private GaitStyle _style;
     private WalkContext _context;
     private GaitController _gait;
     private MovingStateVisualizer _visualizer;
     private FreeControllerV3 _headControl;
 
 
-    public void Configure(WalkStyle style, WalkContext context, GaitController gait, MovingStateVisualizer visualizer)
+    public void Configure(GaitStyle style, WalkContext context, GaitController gait, MovingStateVisualizer visualizer)
     {
         _style = style;
         _context = context;
@@ -40,7 +40,7 @@ public class MovingState : MonoBehaviour, IWalkState
         var bodyCenter = _context.GetBodyCenter();
         _visualizer.Sync(bodyCenter, GetProjectedPosition(bodyCenter));
 
-        if (!_gait.currentFootState.IsDone()) return;
+        if (!_gait.currentFoot.IsDone()) return;
 
         if (FeetAreStable())
         {
@@ -55,20 +55,21 @@ public class MovingState : MonoBehaviour, IWalkState
 
     private bool FeetAreStable()
     {
-        var weightCenter = _context.GetBodyCenter();
-        var lFootDistance = Vector3.Distance(_gait.lFootState.position, GetFootPositionRelativeToBody(_gait.lFootState, GetProjectedPosition(weightCenter)));
+        var projectedPosition = GetProjectedPosition(_context.GetBodyCenter());
+        var bodyRotation = _context.GetBodyRotation();
+        var lFootDistance = Vector3.Distance(_gait.lFoot.position, _gait.lFoot.GetFootPositionRelativeToBodyWalking(projectedPosition, bodyRotation));
         const float footDistanceEpsilon = 0.005f;
         if(lFootDistance > footDistanceEpsilon) return false;
-        var rFootDistance = Vector3.Distance(_gait.rFootState.position, GetFootPositionRelativeToBody(_gait.rFootState, GetProjectedPosition(weightCenter)));
+        var rFootDistance = Vector3.Distance(_gait.rFoot.position, _gait.rFoot.GetFootPositionRelativeToBodyWalking(projectedPosition, bodyRotation));
         if(rFootDistance > footDistanceEpsilon) return false;
         return true;
     }
 
     private void PlotFootCourse(Vector3 weightCenter)
     {
-        var foot = _gait.currentFootState;
+        var foot = _gait.currentFoot;
 
-        var position = GetFootPositionRelativeToBody(foot, GetProjectedPosition(weightCenter));
+        var position = foot.GetFootPositionRelativeToBodyWalking(GetProjectedPosition(weightCenter), _context.GetBodyRotation());
         position = Vector3.MoveTowards(
             foot.position,
             position,
@@ -77,14 +78,7 @@ public class MovingState : MonoBehaviour, IWalkState
 
         var rotation = Quaternion.LookRotation(_headControl.control.forward, Vector3.up);
 
-        _gait.currentFootState.PlotCourse(position, rotation);
-    }
-
-    private Vector3 GetFootPositionRelativeToBody(FootState foot, Vector3 position)
-    {
-        position += _context.GetBodyRotation() * foot.config.footPositionOffset;
-        position.y = foot.config.style.footUpOffset.val;
-        return position;
+        _gait.currentFoot.PlotCourse(position, rotation);
     }
 
     private Vector3 GetProjectedPosition(Vector3 weightCenter)

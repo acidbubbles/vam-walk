@@ -16,7 +16,7 @@ public class Walk : MVRScript
             return;
         }
 
-        var style = new WalkStyle();
+        var style = new GaitStyle();
 
         style.SetupStorables(this);
 
@@ -31,32 +31,30 @@ public class Walk : MVRScript
         }
     }
 
-    private void SetupDependencyTree(WalkStyle style)
+    private void SetupDependencyTree(GaitStyle style)
     {
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { }, false);
 
-        var lFootState = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
+        var lFootController = AddWalkComponent<FootState>("LeftFoot", c => c.Configure(
             style,
-            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
-            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
-            new FootConfig(style, -1),
+            new GaitFootStyle(style, -1),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"), containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
             lFootStateVisualizer
         ), false);
 
         var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { }, false);
 
-        var rFootState = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
+        var rFootController = AddWalkComponent<FootState>("RightFoot", c => c.Configure(
             style,
-            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
-            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
-            new FootConfig(style, 1),
+            new GaitFootStyle(style, 1),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"), containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
             rFootStateVisualizer
         ), false);
 
         var context = AddWalkComponent<WalkContext>("Context", c => c.Configure(
             this,
-            lFootState,
-            rFootState
+            lFootController,
+            rFootController
         ));
 
         var gaitVisualizer = AddWalkComponent<GaitVisualizer>("BodyPostureVisualizer", c => c.Configure(
