@@ -6,6 +6,8 @@ using UnityEngine;
 public class Walk : MVRScript
 {
     private readonly List<GameObject> _walkComponents = new List<GameObject>();
+    private readonly List<GameObject> _defaultActiveComponents = new List<GameObject>();
+    private StateMachine _stateMachine;
 
     public override void Init()
     {
@@ -98,7 +100,7 @@ public class Walk : MVRScript
             heading
         ), false);
 
-        AddWalkComponent<StateMachine>("StateMachine", c => c.Configure(
+        _stateMachine = AddWalkComponent<StateMachine>("StateMachine", c => c.Configure(
             idleState,
             movingState,
             teleportState
@@ -107,12 +109,19 @@ public class Walk : MVRScript
 
     public void OnEnable()
     {
-        foreach(var c in _walkComponents)
+        if (_stateMachine == null) return;
+
+        foreach(var c in _defaultActiveComponents)
             c.SetActive(true);
+
+        _stateMachine.currentState = _stateMachine.idleState;
     }
 
     public void OnDisable()
     {
+        if (_stateMachine != null)
+            _stateMachine.currentState = _stateMachine.idleState;
+
         foreach(var c in _walkComponents)
             c.SetActive(false);
     }
@@ -128,6 +137,7 @@ public class Walk : MVRScript
         var go = new GameObject($"Walk_{goName}");
         go.SetActive(false);
         _walkComponents.Add(go);
+        if (active) _defaultActiveComponents.Add(go);
         go.transform.SetParent(transform, false);
         var c = go.AddComponent<T>();
         configure(c);

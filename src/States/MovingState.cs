@@ -83,7 +83,7 @@ public class MovingState : MonoBehaviour, IWalkState
 
         var rotation = foot.GetFootRotationRelativeToBodyWalking(toRotation);
 
-        _gait.currentFoot.PlotCourse(position, rotation);
+        foot.PlotCourse(position, rotation);
     }
 
     private Vector3 GetProjectedPosition(Vector3 headingCenter)

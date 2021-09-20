@@ -36,6 +36,7 @@ public class HeadingTracker : MonoBehaviour
             sumVelocities += _lastVelocities[i];
         var avgVelocity = sumVelocities / _lastVelocities.Length / Time.deltaTime;
         return Vector3.ProjectOnPlane(avgVelocity, Vector3.up);
+        // TODO: Clamp the velocity
     }
 
     public Vector3 GetFloorCenter()

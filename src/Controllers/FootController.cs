@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class FootController : MonoBehaviour
 {
     public FreeControllerV3 footControl;
     public FreeControllerV3 kneeControl;
+
+    private readonly Keyframe[] _emptyKeys = { new Keyframe(0, 0), new Keyframe(0.1f, 0), new Keyframe(0.2f, 0), new Keyframe(0.3f, 0), new Keyframe(0.4f, 0) };
 
     private GaitStyle _style;
     private GaitFootStyle _footStyle;
@@ -34,6 +37,7 @@ public class FootController : MonoBehaviour
     private AnimationCurve _rotWCurve;
     private float _startTime;
     private float _floorTime;
+    private bool _dirty = true;
 
     public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, FootStateVisualizer visualizer)
     {
@@ -43,14 +47,13 @@ public class FootController : MonoBehaviour
         this.kneeControl = kneeControl;
         _visualizer = visualizer;
 
-        var emptyKeys = new[] { new Keyframe(0, 0), new Keyframe(toeOffTime, 0), new Keyframe(midSwingTime, 0), new Keyframe(heelStrikeTime, 0), new Keyframe(stepTime, 0) };
-        _xCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
-        _yCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
-        _zCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
-        _rotXCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
-        _rotYCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
-        _rotZCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
-        _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = emptyKeys };
+        _xCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
+        _yCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
+        _zCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
+        _rotXCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
+        _rotYCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
+        _rotZCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
+        _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
     }
 
     public Vector3 GetFootPositionRelativeToBodyWalking(Vector3 toPosition, Quaternion toRotation)
@@ -79,6 +82,7 @@ public class FootController : MonoBehaviour
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         gameObject.SetActive(true);
         _visualizer.gameObject.SetActive(true);
+        _dirty = false;
     }
 
     private void PlotPosition(Vector3 toPosition, float distanceRatio)
@@ -86,7 +90,7 @@ public class FootController : MonoBehaviour
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = footControl.control.position;
         var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.1f, 1f);
-        var passingDistance = footControl.control.right * _footStyle.inverse * _style.passingDistance.val * distanceRatio;
+        var passingDistance = Vector3.zero;//footControl.control.right * _footStyle.inverse * _style.passingDistance.val * distanceRatio;
         var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingDistance * _style.toeOffTimeRatio.val;
         var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingDistance * _style.midSwingTimeRatio.val;
         var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + passingDistance * _style.heelStrikeTimeRatio.val;
@@ -177,7 +181,18 @@ public class FootController : MonoBehaviour
     public void CancelCourse()
     {
         // TODO: Clear the curves data and mark it as dirty to avoid future errors
+        _visualizer.gameObject.SetActive(false);
         gameObject.SetActive(false);
+
+        _xCurve.keys = _emptyKeys;
+        _yCurve.keys = _emptyKeys;
+        _zCurve.keys = _emptyKeys;
+        _rotXCurve.keys = _emptyKeys;
+        _rotYCurve.keys = _emptyKeys;
+        _rotZCurve.keys = _emptyKeys;
+        _rotWCurve.keys = _emptyKeys;
+
+        _dirty = true;
     }
 
     public void FixedUpdate()
@@ -185,6 +200,24 @@ public class FootController : MonoBehaviour
         // TODO: Skip if the animation is complete
         // TODO: Increment the time to allow accelerating if the distance is greater than the step length
         var t = Time.time - _startTime;
+        if (t >= stepTime)
+        {
+            Sample(stepTime);
+            CancelCourse();
+            return;
+        }
+        Sample(t);
+        var footForward = footControl.control.forward;
+        // TODO: This is not adjusted for mid swing, but rather for mid anim. Also, potentially bad code.
+        var midSwingRatio = t / (stepTime / 2f);
+        if (midSwingRatio > 1) midSwingRatio = 2f - midSwingRatio;
+        kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val * midSwingRatio);
+    }
+
+    private void Sample(float t)
+    {
+        if (_dirty) throw new InvalidOperationException("Cannot sample foot animation because it is currently dirty.");
+
         var footPosition = new Vector3(
             _xCurve.Evaluate(t),
             _yCurve.Evaluate(t),
@@ -198,15 +231,12 @@ public class FootController : MonoBehaviour
         );
         footControl.control.position = footPosition;
         footControl.control.rotation = footRotation;
-        var footForward = footControl.control.forward;
-        kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val);
     }
 
     public bool FloorContact()
     {
         // TODO: If the distance is to great we may have to re-plot the course or step down faster
         var contact = Time.time >= _floorTime;
-        if(contact) _visualizer.gameObject.SetActive(false);
         return contact;
     }
 
