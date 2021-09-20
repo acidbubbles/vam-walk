@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class TeleportState : MonoBehaviour, IWalkState
 {
@@ -15,9 +16,6 @@ public class TeleportState : MonoBehaviour, IWalkState
 
     public void Update()
     {
-        _gait.lFoot.CancelCourse();
-        _gait.rFoot.CancelCourse();
-
         var bodyCenter = _heading.GetFloorCenter();
         var bodyRotation = _heading.GetPlanarRotation();
         MoveAndRotateFoot(bodyCenter, bodyRotation, _gait.lFoot);
@@ -32,5 +30,11 @@ public class TeleportState : MonoBehaviour, IWalkState
             foot.GetFootPositionRelativeToBodyWalking(bodyCenter, bodyRotation),
             foot.GetFootRotationRelativeToBodyWalking(bodyRotation)
         );
+    }
+
+    public void OnEnable()
+    {
+        _gait.lFoot.CancelCourse();
+        _gait.rFoot.CancelCourse();
     }
 }

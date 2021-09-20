@@ -34,6 +34,14 @@ public class MovingState : MonoBehaviour, IWalkState
     public void Update()
     {
         var bodyCenter = _heading.GetFloorCenter();
+        var feetCenter = _gait.GetFloorFeetCenter();
+
+        if (Vector3.Distance(_heading.GetFloorDesiredCenter(), feetCenter) > _style.stepLength.val * 2)
+        {
+            stateMachine.currentState = stateMachine.teleportState;
+            return;
+        }
+
         _visualizer.Sync(bodyCenter, GetProjectedPosition(bodyCenter));
 
         if (!_gait.currentFoot.FloorContact()) return;

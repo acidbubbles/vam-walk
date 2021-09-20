@@ -47,6 +47,15 @@ public class HeadingTracker : MonoBehaviour
         return headPosition + GetBodyForward() * -_style.footBackOffset.val;
     }
 
+    public Vector3 GetFloorDesiredCenter()
+    {
+        var headPosition = _headRB.transform.position;
+        // Find the floor level
+        headPosition = new Vector3(headPosition.x, 0, headPosition.z);
+        // Offset for expected feet position
+        return headPosition + GetBodyForward() * -_style.footBackOffset.val;
+    }
+
     public Quaternion GetPlanarRotation()
     {
         // TODO: Validate if this works while looking sideways

@@ -19,7 +19,10 @@ public class IdleState : MonoBehaviour, IWalkState
 
     public void Update()
     {
-        if (IsOffBalanceDistance() || IsOffBalanceRotation())
+        var bodyCenter = _heading.GetFloorCenter();
+        var feetCenter = _gait.GetFloorFeetCenter();
+
+        if (IsOffBalanceDistance(bodyCenter, feetCenter) || IsOffBalanceRotation())
         {
             stateMachine.currentState = stateMachine.movingState;
             return;
@@ -28,11 +31,8 @@ public class IdleState : MonoBehaviour, IWalkState
         // TODO: Small movements, hips roll, in-place feet movements
     }
 
-    private bool IsOffBalanceDistance()
+    private bool IsOffBalanceDistance(Vector3 bodyCenter, Vector3 feetCenter)
     {
-        // TODO: We should also check if forward has a 60 degrees angle from the feet line, and if so it's not balanced either.
-        var bodyCenter = _heading.GetFloorCenter();
-        var feetCenter = _gait.GetFloorFeetCenter();
         var stableRadius = GetFeetCenterRadius();
         _visualizer.Sync(bodyCenter, feetCenter, new Vector2(stableRadius, stableRadius));
         return feetCenter.PlanarDistance(bodyCenter) >  stableRadius;
@@ -51,8 +51,6 @@ public class IdleState : MonoBehaviour, IWalkState
     private bool IsOffBalanceRotation()
     {
         // TODO: Configure this
-        SuperController.singleton.ClearMessages();
-        SuperController.LogMessage($"{_gait.GetFeetForward()} <> {_heading.GetBodyForward()} = {Vector3.Angle(_gait.GetFeetForward(), _heading.GetBodyForward())}");
         return Vector3.Angle(_gait.GetFeetForward(), _heading.GetBodyForward()) > 60;
     }
 
