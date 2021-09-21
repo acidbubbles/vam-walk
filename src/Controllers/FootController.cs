@@ -6,8 +6,6 @@ public class FootController : MonoBehaviour
     public FreeControllerV3 footControl;
     public FreeControllerV3 kneeControl;
 
-    private readonly Keyframe[] _emptyKeys = { new Keyframe(0, 0), new Keyframe(0.1f, 0), new Keyframe(0.2f, 0), new Keyframe(0.3f, 0), new Keyframe(0.4f, 0) };
-
     private GaitStyle _style;
     private GaitFootStyle _footStyle;
     private FootStateVisualizer _visualizer;
@@ -28,13 +26,13 @@ public class FootController : MonoBehaviour
     private float heelStrikeHeight => _style.stepHeight.val * _style.heelStrikeHeightRatio.val;
 
     // TODO: Also animate the foot rotation (toes down first, toes up end)
-    private AnimationCurve _xCurve;
-    private AnimationCurve _yCurve;
-    private AnimationCurve _zCurve;
-    private AnimationCurve _rotXCurve;
-    private AnimationCurve _rotYCurve;
-    private AnimationCurve _rotZCurve;
-    private AnimationCurve _rotWCurve;
+    private FixedAnimationCurve _xCurve;
+    private FixedAnimationCurve _yCurve;
+    private FixedAnimationCurve _zCurve;
+    private FixedAnimationCurve _rotXCurve;
+    private FixedAnimationCurve _rotYCurve;
+    private FixedAnimationCurve _rotZCurve;
+    private FixedAnimationCurve _rotWCurve;
     private float _startTime;
     private float _floorTime;
     private bool _dirty = true;
@@ -47,13 +45,13 @@ public class FootController : MonoBehaviour
         this.kneeControl = kneeControl;
         _visualizer = visualizer;
 
-        _xCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
-        _yCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
-        _zCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
-        _rotXCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
-        _rotYCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
-        _rotZCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
-        _rotWCurve = new AnimationCurve { preWrapMode = WrapMode.Clamp, postWrapMode = WrapMode.Clamp, keys = _emptyKeys };
+        _xCurve = new FixedAnimationCurve();
+        _yCurve = new FixedAnimationCurve();
+        _zCurve = new FixedAnimationCurve();
+        _rotXCurve = new FixedAnimationCurve();
+        _rotYCurve = new FixedAnimationCurve();
+        _rotZCurve = new FixedAnimationCurve();
+        _rotWCurve = new FixedAnimationCurve();
     }
 
     public Vector3 GetFootPositionRelativeToBodyWalking(Vector3 toPosition, Quaternion toRotation)
@@ -90,7 +88,7 @@ public class FootController : MonoBehaviour
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = footControl.control.position;
         var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.1f, 1f);
-        var passingDistance = Vector3.zero;//footControl.control.right * _footStyle.inverse * _style.passingDistance.val * distanceRatio;
+        var passingDistance = footControl.control.right * _footStyle.inverse * _style.passingDistance.val * distanceRatio;
         var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingDistance * _style.toeOffTimeRatio.val;
         var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingDistance * _style.midSwingTimeRatio.val;
         var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + passingDistance * _style.heelStrikeTimeRatio.val;
@@ -100,27 +98,21 @@ public class FootController : MonoBehaviour
         _xCurve.MoveKey(2, new Keyframe(midSwingTime, midSwingPosition.x));
         _xCurve.MoveKey(3, new Keyframe(heelStrikeTime, heelStrikePosition.x));
         _xCurve.MoveKey(4, new Keyframe(stepTime, toPosition.x));
-        _xCurve.SmoothTangents(1, 1);
-        _xCurve.SmoothTangents(2, 1);
-        _xCurve.SmoothTangents(3, 1);
+        _xCurve.Sync();
 
         _yCurve.MoveKey(0, new Keyframe(0, currentPosition.y));
         _yCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffPosition.y));
         _yCurve.MoveKey(2, new Keyframe(midSwingTime, midSwingPosition.y));
         _yCurve.MoveKey(3, new Keyframe(heelStrikeTime, heelStrikePosition.y));
         _yCurve.MoveKey(4, new Keyframe(stepTime, toPosition.y));
-        _yCurve.SmoothTangents(1, 1);
-        _yCurve.SmoothTangents(2, 1);
-        _yCurve.SmoothTangents(3, 1);
+        _yCurve.Sync();
 
         _zCurve.MoveKey(0, new Keyframe(0, currentPosition.z));
         _zCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffPosition.z));
         _zCurve.MoveKey(2, new Keyframe(midSwingTime, midSwingPosition.z));
         _zCurve.MoveKey(3, new Keyframe(heelStrikeTime, heelStrikePosition.z));
         _zCurve.MoveKey(4, new Keyframe(stepTime, toPosition.z));
-        _zCurve.SmoothTangents(1, 1);
-        _zCurve.SmoothTangents(2, 1);
-        _zCurve.SmoothTangents(3, 1);
+        _zCurve.Sync();
     }
 
     private void PlotRotation(Quaternion rotation, float distanceRatio, float forwardRatio)
@@ -140,36 +132,28 @@ public class FootController : MonoBehaviour
         _rotXCurve.MoveKey(2, new Keyframe(midSwingTime, midSwingRotation.x));
         _rotXCurve.MoveKey(3, new Keyframe(heelStrikeTime, heelStrikeRotation.x));
         _rotXCurve.MoveKey(4, new Keyframe(stepTime, rotation.x));
-        _rotXCurve.SmoothTangents(1, 1);
-        _rotXCurve.SmoothTangents(2, 1);
-        _rotXCurve.SmoothTangents(3, 1);
+        _rotXCurve.Sync();
 
         _rotYCurve.MoveKey(0, new Keyframe(0, currentRotation.y));
         _rotYCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffRotation.y));
         _rotYCurve.MoveKey(2, new Keyframe(midSwingTime, midSwingRotation.y));
         _rotYCurve.MoveKey(3, new Keyframe(heelStrikeTime, heelStrikeRotation.y));
         _rotYCurve.MoveKey(4, new Keyframe(stepTime, rotation.y));
-        _rotYCurve.SmoothTangents(1, 1);
-        _rotYCurve.SmoothTangents(2, 1);
-        _rotYCurve.SmoothTangents(3, 1);
+        _rotYCurve.Sync();
 
         _rotZCurve.MoveKey(0, new Keyframe(0, currentRotation.z));
         _rotZCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffRotation.z));
         _rotZCurve.MoveKey(2, new Keyframe(midSwingTime, midSwingRotation.z));
         _rotZCurve.MoveKey(3, new Keyframe(heelStrikeTime, heelStrikeRotation.z));
         _rotZCurve.MoveKey(4, new Keyframe(stepTime, rotation.z));
-        _rotZCurve.SmoothTangents(1, 1);
-        _rotZCurve.SmoothTangents(2, 1);
-        _rotZCurve.SmoothTangents(3, 1);
+        _rotZCurve.Sync();
 
         _rotWCurve.MoveKey(0, new Keyframe(0, currentRotation.w));
         _rotWCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffRotation.w));
         _rotWCurve.MoveKey(2, new Keyframe(midSwingTime, midSwingRotation.w));
         _rotWCurve.MoveKey(3, new Keyframe(heelStrikeTime, heelStrikeRotation.w));
         _rotWCurve.MoveKey(4, new Keyframe(stepTime, rotation.w));
-        _rotWCurve.SmoothTangents(1, 1);
-        _rotWCurve.SmoothTangents(2, 1);
-        _rotWCurve.SmoothTangents(3, 1);
+        _rotWCurve.Sync();
     }
 
     private static void EnsureQuaternionContinuity(ref Quaternion target, Quaternion reference)
@@ -183,15 +167,6 @@ public class FootController : MonoBehaviour
         // TODO: Clear the curves data and mark it as dirty to avoid future errors
         _visualizer.gameObject.SetActive(false);
         gameObject.SetActive(false);
-
-        _xCurve.keys = _emptyKeys;
-        _yCurve.keys = _emptyKeys;
-        _zCurve.keys = _emptyKeys;
-        _rotXCurve.keys = _emptyKeys;
-        _rotYCurve.keys = _emptyKeys;
-        _rotZCurve.keys = _emptyKeys;
-        _rotWCurve.keys = _emptyKeys;
-
         _dirty = true;
     }
 
@@ -235,9 +210,7 @@ public class FootController : MonoBehaviour
 
     public bool FloorContact()
     {
-        // TODO: If the distance is to great we may have to re-plot the course or step down faster
-        var contact = Time.time >= _floorTime;
-        return contact;
+        return Time.time >= _floorTime;
     }
 
     public void OnDisable()

@@ -16,16 +16,16 @@ public class FootStateVisualizer : MonoBehaviour
     }
 
     public void Sync(
-        AnimationCurve xCurve,
-        AnimationCurve yCurve,
-        AnimationCurve zCurve,
-        AnimationCurve rotXCurve,
-        AnimationCurve rotYCurve,
-        AnimationCurve rotZCurve,
-        AnimationCurve rotWCurve
+        FixedAnimationCurve xCurve,
+        FixedAnimationCurve yCurve,
+        FixedAnimationCurve zCurve,
+        FixedAnimationCurve rotXCurve,
+        FixedAnimationCurve rotYCurve,
+        FixedAnimationCurve rotZCurve,
+        FixedAnimationCurve rotWCurve
         )
     {
-        var duration = xCurve[xCurve.length - 1].time;
+        var duration = xCurve.duration;
         var step = duration / _footPathLineRenderer.positionCount;
         for (var i = 0; i < _footPathLineRenderer.positionCount; i++)
         {
@@ -46,16 +46,16 @@ public class FootStateVisualizer : MonoBehaviour
     private static void SyncCueLine(
         LineRenderer lineRenderer,
         int index,
-        AnimationCurve xCurve,
-        AnimationCurve yCurve,
-        AnimationCurve zCurve,
-        AnimationCurve rotXCurve,
-        AnimationCurve rotYCurve,
-        AnimationCurve rotZCurve,
-        AnimationCurve rotWCurve)
+        FixedAnimationCurve xCurve,
+        FixedAnimationCurve yCurve,
+        FixedAnimationCurve zCurve,
+        FixedAnimationCurve rotXCurve,
+        FixedAnimationCurve rotYCurve,
+        FixedAnimationCurve rotZCurve,
+        FixedAnimationCurve rotWCurve)
     {
-        var position = new Vector3(xCurve[index].value, yCurve[index].value, zCurve[index].value);
-        var rotation = new Quaternion(rotXCurve[index].value, rotYCurve[index].value, rotZCurve[index].value, rotWCurve[index].value);
+        var position = new Vector3(xCurve.GetValueAtKey(index), yCurve.GetValueAtKey(index), zCurve.GetValueAtKey(index));
+        var rotation = new Quaternion(rotXCurve.GetValueAtKey(index), rotYCurve.GetValueAtKey(index), rotZCurve.GetValueAtKey(index), rotWCurve.GetValueAtKey(index));
         lineRenderer.SetPosition(0, position);
         lineRenderer.SetPosition(1, position + rotation * Vector3.forward * 0.04f);
     }
