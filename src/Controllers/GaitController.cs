@@ -51,12 +51,28 @@ public class GaitController : MonoBehaviour
         );
     }
 
-    public void SelectClosestFoot(Vector3 position)
+    public void SelectStartFoot(Vector3 toPosition)
     {
-        var bodyCenter = _heading.GetFloorCenter();
-        currentFoot = lFoot.floorPosition.PlanarDistance(bodyCenter) > rFoot.floorPosition.PlanarDistance(bodyCenter)
-            ? lFoot
-            : rFoot;
+        var currentPosition = _heading.GetFloorCenter();
+        var forwardRatio = Vector3.Dot(toPosition - currentPosition, GetFeetForward());
+
+        var lFootDistance = lFoot.floorPosition.PlanarDistance(currentPosition);
+        var rFootDistance = rFoot.floorPosition.PlanarDistance(currentPosition);
+
+        if(Mathf.Abs(forwardRatio) > 0.2)
+        {
+            // Forward / Backwards
+            currentFoot = lFootDistance > rFootDistance
+                ? lFoot
+                : rFoot;
+        }
+        else
+        {
+            // Sideways
+            currentFoot = lFootDistance > rFootDistance
+                ? rFoot
+                : lFoot;
+        }
     }
 
     public void SwitchFoot()

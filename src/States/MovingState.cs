@@ -21,7 +21,7 @@ public class MovingState : MonoBehaviour, IWalkState
     public void OnEnable()
     {
         var bodyCenter = _heading.GetFloorCenter();
-        _gait.SelectClosestFoot(bodyCenter);
+        _gait.SelectStartFoot(bodyCenter);
         PlotFootCourse(_style.maxStepDistance.val / 2f);
         _visualizer.gameObject.SetActive(true);
     }
@@ -55,8 +55,6 @@ public class MovingState : MonoBehaviour, IWalkState
         _gait.SwitchFoot();
         PlotFootCourse(_style.maxStepDistance.val);
     }
-
-
 
     private void PlotFootCourse(float maxStepDistance)
     {
