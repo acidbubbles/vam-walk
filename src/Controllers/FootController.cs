@@ -33,8 +33,8 @@ public class FootController : MonoBehaviour
     private FixedAnimationCurve _rotYCurve;
     private FixedAnimationCurve _rotZCurve;
     private FixedAnimationCurve _rotWCurve;
-    private float _startTime;
-    private float _floorTime;
+    private float _time;
+    private float _hitFloorTime;
     private bool _dirty = true;
 
     public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, FootStateVisualizer visualizer)
@@ -66,29 +66,32 @@ public class FootController : MonoBehaviour
 
     public void PlotCourse(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
-        _startTime = Time.time;
+        _time = 0;
         var controlPosition = footControl.control.position;
         toPosition.y = _style.footFloorDistance.val;
         var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
-        // TODO: We can animate the knee too
-        PlotPosition(toPosition, standToWalkRatio);
+        PlotPosition(toPosition, standToWalkRatio, forwardRatio);
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
-        _floorTime = _startTime + (stepTime + heelStrikeTime) / 2f;
+        // TODO: Find a better way to find that, this should be pretty close though
+        _hitFloorTime = (stepTime + heelStrikeTime) / 2f;
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         gameObject.SetActive(true);
         _visualizer.gameObject.SetActive(true);
         _dirty = false;
     }
 
-    private void PlotPosition(Vector3 toPosition, float standToWalkRatio)
+    private void PlotPosition(Vector3 toPosition, float standToWalkRatio, float forwardRatio)
     {
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = footControl.control.position;
         var up = Vector3.up * Mathf.Clamp(standToWalkRatio, 0.1f, 1f);
-        var passingDistance = footControl.control.right * _footStyle.inverse * _style.passingDistance.val * standToWalkRatio;
-        var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingDistance * _style.toeOffTimeRatio.val;
-        var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingDistance * _style.midSwingTimeRatio.val;
-        var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + passingDistance * _style.heelStrikeTimeRatio.val;
+        var forwardRatioAbs = Mathf.Abs(forwardRatio);
+        var passingOffset =
+            footControl.control.right * _footStyle.inverse * _style.passingDistance.val * standToWalkRatio * forwardRatioAbs; /* +
+            footControl.control.forward * _style.passingDistance.val * standToWalkRatio * (1 - forwardRatio);*/
+        var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingOffset * _style.toeOffTimeRatio.val;
+        var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingOffset * _style.midSwingTimeRatio.val;
+        var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + passingOffset * _style.heelStrikeTimeRatio.val;
 
         _xCurve.MoveKey(0, new Keyframe(0, currentPosition.x));
         _xCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffPosition.x));
@@ -161,8 +164,8 @@ public class FootController : MonoBehaviour
 
     public void CancelCourse()
     {
-        _startTime = 0;
-        _floorTime = 0;
+        _time = 0;
+        _hitFloorTime = 0;
         _dirty = true;
         _visualizer.gameObject.SetActive(false);
         gameObject.SetActive(false);
@@ -172,17 +175,17 @@ public class FootController : MonoBehaviour
     {
         // TODO: Skip if the animation is complete
         // TODO: Increment the time to allow accelerating if the distance is greater than the step length
-        var t = Time.time - _startTime;
-        if (t >= stepTime)
+        _time += Time.deltaTime;
+        if (_time >= stepTime)
         {
             Sample(stepTime);
             CancelCourse();
             return;
         }
-        Sample(t);
+        Sample(_time);
         var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + Vector3.up;
         // TODO: This is not adjusted for mid swing, but rather for mid anim. Also, potentially bad code.
-        var midSwingRatio = t / (stepTime / 2f);
+        var midSwingRatio = _time / (stepTime / 2f);
         if (midSwingRatio > 1) midSwingRatio = 2f - midSwingRatio;
         kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val * midSwingRatio);
     }
@@ -207,7 +210,7 @@ public class FootController : MonoBehaviour
 
     public bool FloorContact()
     {
-        return Time.time >= _floorTime;
+        return _time >= _hitFloorTime;
     }
 
     public void OnDisable()
