@@ -3,24 +3,21 @@ using UnityEngine.Events;
 
 public class GaitStyle
 {
-    public readonly JSONStorableFloat footUpOffset = new JSONStorableFloat("Foot Offset Up", 0.05f, 0f, 0.2f, false);
-    public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Offset Back", 0.07f, -0.1f, 0.1f, false);
+    public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
+    public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
+    public readonly JSONStorableFloat maxStepDistance = new JSONStorableFloat("Max Step Distance", 0.8f, 0f, 1f, false);
+    public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.05f, 0f, 0.2f, false);
+    public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.07f, -0.1f, 0.1f, false);
+    public readonly JSONStorableFloat footPitch = new JSONStorableFloat("Foot Pitch", 18.42f, -45f, 45f, false);
+    public readonly JSONStorableFloat footRoll = new JSONStorableFloat("Foot Roll", 2.42f, -45f, 45f, false);
 
-    public readonly JSONStorableFloat footWalkingOutOffset = new JSONStorableFloat("Foot Walking Offset Out", 0.09f, 0f, 0.2f, false);
-    public readonly JSONStorableFloat footWalkingPitch = new JSONStorableFloat("Foot Walking Pitch", 18.42f, -45f, 45f, false);
-    public readonly JSONStorableFloat footWalkingYaw = new JSONStorableFloat("Foot Walking Yaw", 8.81f, -45f, 45f, false);
-    public readonly JSONStorableFloat footWalkingRoll = new JSONStorableFloat("Foot Walking Roll", 2.42f, -45f, 45f, false);
-
-    public readonly JSONStorableFloat footStandingOutOffset = new JSONStorableFloat("Foot Standing Offset Out", 0.09f, 0f, 0.2f, false);
-    public readonly JSONStorableFloat footStandingPitch = new JSONStorableFloat("Foot Standing Pitch", 18.42f, -45f, 45f, false);
+    public readonly JSONStorableFloat footStandingOutOffset = new JSONStorableFloat("Foot Standing Offset Out", 0.09f, -0.2f, 0.2f, false);
     public readonly JSONStorableFloat footStandingYaw = new JSONStorableFloat("Foot Standing Yaw", 8.81f, -45f, 45f, false);
-    public readonly JSONStorableFloat footStandingRoll = new JSONStorableFloat("Foot Standing Roll", 2.42f, -45f, 45f, false);
+
+    public readonly JSONStorableFloat footWalkingOutOffset = new JSONStorableFloat("Foot Walking Offset Out", 0.01f, -0.2f, 0.2f, false);
+    public readonly JSONStorableFloat footWalkingYaw = new JSONStorableFloat("Foot Walking Yaw", 1.5f, -45f, 45f, false);
 
     public readonly JSONStorableFloat kneeForwardForce = new JSONStorableFloat("Knee Forward Force", 50f, 0f, 1000f, false);
-
-    public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
-    public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.2f, 0f, 1f, false);
-    public readonly JSONStorableFloat stepLength = new JSONStorableFloat("Step Length", 0.8f, 0f, 1f, false);
 
     public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.05f, -0.1f, 0.5f, false);
 
@@ -44,18 +41,16 @@ public class GaitStyle
 
     public GaitStyle()
     {
-        footUpOffset.setCallbackFunction = OnFootOffsetChanged;
+        footFloorDistance.setCallbackFunction = OnFootOffsetChanged;
         footBackOffset.setCallbackFunction = OnFootOffsetChanged;
+        footPitch.setCallbackFunction = OnFootOffsetChanged;
+        footRoll.setCallbackFunction = OnFootOffsetChanged;
 
         footWalkingOutOffset.setCallbackFunction = OnFootOffsetChanged;
-        footWalkingPitch.setCallbackFunction = OnFootOffsetChanged;
         footWalkingYaw.setCallbackFunction = OnFootOffsetChanged;
-        footWalkingRoll.setCallbackFunction = OnFootOffsetChanged;
 
         footStandingOutOffset.setCallbackFunction = OnFootOffsetChanged;
-        footStandingPitch.setCallbackFunction = OnFootOffsetChanged;
         footStandingYaw.setCallbackFunction = OnFootOffsetChanged;
-        footStandingRoll.setCallbackFunction = OnFootOffsetChanged;
 
         stepDuration.setCallbackFunction = val =>
         {
@@ -97,13 +92,20 @@ public class GaitStyle
 
     public void SetupStorables(MVRScript plugin)
     {
-        AddFloat(plugin, footWalkingOutOffset);
-        AddFloat(plugin, footUpOffset);
-        AddFloat(plugin, footBackOffset);
-
         AddFloat(plugin, stepDuration);
         AddFloat(plugin, stepHeight);
-        AddFloat(plugin, stepLength);
+        AddFloat(plugin, maxStepDistance);
+
+        AddFloat(plugin, footFloorDistance);
+        AddFloat(plugin, footBackOffset);
+        AddFloat(plugin, footPitch);
+        AddFloat(plugin, footRoll);
+
+        AddFloat(plugin, footStandingOutOffset);
+        AddFloat(plugin, footStandingYaw);
+
+        AddFloat(plugin, footWalkingOutOffset);
+        AddFloat(plugin, footWalkingYaw);
 
         AddFloat(plugin, kneeForwardForce);
 

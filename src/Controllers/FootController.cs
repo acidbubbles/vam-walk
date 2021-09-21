@@ -54,28 +54,25 @@ public class FootController : MonoBehaviour
         _rotWCurve = new FixedAnimationCurve();
     }
 
-    public Vector3 GetFootPositionRelativeToBodyWalking(Vector3 toPosition, Quaternion toRotation)
+    public Vector3 GetFootPositionRelativeToBody(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
-        toPosition += toRotation * _footStyle.footWalkingPositionOffset;
-        toPosition.y = _style.footUpOffset.val;
-        return toPosition;
+        return toPosition + (toRotation * _footStyle.footStandingPositionOffset) * (1 - standToWalkRatio) + (toRotation * _footStyle.footWalkingPositionOffset) * standToWalkRatio;
     }
 
-    public Quaternion GetFootRotationRelativeToBodyWalking(Quaternion toRotation)
+    public Quaternion GetFootRotationRelativeToBody(Quaternion toRotation, float standToWalkRatio)
     {
-        return toRotation * _footStyle.footWalkingRotationOffset;
+        return toRotation * Quaternion.Slerp(_footStyle.footStandingRotationOffset, _footStyle.footWalkingRotationOffset, standToWalkRatio);
     }
 
-    public void PlotCourse(Vector3 toPosition, Quaternion toRotation)
+    public void PlotCourse(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
         _startTime = Time.time;
-        // TODO: Adjust height and rotation based on percentage of distance
         var controlPosition = footControl.control.position;
-        var distanceRatio = Mathf.Clamp01(Vector3.Distance(controlPosition, toPosition) / _style.stepLength.val);
+        toPosition.y = _style.footFloorDistance.val;
         var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
         // TODO: We can animate the knee too
-        PlotPosition(toPosition, distanceRatio);
-        PlotRotation(toRotation, distanceRatio, forwardRatio);
+        PlotPosition(toPosition, standToWalkRatio);
+        PlotRotation(toRotation, standToWalkRatio, forwardRatio);
         _floorTime = _startTime + (stepTime + heelStrikeTime) / 2f;
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         gameObject.SetActive(true);
@@ -83,12 +80,12 @@ public class FootController : MonoBehaviour
         _dirty = false;
     }
 
-    private void PlotPosition(Vector3 toPosition, float distanceRatio)
+    private void PlotPosition(Vector3 toPosition, float standToWalkRatio)
     {
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = footControl.control.position;
-        var up = Vector3.up * Mathf.Clamp(distanceRatio, 0.1f, 1f);
-        var passingDistance = footControl.control.right * _footStyle.inverse * _style.passingDistance.val * distanceRatio;
+        var up = Vector3.up * Mathf.Clamp(standToWalkRatio, 0.1f, 1f);
+        var passingDistance = footControl.control.right * _footStyle.inverse * _style.passingDistance.val * standToWalkRatio;
         var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingDistance * _style.toeOffTimeRatio.val;
         var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingDistance * _style.midSwingTimeRatio.val;
         var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + passingDistance * _style.heelStrikeTimeRatio.val;
@@ -115,12 +112,12 @@ public class FootController : MonoBehaviour
         _zCurve.Sync();
     }
 
-    private void PlotRotation(Quaternion rotation, float distanceRatio, float forwardRatio)
+    private void PlotRotation(Quaternion rotation, float standToWalkRatio, float forwardRatio)
     {
         var currentRotation = footControl.control.rotation;
-        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * distanceRatio * forwardRatio, 0, 0) * currentRotation;
-        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * distanceRatio * forwardRatio, 0, 0) * rotation;
-        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * distanceRatio * Mathf.Clamp01(forwardRatio), 0, 0) * rotation;
+        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * standToWalkRatio, 0, 0) * currentRotation;
+        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * standToWalkRatio * forwardRatio, 0, 0) * rotation;
+        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * rotation;
 
         EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);
@@ -164,10 +161,11 @@ public class FootController : MonoBehaviour
 
     public void CancelCourse()
     {
-        // TODO: Clear the curves data and mark it as dirty to avoid future errors
+        _startTime = 0;
+        _floorTime = 0;
+        _dirty = true;
         _visualizer.gameObject.SetActive(false);
         gameObject.SetActive(false);
-        _dirty = true;
     }
 
     public void FixedUpdate()
@@ -182,7 +180,7 @@ public class FootController : MonoBehaviour
             return;
         }
         Sample(t);
-        var footForward = footControl.control.forward;
+        var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + Vector3.up;
         // TODO: This is not adjusted for mid swing, but rather for mid anim. Also, potentially bad code.
         var midSwingRatio = t / (stepTime / 2f);
         if (midSwingRatio > 1) midSwingRatio = 2f - midSwingRatio;

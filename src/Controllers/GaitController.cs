@@ -37,6 +37,7 @@ public class GaitController : MonoBehaviour
         // TODO: Make the hip catch up speed configurable, and consider other approaches. We want the hip to stay straight, so maybe it should be part of the moving state?
         // TODO: The hip should track passing, not leg height.
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
+        #warning This does not rotate correctly
         _hipControl.control.rotation = Quaternion.Euler(20, lrRatio * -35f, lrRatio * -18f) * headRotation;
         var bodyCenter = Vector3.Lerp(
             new Vector3(feetCenter.x, hipPosition.y, feetCenter.z),
@@ -57,7 +58,7 @@ public class GaitController : MonoBehaviour
             : rFoot;
     }
 
-    public void SelectOtherFoot()
+    public void SwitchFoot()
     {
         currentFoot = currentFoot == lFoot ? rFoot : lFoot;
     }

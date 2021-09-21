@@ -27,8 +27,8 @@ public class TeleportState : MonoBehaviour, IWalkState
     private static void MoveAndRotateFoot(Vector3 bodyCenter, Quaternion bodyRotation, FootController foot)
     {
         foot.footControl.control.SetPositionAndRotation(
-            foot.GetFootPositionRelativeToBodyWalking(bodyCenter, bodyRotation),
-            foot.GetFootRotationRelativeToBodyWalking(bodyRotation)
+            foot.GetFootPositionRelativeToBody(bodyCenter, bodyRotation, 0f),
+            foot.GetFootRotationRelativeToBody(bodyRotation, 0f)
         );
     }
 
