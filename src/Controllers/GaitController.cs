@@ -24,7 +24,7 @@ public class GaitController : MonoBehaviour
     public void FixedUpdate()
     {
         var headPosition = _heading.GetHeadPosition();
-        var headRotation = _heading.GetPlanarRotation();
+        var headingRotation = _heading.GetPlanarRotation();
         var feetCenter = GetFloorFeetCenter();
         // TODO: Compute this from bones instead
         // TODO: Deal with when bending down, the hip should stay back (rely on the hip-to-head angle)
@@ -38,7 +38,6 @@ public class GaitController : MonoBehaviour
         // TODO: The hip should track passing, not leg height.
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
         #warning This does not rotate correctly
-        _hipControl.control.rotation = Quaternion.Euler(20, lrRatio * -35f, lrRatio * -18f) * headRotation;
         var bodyCenter = Vector3.Lerp(
             new Vector3(feetCenter.x, hipPosition.y, feetCenter.z),
             new Vector3(headPosition.x, hipPosition.y, headPosition.z),
@@ -46,8 +45,10 @@ public class GaitController : MonoBehaviour
         );
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
         var hipRaise = Mathf.Max(lFootY, rFootY) * 0.2f;
-        _hipControl.control.position = bodyCenter + new Vector3(0, hipRaise, 0);
-        // TODO: Adjust hip rotation
+        _hipControl.control.SetPositionAndRotation(
+            bodyCenter + new Vector3(0, hipRaise, 0),
+            headingRotation * Quaternion.Euler(20, lrRatio * -35f, lrRatio * -18f)
+        );
     }
 
     public void SelectClosestFoot(Vector3 position)
@@ -74,6 +75,19 @@ public class GaitController : MonoBehaviour
     {
         // TODO: Cheap plane to get a perpendicular direction to the feet line, there is surely a better method
         return Vector3.Cross(rFoot.footControl.control.position - lFoot.footControl.control.position, Vector3.up).normalized;
+    }
+
+    public bool FeetAreStable()
+    {
+        var projectedPosition = _heading.GetProjectedPosition();
+        var bodyRotation = _heading.GetPlanarRotation();
+        // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
+        const float footDistanceEpsilon = 0.05f;
+        var lFootDistance = Vector3.Distance(lFoot.position, lFoot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
+        if(lFootDistance > footDistanceEpsilon) return false;
+        var rFootDistance = Vector3.Distance(rFoot.position, rFoot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
+        if(rFootDistance > footDistanceEpsilon) return false;
+        return true;
     }
 
     public void OnEnable()

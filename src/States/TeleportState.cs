@@ -16,12 +16,16 @@ public class TeleportState : MonoBehaviour, IWalkState
 
     public void Update()
     {
+        if (_gait.FeetAreStable())
+        {
+            stateMachine.currentState = stateMachine.movingState;
+            return;
+        }
+
         var bodyCenter = _heading.GetFloorCenter();
         var bodyRotation = _heading.GetPlanarRotation();
         MoveAndRotateFoot(bodyCenter, bodyRotation, _gait.lFoot);
         MoveAndRotateFoot(bodyCenter, bodyRotation, _gait.rFoot);
-
-        stateMachine.currentState = stateMachine.movingState;
     }
 
     private static void MoveAndRotateFoot(Vector3 bodyCenter, Quaternion bodyRotation, FootController foot)

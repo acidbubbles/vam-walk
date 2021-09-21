@@ -29,7 +29,15 @@ public class HeadingTracker : MonoBehaviour
         _lastVelocityMeasurePoint = velocityMeasurePoint;
     }
 
-    public Vector3 GetPlanarVelocity()
+    public Vector3 GetProjectedPosition()
+    {
+        var velocity = GetPlanarVelocity();
+        // TODO: Make this an option, how much of the velocity is used for prediction
+        var finalPosition = GetFloorCenter() + velocity * (_style.stepDuration.val * 1.1f);
+        return finalPosition;
+    }
+
+    private Vector3 GetPlanarVelocity()
     {
         var sumVelocities = Vector3.zero;
         for (var i = 0; i < _lastVelocities.Length; i++)
@@ -48,6 +56,7 @@ public class HeadingTracker : MonoBehaviour
         return headPosition + GetBodyForward() * -_style.footBackOffset.val;
     }
 
+    // TODO: Validate this?
     public Vector3 GetFloorDesiredCenter()
     {
         var headPosition = _headRB.transform.position;

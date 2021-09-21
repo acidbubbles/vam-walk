@@ -202,8 +202,7 @@ public class FootController : MonoBehaviour
             _rotZCurve.Evaluate(t),
             _rotWCurve.Evaluate(t)
         );
-        footControl.control.position = footPosition;
-        footControl.control.rotation = footRotation;
+        footControl.control.SetPositionAndRotation(footPosition, footRotation);
     }
 
     public bool FloorContact()
