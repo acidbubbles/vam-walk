@@ -8,6 +8,7 @@ public class GaitController : MonoBehaviour
     private GaitVisualizer _visualizer;
 
     public FootController currentFoot { get; private set; }
+    public FootController otherFoot { get; private set; }
     public FootController rFoot { get; set; }
     public FootController lFoot { get; set; }
 
@@ -42,25 +43,21 @@ public class GaitController : MonoBehaviour
         // TODO: Compute this from bones instead
         // TODO: Deal with when bending down, the hip should stay back (rely on the hip-to-head angle)
         var hipPosition = feetCenter + new Vector3(0, headPosition.y * 0.65f, 0);
-        var lFootY = lFoot.position.y;
-        var lFootHeightRatio = lFootY / _style.stepHeight.val;
-        var rFootY = rFoot.position.y;
-        var rFootHeightRatio = rFootY / _style.stepHeight.val;
-        var lrRatio = -lFootHeightRatio + rFootHeightRatio;
+        var lrRatio = -lFoot.GetMidSwingStrength() + rFoot.GetMidSwingStrength();
         // TODO: Make the hip catch up speed configurable, and consider other approaches. We want the hip to stay straight, so maybe it should be part of the moving state?
         // TODO: The hip should track passing, not leg height.
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
-        #warning This does not rotate correctly
         var bodyCenter = Vector3.Lerp(
             new Vector3(feetCenter.x, hipPosition.y, feetCenter.z),
             new Vector3(headPosition.x, hipPosition.y, headPosition.z),
-            0.9f
+            0.6f
         );
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
-        var hipRaise = Mathf.Max(lFootY, rFootY) * 0.2f;
+        var hipRaise = lrRatio * 0.04f;
+        var hipSide = lrRatio * -0.06f;
         _hipControl.control.SetPositionAndRotation(
-            bodyCenter + new Vector3(0, hipRaise, 0),
-            headingRotation * Quaternion.Euler(20, lrRatio * -35f, lrRatio * -18f)
+            bodyCenter + headingRotation * new Vector3(hipSide, hipRaise, 0),
+            headingRotation * Quaternion.Euler(12, lrRatio * -15f, lrRatio * 10f)
         );
     }
 
@@ -75,22 +72,45 @@ public class GaitController : MonoBehaviour
         if(Mathf.Abs(forwardRatio) > 0.2)
         {
             // Forward / Backwards
-            currentFoot = lFootDistance > rFootDistance
-                ? lFoot
-                : rFoot;
+            if (lFootDistance > rFootDistance)
+            {
+                currentFoot = lFoot;
+                otherFoot = rFoot;
+            }
+            else
+            {
+                currentFoot = rFoot;
+                otherFoot = lFoot;
+            }
         }
         else
         {
             // Sideways
-            currentFoot = lFootDistance > rFootDistance
-                ? rFoot
-                : lFoot;
+            if (lFootDistance > rFootDistance)
+            {
+                currentFoot = rFoot;
+                otherFoot = lFoot;
+            }
+            else
+            {
+                currentFoot = lFoot;
+                otherFoot = rFoot;
+            }
         }
     }
 
     public void SwitchFoot()
     {
-        currentFoot = currentFoot == lFoot ? rFoot : lFoot;
+        if (currentFoot == lFoot)
+        {
+            currentFoot = rFoot;
+            otherFoot = lFoot;
+        }
+        else
+        {
+            currentFoot = lFoot;
+            otherFoot = rFoot;
+        }
     }
 
     public Vector3 GetFloorFeetCenter()

@@ -36,9 +36,12 @@ public class MovingState : MonoBehaviour, IWalkState
     {
         var feetCenter = _gait.GetFloorFeetCenter();
 
+        var forward = Vector3.Dot(_heading.GetFloorCenter() - feetCenter, _heading.GetBodyForward());
         var distance = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
-        var distanceInHalfSteps = distance / (_style.maxStepDistance.val / 4f);
-        _gait.speed = Mathf.Clamp(distanceInHalfSteps, 1f, 2f);
+
+        _gait.speed = forward > 0
+            ? Mathf.Clamp(distance / (_style.maxStepDistance.val / 4f), 1f, 2f)
+            : 1f;
 
         if (distance > _style.maxStepDistance.val * 1.5)
         {
@@ -52,7 +55,6 @@ public class MovingState : MonoBehaviour, IWalkState
 
         if (_gait.FeetAreStable())
         {
-            // TODO: If the feet distance is too far away, move to another state that'll do instant catchup
             stateMachine.currentState = stateMachine.idleState;
             return;
         }
@@ -63,20 +65,31 @@ public class MovingState : MonoBehaviour, IWalkState
         PlotFootCourse(_style.maxStepDistance.val);
     }
 
-    private void PlotFootCourse(float maxStepDistance)
+    private void PlotFootCourse(float _)
     {
+        var maxStepDistance = _style.maxStepDistance.val;
+        var halfStepDistance = maxStepDistance / 2f;
         var foot = _gait.currentFoot;
         var projectedCenter = _heading.GetProjectedPosition();
         var toRotation = _heading.GetPlanarRotation();
         var toPosition = foot.GetFootPositionRelativeToBody(projectedCenter,  toRotation, 0f);
         var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(foot.floorPosition, toPosition) / _style.maxStepDistance.val);
-
         toPosition = foot.GetFootPositionRelativeToBody(projectedCenter,  toRotation, standToWalkRatio);
         toPosition = Vector3.MoveTowards(
             foot.floorPosition,
             toPosition,
             maxStepDistance
         );
+        var finalFeetDistance = Vector3.Distance(_gait.otherFoot.floorPosition, toPosition);
+        if (finalFeetDistance > halfStepDistance)
+        {
+            var extraDistance = finalFeetDistance - halfStepDistance;
+            toPosition = Vector3.MoveTowards(
+                toPosition,
+                foot.floorPosition,
+                extraDistance
+            );
+        }
 
         var rotation = foot.GetFootRotationRelativeToBody(toRotation, standToWalkRatio);
 

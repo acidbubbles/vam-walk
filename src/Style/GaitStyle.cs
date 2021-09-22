@@ -14,12 +14,12 @@ public class GaitStyle
     public readonly JSONStorableFloat footStandingOutOffset = new JSONStorableFloat("Foot Standing Offset Out", 0.09f, -0.2f, 0.2f, false);
     public readonly JSONStorableFloat footStandingYaw = new JSONStorableFloat("Foot Standing Yaw", 8.81f, -45f, 45f, false);
 
-    public readonly JSONStorableFloat footWalkingOutOffset = new JSONStorableFloat("Foot Walking Offset Out", 0.01f, -0.2f, 0.2f, false);
+    public readonly JSONStorableFloat footWalkingOutOffset = new JSONStorableFloat("Foot Walking Offset Out", 0.03f, -0.2f, 0.2f, false);
     public readonly JSONStorableFloat footWalkingYaw = new JSONStorableFloat("Foot Walking Yaw", 1.5f, -45f, 45f, false);
 
     public readonly JSONStorableFloat kneeForwardForce = new JSONStorableFloat("Knee Forward Force", 50f, 0f, 1000f, false);
 
-    public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.05f, -0.1f, 0.5f, false);
+    public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.2f, -0.1f, 0.5f, false);
 
     public readonly JSONStorableFloat toeOffTimeRatio = new JSONStorableFloat("ToeOffTimeRatio", 0.2f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingTimeRatio = new JSONStorableFloat("MidSwingTimeRatio", 0.55f, 0f, 1f, true);

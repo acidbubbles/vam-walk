@@ -37,7 +37,8 @@ public class FootController : MonoBehaviour
     private FixedAnimationCurve _rotWCurve;
     private float _time;
     private float _hitFloorTime;
-    private bool _dirty = true;
+    private bool _active;
+    private float _standToWalkRatio;
 
     public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, FootStateVisualizer visualizer)
     {
@@ -54,6 +55,8 @@ public class FootController : MonoBehaviour
         _rotYCurve = new FixedAnimationCurve();
         _rotZCurve = new FixedAnimationCurve();
         _rotWCurve = new FixedAnimationCurve();
+
+        SyncHitFloorTime();
     }
 
     public Vector3 GetFootPositionRelativeToBody(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
@@ -68,18 +71,24 @@ public class FootController : MonoBehaviour
 
     public void PlotCourse(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
+        _standToWalkRatio = standToWalkRatio;
         _time = 0;
+        SyncHitFloorTime();
         var controlPosition = footControl.control.position;
         toPosition.y = _style.footFloorDistance.val;
         var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
-        PlotPosition(toPosition, standToWalkRatio, forwardRatio);
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
-        // TODO: Find a better way to find that, this should be pretty close though
-        _hitFloorTime = (stepTime + heelStrikeTime) / 2f;
+        PlotPosition(toPosition, standToWalkRatio, forwardRatio);
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         gameObject.SetActive(true);
         _visualizer.gameObject.SetActive(true);
-        _dirty = false;
+        _active = true;
+    }
+
+    private void SyncHitFloorTime()
+    {
+        // TODO: Find a better way to find that, this should be pretty close though
+        _hitFloorTime = Mathf.Max((stepTime + heelStrikeTime) / 2f, 0.01f);
     }
 
     private void PlotPosition(Vector3 toPosition, float standToWalkRatio, float forwardRatio)
@@ -88,12 +97,11 @@ public class FootController : MonoBehaviour
         var currentPosition = footControl.control.position;
         var up = Vector3.up * Mathf.Clamp(standToWalkRatio, 0.1f, 1f);
         var forwardRatioAbs = Mathf.Abs(forwardRatio);
-        var passingOffset =
-            footControl.control.right * _footStyle.inverse * _style.passingDistance.val * standToWalkRatio * forwardRatioAbs; /* +
-            footControl.control.forward * _style.passingDistance.val * standToWalkRatio * (1 - forwardRatio);*/
-        var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + passingOffset * _style.toeOffTimeRatio.val;
-        var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + passingOffset * _style.midSwingTimeRatio.val;
-        var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + passingOffset * _style.heelStrikeTimeRatio.val;
+
+        var passingOffset = Vector3.right * (_footStyle.inverse * _style.passingDistance.val * standToWalkRatio * forwardRatioAbs);
+        var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + (GetRotationAtFrame(1) * passingOffset) * _style.toeOffTimeRatio.val;
+        var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + (GetRotationAtFrame(2) * passingOffset) * _style.midSwingTimeRatio.val;
+        var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + (GetRotationAtFrame(3) * passingOffset) * _style.heelStrikeTimeRatio.val;
 
         _xCurve.MoveKey(0, new Keyframe(0, currentPosition.x));
         _xCurve.MoveKey(1, new Keyframe(toeOffTime, toeOffPosition.x));
@@ -120,9 +128,9 @@ public class FootController : MonoBehaviour
     private void PlotRotation(Quaternion rotation, float standToWalkRatio, float forwardRatio)
     {
         var currentRotation = footControl.control.rotation;
-        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * standToWalkRatio, 0, 0) * currentRotation;
-        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * standToWalkRatio * forwardRatio, 0, 0) * rotation;
-        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * rotation;
+        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * standToWalkRatio, 0, 0) * Quaternion.Slerp(currentRotation, rotation, _style.toeOffTimeRatio.val);
+        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(currentRotation, rotation, _style.midSwingTimeRatio.val);
+        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(currentRotation, rotation, _style.heelStrikeTimeRatio.val);
 
         EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);
@@ -158,6 +166,16 @@ public class FootController : MonoBehaviour
         _rotWCurve.Sync();
     }
 
+    private Quaternion GetRotationAtFrame(int index)
+    {
+        return new Quaternion(
+            _rotXCurve.GetValueAtKey(index),
+            _rotYCurve.GetValueAtKey(index),
+            _rotZCurve.GetValueAtKey(index),
+            _rotWCurve.GetValueAtKey(index)
+        );
+    }
+
     private static void EnsureQuaternionContinuity(ref Quaternion target, Quaternion reference)
     {
         if (Quaternion.Dot(target, reference) < 0.0f)
@@ -167,8 +185,7 @@ public class FootController : MonoBehaviour
     public void CancelCourse()
     {
         _time = 0;
-        _hitFloorTime = 0;
-        _dirty = true;
+        _active = false;
         _visualizer.gameObject.SetActive(false);
         gameObject.SetActive(false);
     }
@@ -186,15 +203,21 @@ public class FootController : MonoBehaviour
         }
         Sample(_time);
         var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + Vector3.up;
+        kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val * GetMidSwingStrength());
+    }
+
+    public float GetMidSwingStrength()
+    {
         // TODO: This is not adjusted for mid swing, but rather for mid anim. Also, potentially bad code.
-        var midSwingRatio = _time / (stepTime / 2f);
+        if (!_active) return 0f;
+        var midSwingRatio = _time / (_hitFloorTime / 2f);
         if (midSwingRatio > 1) midSwingRatio = 2f - midSwingRatio;
-        kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val * midSwingRatio);
+        return midSwingRatio * _standToWalkRatio;
     }
 
     private void Sample(float t)
     {
-        if (_dirty) throw new InvalidOperationException("Cannot sample foot animation because it is currently dirty.");
+        if (!_active) throw new InvalidOperationException("Cannot sample foot animation because it is currently inactive.");
 
         var footPosition = new Vector3(
             _xCurve.Evaluate(t),
@@ -212,7 +235,7 @@ public class FootController : MonoBehaviour
 
     public bool FloorContact()
     {
-        return _time >= _hitFloorTime;
+        return !_active || _time >= _hitFloorTime;
     }
 
     public void OnDisable()

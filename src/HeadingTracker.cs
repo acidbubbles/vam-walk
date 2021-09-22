@@ -9,7 +9,7 @@ public class HeadingTracker : MonoBehaviour
 
     private Vector3 _lastVelocityMeasurePoint;
     // TODO: Determine how many frames based on the physics rate
-    private readonly Vector3[] _lastVelocities = new Vector3[30];
+    private readonly Vector3[] _lastVelocities = new Vector3[20];
     private int _currentVelocityIndex;
 
     public void Configure(GaitStyle style, Rigidbody headRB, DAZBone headBone)
@@ -33,7 +33,7 @@ public class HeadingTracker : MonoBehaviour
     {
         var velocity = GetPlanarVelocity();
         // TODO: Make this an option, how much of the velocity is used for prediction
-        var finalPosition = GetFloorCenter() + velocity * (_style.stepDuration.val * 1.1f);
+        var finalPosition = GetFloorCenter() + velocity * (_style.stepDuration.val * 0.7f);
         return finalPosition;
     }
 
@@ -50,16 +50,6 @@ public class HeadingTracker : MonoBehaviour
     public Vector3 GetFloorCenter()
     {
         var headPosition = _neckBone.transform.position;
-        // Find the floor level
-        headPosition = new Vector3(headPosition.x, 0, headPosition.z);
-        // Offset for expected feet position
-        return headPosition + GetBodyForward() * -_style.footBackOffset.val;
-    }
-
-    // TODO: Validate this?
-    public Vector3 GetFloorDesiredCenter()
-    {
-        var headPosition = _headRB.transform.position;
         // Find the floor level
         headPosition = new Vector3(headPosition.x, 0, headPosition.z);
         // Offset for expected feet position

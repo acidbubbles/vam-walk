@@ -17,7 +17,7 @@ public class FixedAnimationCurve
     {
         _curve.keys = _keys;
         for (var i = 1; i < _curve.length - 1; i++)
-            _curve.SmoothTangents(i, 1);
+            _curve.SmoothTangents(i, 0);
     }
 
     public float Evaluate(float t)
