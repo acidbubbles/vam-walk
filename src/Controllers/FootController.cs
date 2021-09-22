@@ -17,6 +17,8 @@ public class FootController : MonoBehaviour
         get { var footPosition = footControl.control.position; return new Vector3(footPosition.x, 0, footPosition.z); }
     }
 
+    public float speed = 1f;
+
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
     private float midSwingTime => _style.stepDuration.val * _style.midSwingTimeRatio.val;
@@ -175,7 +177,7 @@ public class FootController : MonoBehaviour
     {
         // TODO: Skip if the animation is complete
         // TODO: Increment the time to allow accelerating if the distance is greater than the step length
-        _time += Time.deltaTime;
+        _time += Time.deltaTime * speed;
         if (_time >= stepTime)
         {
             Sample(stepTime);

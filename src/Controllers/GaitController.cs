@@ -11,6 +11,19 @@ public class GaitController : MonoBehaviour
     public FootController rFoot { get; set; }
     public FootController lFoot { get; set; }
 
+    public float speed
+    {
+        set
+        {
+            lFoot.speed = value;
+            rFoot.speed = value;
+        }
+        get
+        {
+            return lFoot.speed;
+        }
+    }
+
     public void Configure(HeadingTracker heading, FootController lFoot, FootController rFoot, GaitStyle style, FreeControllerV3 hipControl, GaitVisualizer visualizer)
     {
         _heading = heading;

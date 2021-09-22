@@ -28,6 +28,7 @@ public class MovingState : MonoBehaviour, IWalkState
 
     public void OnDisable()
     {
+        _gait.speed = 1f;
         _visualizer.gameObject.SetActive(false);
     }
 
@@ -35,7 +36,11 @@ public class MovingState : MonoBehaviour, IWalkState
     {
         var feetCenter = _gait.GetFloorFeetCenter();
 
-        if (Vector3.Distance(_heading.GetFloorDesiredCenter(), feetCenter) > _style.maxStepDistance.val * 1.5)
+        var distance = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
+        var distanceInHalfSteps = distance / (_style.maxStepDistance.val / 4f);
+        _gait.speed = Mathf.Clamp(distanceInHalfSteps, 1f, 2f);
+
+        if (distance > _style.maxStepDistance.val * 1.5)
         {
             stateMachine.currentState = stateMachine.teleportState;
             return;
@@ -52,6 +57,8 @@ public class MovingState : MonoBehaviour, IWalkState
             return;
         }
 
+        // TODO: Max half step from other foot on the z axis, max full step from current position
+        // TODO: If the step didn't reach the other foot (negative) don't switch
         _gait.SwitchFoot();
         PlotFootCourse(_style.maxStepDistance.val);
     }
