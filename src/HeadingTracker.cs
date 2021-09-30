@@ -33,7 +33,7 @@ public class HeadingTracker : MonoBehaviour
     {
         var velocity = GetPlanarVelocity();
         // TODO: Make this an option, how much of the velocity is used for prediction
-        var finalPosition = GetFloorCenter() + velocity * (_style.stepDuration.val * 0.7f);
+        var finalPosition = GetFloorCenter() + velocity * (_style.stepDuration.val * 1.5f);
         return finalPosition;
     }
 

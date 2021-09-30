@@ -50,7 +50,7 @@ public class GaitController : MonoBehaviour
         var bodyCenter = Vector3.Lerp(
             new Vector3(feetCenter.x, hipPosition.y, feetCenter.z),
             new Vector3(headPosition.x, hipPosition.y, headPosition.z),
-            0.6f
+            0.9f
         );
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
         var hipRaise = lrRatio * 0.04f;
