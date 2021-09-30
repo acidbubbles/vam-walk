@@ -33,19 +33,12 @@ public class IdleState : MonoBehaviour, IWalkState
 
     private bool IsOffBalanceDistance(Vector3 bodyCenter, Vector3 feetCenter)
     {
-        var stableRadius = GetFeetCenterRadius();
-        _visualizer.Sync(bodyCenter, feetCenter, new Vector2(stableRadius, stableRadius));
-        return feetCenter.PlanarDistance(bodyCenter) >  stableRadius;
-    }
-
-    private float GetFeetCenterRadius()
-    {
-        var lFootControlPosition = _gait.lFoot.floorPosition;
-        var rFootControlPosition = _gait.rFoot.floorPosition;
-        var feetCenterStableRadius = rFootControlPosition.PlanarDistance(lFootControlPosition) / 2f;
-        // TODO: We might want to add an offset
-        // TODO: We need to make an ellipse, more stable in feet direction, less perpendicular to the feet line
-        return feetCenterStableRadius;
+        var radius = new Vector2(0.25f, 0.12f);
+        var normalized = bodyCenter - feetCenter;
+        // X^2/a^2 + Y^2/b^2 <= 1
+        var normalizedDistanceFromCenter = (normalized.x * normalized.x) / (radius.x * radius.x) + (normalized.z * normalized.z) / (radius.y * radius.y);
+        _visualizer.Sync(bodyCenter, feetCenter, radius);
+        return normalizedDistanceFromCenter > 1f;
     }
 
     private bool IsOffBalanceRotation()
