@@ -8,8 +8,8 @@ public class HeadingTracker : MonoBehaviour
     private DAZBone _neckBone;
 
     private Vector3 _lastVelocityMeasurePoint;
-    // TODO: Determine how many frames based on the physics rate
-    private readonly Vector3[] _lastVelocities = new Vector3[20];
+    private readonly float[] _lastDeltaTimes = new float[30];
+    private readonly Vector3[] _lastVelocities = new Vector3[30];
     private int _currentVelocityIndex;
 
     public void Configure(GaitStyle style, Rigidbody headRB, DAZBone headBone)
@@ -21,11 +21,12 @@ public class HeadingTracker : MonoBehaviour
         _lastVelocityMeasurePoint = _neckBone.transform.position;
     }
 
-    public void FixedUpdate()
+    public void Update()
     {
         var velocityMeasurePoint = _neckBone.transform.position;
-        _lastVelocities[_currentVelocityIndex++] = velocityMeasurePoint - _lastVelocityMeasurePoint;
-        if (_currentVelocityIndex == _lastVelocities.Length) _currentVelocityIndex = 0;
+        _lastVelocities[_currentVelocityIndex] = velocityMeasurePoint - _lastVelocityMeasurePoint;
+        _lastDeltaTimes[_currentVelocityIndex] = Time.deltaTime;
+        if (++_currentVelocityIndex == _lastVelocities.Length) _currentVelocityIndex = 0;
         _lastVelocityMeasurePoint = velocityMeasurePoint;
     }
 
@@ -40,9 +41,13 @@ public class HeadingTracker : MonoBehaviour
     private Vector3 GetPlanarVelocity()
     {
         var sumVelocities = Vector3.zero;
+        var sumDeltaTimes = 0f;
         for (var i = 0; i < _lastVelocities.Length; i++)
+        {
             sumVelocities += _lastVelocities[i];
-        var avgVelocity = sumVelocities / _lastVelocities.Length / Time.deltaTime;
+            sumDeltaTimes += _lastDeltaTimes[i];
+        }
+        var avgVelocity = sumVelocities / sumDeltaTimes;
         return Vector3.ProjectOnPlane(avgVelocity, Vector3.up);
         // TODO: Clamp the velocity
     }
