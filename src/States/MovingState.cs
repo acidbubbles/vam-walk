@@ -39,9 +39,8 @@ public class MovingState : MonoBehaviour, IWalkState
         var forward = Vector3.Dot(_heading.GetFloorCenter() - feetCenter, _heading.GetBodyForward());
         var distance = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
 
-        _gait.speed = forward > 0
-            ? Mathf.Clamp(distance / (_style.maxStepDistance.val / 2f), 1f, 2f)
-            : 1f;
+        // TODO: Configurable min speed increase and max speed
+        _gait.speed = Mathf.Clamp(distance / (_style.maxStepDistance.val / 4f), 1f, 4f);
 
         if (distance > _style.maxStepDistance.val * 1.5)
         {
@@ -81,9 +80,9 @@ public class MovingState : MonoBehaviour, IWalkState
             maxStepDistance
         );
         var finalFeetDistance = Vector3.Distance(_gait.otherFoot.floorPosition, toPosition);
-        if (finalFeetDistance > maxStepDistance)
+        if (finalFeetDistance > halfStepDistance)
         {
-            var extraDistance = finalFeetDistance - maxStepDistance;
+            var extraDistance = finalFeetDistance - halfStepDistance;
             toPosition = Vector3.MoveTowards(
                 toPosition,
                 foot.floorPosition,

@@ -131,7 +131,7 @@ public class GaitController : MonoBehaviour
         var projectedPosition = _heading.GetProjectedPosition();
         var bodyRotation = _heading.GetPlanarRotation();
         // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
-        const float footDistanceEpsilon = 0.05f;
+        const float footDistanceEpsilon = 0.02f;
         var lFootDistance = Vector3.Distance(lFoot.position, lFoot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
         if(lFootDistance > footDistanceEpsilon) return false;
         var rFootDistance = Vector3.Distance(rFoot.position, rFoot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
