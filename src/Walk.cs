@@ -37,6 +37,12 @@ public class Walk : MVRScript
     {
         var bones = containingAtom.transform.Find("rescale2").GetComponentsInChildren<DAZBone>();
 
+        // TODO: Refresh when style.footFloorDistance changes or when the model changes
+        var personMeasurements = new PersonMeasurements(bones, style);
+
+        // TODO: Wait for model loaded
+        personMeasurements.Sync();
+
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { }, false);
 
         var lFootController = AddWalkComponent<FootController>("LeftFoot", c => c.Configure(
@@ -59,6 +65,7 @@ public class Walk : MVRScript
 
         var heading = AddWalkComponent<HeadingTracker>("HeadingTracker", c => c.Configure(
             style,
+            personMeasurements,
             containingAtom.rigidbodies.FirstOrDefault(fc => fc.name == "head"),
             bones.FirstOrDefault(fc => fc.name == "head")
         ));
@@ -69,6 +76,7 @@ public class Walk : MVRScript
 
         var gait = AddWalkComponent<GaitController>("Gait", c => c.Configure(
             heading,
+            personMeasurements,
             lFootController,
             rFootController,
             style,

@@ -3,6 +3,7 @@
 public class GaitController : MonoBehaviour
 {
     private HeadingTracker _heading;
+    private PersonMeasurements _personMeasurements;
     private GaitStyle _style;
     private FreeControllerV3 _hipControl;
     private GaitVisualizer _visualizer;
@@ -25,9 +26,10 @@ public class GaitController : MonoBehaviour
         }
     }
 
-    public void Configure(HeadingTracker heading, FootController lFoot, FootController rFoot, GaitStyle style, FreeControllerV3 hipControl, GaitVisualizer visualizer)
+    public void Configure(HeadingTracker heading, PersonMeasurements personMeasurements, FootController lFoot, FootController rFoot, GaitStyle style, FreeControllerV3 hipControl, GaitVisualizer visualizer)
     {
         _heading = heading;
+        _personMeasurements = personMeasurements;
         this.lFoot = lFoot;
         this.rFoot = rFoot;
         _style = style;
@@ -37,22 +39,26 @@ public class GaitController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        var headPosition = _heading.GetHeadPosition();
         var headingRotation = _heading.GetPlanarRotation();
+
+        var headPosition = _heading.GetFloorCenter();
         var feetCenter = GetFloorFeetCenter();
         // TODO: Compute this from bones instead
         // TODO: Deal with when bending down, the hip should stay back (rely on the hip-to-head angle)
-        var hipPosition = feetCenter + new Vector3(0, headPosition.y * 0.65f, 0);
-        var lrRatio = -lFoot.GetMidSwingStrength() + rFoot.GetMidSwingStrength();
+        var hipLocalPosition = headingRotation * new Vector3(0, _personMeasurements.hip, 0.05f);
+        var hipPositionFromFeet = feetCenter + hipLocalPosition;
+        var hipPositionFromHead = headPosition + hipLocalPosition;
         // TODO: Make the hip catch up speed configurable, and consider other approaches. We want the hip to stay straight, so maybe it should be part of the moving state?
         // TODO: The hip should track passing, not leg height.
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
         var bodyCenter = Vector3.Lerp(
-            new Vector3(feetCenter.x, hipPosition.y, feetCenter.z),
-            new Vector3(headPosition.x, hipPosition.y, headPosition.z),
+            hipPositionFromFeet,
+            hipPositionFromHead,
             0.9f
         );
+
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
+        var lrRatio = -lFoot.GetMidSwingStrength() + rFoot.GetMidSwingStrength();
         var hipRaise = lrRatio * 0.04f;
         var hipSide = lrRatio * -0.06f;
         _hipControl.control.SetPositionAndRotation(

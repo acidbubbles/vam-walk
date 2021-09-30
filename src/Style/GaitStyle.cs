@@ -6,7 +6,7 @@ public class GaitStyle
     public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
     public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
     public readonly JSONStorableFloat maxStepDistance = new JSONStorableFloat("Max Step Distance", 0.9f, 0f, 1f, false);
-    public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.05f, 0f, 0.2f, false);
+    public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.07f, -0.1f, 0.1f, false);
     public readonly JSONStorableFloat footPitch = new JSONStorableFloat("Foot Pitch", 18.42f, -45f, 45f, false);
     public readonly JSONStorableFloat footRoll = new JSONStorableFloat("Foot Roll", 2.42f, -45f, 45f, false);

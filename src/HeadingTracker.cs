@@ -3,6 +3,7 @@
 public class HeadingTracker : MonoBehaviour
 {
     private GaitStyle _style;
+    private PersonMeasurements _personMeasurements;
     private Rigidbody _headRB;
     private DAZBone _headBone;
     private DAZBone _neckBone;
@@ -12,9 +13,10 @@ public class HeadingTracker : MonoBehaviour
     private readonly Vector3[] _lastVelocities = new Vector3[30];
     private int _currentVelocityIndex;
 
-    public void Configure(GaitStyle style, Rigidbody headRB, DAZBone headBone)
+    public void Configure(GaitStyle style, PersonMeasurements personMeasurements, Rigidbody headRB, DAZBone headBone)
     {
         _style = style;
+        _personMeasurements = personMeasurements;
         _headRB = headRB;
         _headBone = headBone;
         _neckBone = headBone.parentBone;

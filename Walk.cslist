@@ -12,6 +12,7 @@ src\States\TeleportState.cs
 src\Style\GaitFootStyle.cs
 src\Style\GaitStyle.cs
 src\Utils\FixedAnimationCurve.cs
+src\Utils\PersonMeasurements.cs
 src\Utils\TransformExtensions.cs
 src\Utils\Vector3Extensions.cs
 src\HeadingTracker.cs

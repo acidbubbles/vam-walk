@@ -202,7 +202,7 @@ public class FootController : MonoBehaviour
             return;
         }
         Sample(_time);
-        var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + Vector3.up;
+        var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + (Vector3.up * 0.2f);
         kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val * GetMidSwingStrength());
     }
 

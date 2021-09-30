@@ -23,6 +23,7 @@
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Style\\GaitFootStyle.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Style\\GaitStyle.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\FixedAnimationCurve.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\PersonMeasurements.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\TransformExtensions.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\Vector3Extensions.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\HeadingTracker.cs",
