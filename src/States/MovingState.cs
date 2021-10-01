@@ -41,8 +41,6 @@ public class MovingState : MonoBehaviour, IWalkState
 
         // TODO: Configurable min speed increase and max speed
         _gait.speed = Mathf.Clamp(distance / (_style.maxStepDistance.val / 4f) + 1f, 1f, 4f);
-        SuperController.singleton.ClearMessages();
-        SuperController.LogMessage($"{_gait.speed}");
 
         if (distance > _style.maxStepDistance.val * 1.5)
         {

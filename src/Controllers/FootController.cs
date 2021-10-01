@@ -79,6 +79,7 @@ public class FootController : MonoBehaviour
         var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
         PlotPosition(toPosition, standToWalkRatio, forwardRatio);
+        // TODO: Also animate the toes
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         gameObject.SetActive(true);
         _visualizer.gameObject.SetActive(true);

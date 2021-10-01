@@ -40,7 +40,7 @@ public class HeadingTracker : MonoBehaviour
         return finalPosition;
     }
 
-    public float GetStandToCrouchRatio()
+    public float GetStandingRatio()
     {
         // TODO: When crouching, the feet should go up and point down (on toes)
         // This will move from 0.5-1 to 0-1
@@ -67,7 +67,9 @@ public class HeadingTracker : MonoBehaviour
         // Find the floor level
         headPosition = new Vector3(headPosition.x, 0, headPosition.z);
         // Offset for expected feet position
-        return headPosition + GetBodyForward() * -_style.footBackOffset.val;
+        var bodyForward = GetBodyForward();
+        var standingFloorCenter = headPosition + bodyForward * -_style.footBackOffset.val;
+        return standingFloorCenter + (bodyForward * (-0.12f * (1f - GetStandingRatio())));
     }
 
     public Quaternion GetPlanarRotation()

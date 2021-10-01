@@ -41,7 +41,7 @@ public class GaitController : MonoBehaviour
     public void FixedUpdate()
     {
         var headingRotation = _heading.GetPlanarRotation();
-        var standToCrouchRatio = _heading.GetStandToCrouchRatio();
+        var standingRatio = _heading.GetStandingRatio();
 
         var headPosition = _heading.GetFloorCenter();
         var feetCenter = GetFloorFeetCenter();
@@ -50,9 +50,9 @@ public class GaitController : MonoBehaviour
         var hipLocalPosition = headingRotation * new Vector3(
             0,
             // TODO: Make the crouch ratio effect on Y configurable
-            (_heading.GetHeadPosition().y - _personMeasurements.hipToHead) * (0.8f + standToCrouchRatio * 0.2f),
+            (_heading.GetHeadPosition().y - _personMeasurements.hipToHead) * (0.8f + standingRatio * 0.2f),
             // TODO: Make the crouch ratio effect on Z configurable
-            Mathf.Lerp(-0.3f, 0.10f, standToCrouchRatio)
+            Mathf.Lerp(-0.12f, 0.10f, standingRatio)
         );
         var hipPositionFromFeet = feetCenter + hipLocalPosition;
         var hipPositionFromHead = headPosition + hipLocalPosition;
@@ -71,7 +71,7 @@ public class GaitController : MonoBehaviour
         var hipSide = lrRatio * -0.06f;
         _hipControl.control.SetPositionAndRotation(
             bodyCenter + headingRotation * new Vector3(hipSide, hipRaise, 0),
-            headingRotation * Quaternion.Euler(12f + ((1f-standToCrouchRatio) * 22f), lrRatio * -15f, lrRatio * 10f)
+            headingRotation * Quaternion.Euler(6f + ((1f-standingRatio) * 22f), lrRatio * -15f, lrRatio * 10f)
         );
     }
 
