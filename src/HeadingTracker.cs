@@ -40,6 +40,13 @@ public class HeadingTracker : MonoBehaviour
         return finalPosition;
     }
 
+    public float GetStandToCrouchRatio()
+    {
+        // TODO: When crouching, the feet should go up and point down (on toes)
+        // This will move from 0.5-1 to 0-1
+        return Mathf.Clamp(_headBone.transform.position.y / _personMeasurements.footToHead, 0.5f, 1f) * 2f - 1f;
+    }
+
     private Vector3 GetPlanarVelocity()
     {
         var sumVelocities = Vector3.zero;
