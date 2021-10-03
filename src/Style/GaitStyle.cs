@@ -90,47 +90,87 @@ public class GaitStyle
         valueUpdated.Invoke();
     }
 
-    public void SetupStorables(MVRScript plugin)
+    public void RegisterStorables(MVRScript plugin)
     {
-        AddFloat(plugin, stepDuration);
-        AddFloat(plugin, stepHeight);
-        AddFloat(plugin, maxStepDistance);
+        plugin.RegisterFloat(stepDuration);
+        plugin.RegisterFloat(stepHeight);
+        plugin.RegisterFloat(maxStepDistance);
 
-        AddFloat(plugin, footFloorDistance);
-        AddFloat(plugin, footBackOffset);
-        AddFloat(plugin, footPitch);
-        AddFloat(plugin, footRoll);
+        plugin.RegisterFloat(footFloorDistance);
+        plugin.RegisterFloat(footBackOffset);
+        plugin.RegisterFloat(footPitch);
+        plugin.RegisterFloat(footRoll);
 
-        AddFloat(plugin, footStandingOutOffset);
-        AddFloat(plugin, footStandingYaw);
+        plugin.RegisterFloat(footStandingOutOffset);
+        plugin.RegisterFloat(footStandingYaw);
 
-        AddFloat(plugin, footWalkingOutOffset);
-        AddFloat(plugin, footWalkingYaw);
+        plugin.RegisterFloat(footWalkingOutOffset);
+        plugin.RegisterFloat(footWalkingYaw);
 
-        AddFloat(plugin, kneeForwardForce);
+        plugin.RegisterFloat(kneeForwardForce);
 
-        AddFloat(plugin, passingDistance);
+        plugin.RegisterFloat(passingDistance);
 
-        AddFloat(plugin, toeOffTimeRatio, true);
-        AddFloat(plugin, midSwingTimeRatio, true);
-        AddFloat(plugin, heelStrikeTimeRatio, true);
+        plugin.RegisterFloat(toeOffTimeRatio);
+        plugin.RegisterFloat(midSwingTimeRatio);
+        plugin.RegisterFloat(heelStrikeTimeRatio);
 
-        AddFloat(plugin, toeOffHeightRatio, true);
-        AddFloat(plugin, midSwingHeightRatio, true);
-        AddFloat(plugin, heelStrikeHeightRatio, true);
+        plugin.RegisterFloat(toeOffHeightRatio);
+        plugin.RegisterFloat(midSwingHeightRatio);
+        plugin.RegisterFloat(heelStrikeHeightRatio);
 
-        AddFloat(plugin, toeOffDistanceRatio, true);
-        AddFloat(plugin, midSwingDistanceRatio, true);
-        AddFloat(plugin, heelStrikeDistanceRatio, true);
+        plugin.RegisterFloat(toeOffDistanceRatio);
+        plugin.RegisterFloat(midSwingDistanceRatio);
+        plugin.RegisterFloat(heelStrikeDistanceRatio);
 
-        AddFloat(plugin, toeOffPitch, true);
-        AddFloat(plugin, midSwingPitch, true);
-        AddFloat(plugin, heelStrikePitch, true);
+        plugin.RegisterFloat(toeOffPitch);
+        plugin.RegisterFloat(midSwingPitch);
+        plugin.RegisterFloat(heelStrikePitch);
     }
 
-    private static void AddFloat(MVRScript plugin, JSONStorableFloat jsf, bool rightSide = false)
+    public void SetupUI(UI ui)
     {
-        plugin.RegisterFloat(jsf);
-        plugin.CreateSlider(jsf, rightSide);
+        ui.AddHeader("Foot Position", 1);
+        ui.AddFloat(footFloorDistance);
+        ui.AddFloat(footBackOffset);
+        ui.AddFloat(footPitch);
+        ui.AddFloat(footRoll);
+
+        ui.AddHeader("While Standing", 2);
+        ui.AddFloat(footStandingOutOffset);
+        ui.AddFloat(footStandingYaw);
+
+        ui.AddHeader("While Walking", 2);
+        ui.AddFloat(footWalkingOutOffset);
+        ui.AddFloat(footWalkingYaw);
+
+        ui.AddHeader("Step Configuration", 1);
+        ui.AddFloat(stepDuration);
+        ui.AddFloat(stepHeight);
+        ui.AddFloat(maxStepDistance);
+        ui.AddFloat(kneeForwardForce);
+        ui.AddFloat(passingDistance);
+
+        ui.AddHeader("Animation Curve", 1, true);
+
+        ui.AddHeader("Timing", 2, true);
+        ui.AddFloat(toeOffTimeRatio, true);
+        ui.AddFloat(midSwingTimeRatio, true);
+        ui.AddFloat(heelStrikeTimeRatio, true);
+
+        ui.AddHeader("Height", 2, true);
+        ui.AddFloat(toeOffHeightRatio, true);
+        ui.AddFloat(midSwingHeightRatio, true);
+        ui.AddFloat(heelStrikeHeightRatio, true);
+
+        ui.AddHeader("Distance", 2, true);
+        ui.AddFloat(toeOffDistanceRatio, true);
+        ui.AddFloat(midSwingDistanceRatio, true);
+        ui.AddFloat(heelStrikeDistanceRatio, true);
+
+        ui.AddHeader("Pitch", 2, true);
+        ui.AddFloat(toeOffPitch, true);
+        ui.AddFloat(midSwingPitch, true);
+        ui.AddFloat(heelStrikePitch, true);
     }
 }

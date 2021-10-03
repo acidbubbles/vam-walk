@@ -19,8 +19,10 @@ public class Walk : MVRScript
         }
 
         var style = new GaitStyle();
+        style.RegisterStorables(this);
 
-        style.SetupStorables(this);
+        var ui = new UI(this);
+        InitUI(ui, style);
 
         try
         {
@@ -113,6 +115,11 @@ public class Walk : MVRScript
             movingState,
             teleportState
         ));
+    }
+
+    private static void InitUI(UI ui, GaitStyle style)
+    {
+        style.SetupUI(ui);
     }
 
     public void OnEnable()
