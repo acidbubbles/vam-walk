@@ -45,9 +45,9 @@ public class Walk : MVRScript
         // TODO: Wait for model loaded
         personMeasurements.Sync();
 
-        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootStateVisualizer", c => { }, false);
+        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootControllerVisualizer", c => { }, false);
 
-        var lFootController = AddWalkComponent<FootController>("LeftFoot", c => c.Configure(
+        var lFootController = AddWalkComponent<FootController>("LeftFootController", c => c.Configure(
             style,
             new GaitFootStyle(style, -1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
@@ -55,9 +55,9 @@ public class Walk : MVRScript
             lFootStateVisualizer
         ), false);
 
-        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootStateVisualizer", c => { }, false);
+        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootControllerVisualizer", c => { }, false);
 
-        var rFootController = AddWalkComponent<FootController>("RightFoot", c => c.Configure(
+        var rFootController = AddWalkComponent<FootController>("RightFootController", c => c.Configure(
             style,
             new GaitFootStyle(style, 1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
@@ -72,11 +72,11 @@ public class Walk : MVRScript
             bones.FirstOrDefault(fc => fc.name == "head")
         ));
 
-        var gaitVisualizer = AddWalkComponent<GaitVisualizer>("BodyPostureVisualizer", c => c.Configure(
+        var gaitVisualizer = AddWalkComponent<GaitVisualizer>("GaitVisualizer", c => c.Configure(
             containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
         ));
 
-        var gait = AddWalkComponent<GaitController>("Gait", c => c.Configure(
+        var gait = AddWalkComponent<GaitController>("GaitController", c => c.Configure(
             heading,
             personMeasurements,
             lFootController,
@@ -97,15 +97,14 @@ public class Walk : MVRScript
 
         var movingStateVisualizer = AddWalkComponent<MovingStateVisualizer>("MovingStateVisualizer", c => { }, false);
 
-        // TODO: Separate the moving state (feet close, forward) and the standing state (separate feet, rotate out)
-        var movingState = AddWalkComponent<MovingState>("MovingState", c => c.Configure(
+        var movingState = AddWalkComponent<WalkingState>("WalkingState", c => c.Configure(
             style,
             heading,
             gait,
             movingStateVisualizer
         ), false);
 
-        var teleportState = AddWalkComponent<TeleportState>("TeleportState", c => c.Configure(
+        var teleportState = AddWalkComponent<JumpingState>("JumpingState", c => c.Configure(
             gait,
             heading
         ), false);

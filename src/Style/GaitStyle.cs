@@ -3,9 +3,6 @@ using UnityEngine.Events;
 
 public class GaitStyle
 {
-    public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
-    public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
-    public readonly JSONStorableFloat maxStepDistance = new JSONStorableFloat("Max Step Distance", 0.9f, 0f, 1f, false);
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.07f, -0.1f, 0.1f, false);
     public readonly JSONStorableFloat footPitch = new JSONStorableFloat("Foot Pitch", 18.42f, -45f, 45f, false);
@@ -17,9 +14,18 @@ public class GaitStyle
     public readonly JSONStorableFloat footWalkingOutOffset = new JSONStorableFloat("Foot Walking Offset Out", 0.06f, -0.2f, 0.2f, false);
     public readonly JSONStorableFloat footWalkingYaw = new JSONStorableFloat("Foot Walking Yaw", 1.5f, -45f, 45f, false);
 
+    public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
+    public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
+    public readonly JSONStorableFloat minStepHeightRatio = new JSONStorableFloat("Min Step Height Ratio", 0.2f, 0f, 1f, true);
+    public readonly JSONStorableFloat maxStepDistance = new JSONStorableFloat("Max Step Distance", 0.9f, 0f, 1f, false);
+
     public readonly JSONStorableFloat kneeForwardForce = new JSONStorableFloat("Knee Forward Force", 50f, 0f, 1000f, false);
 
     public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.08f, -0.1f, 0.5f, false);
+
+    public readonly JSONStorableFloat accelerationMinDistance = new JSONStorableFloat("Accelerate Min Distance", 0.15f, 0f, 1f, false);
+    public readonly JSONStorableFloat accelerationRate = new JSONStorableFloat("Accelerate Rate", 1.4f, 1f, 10f, true);
+    public readonly JSONStorableFloat speedMax = new JSONStorableFloat("Accelerate Max Speed", 4f, 1f, 10f, true);
 
     public readonly JSONStorableFloat toeOffTimeRatio = new JSONStorableFloat("ToeOffTimeRatio", 0.2f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingTimeRatio = new JSONStorableFloat("MidSwingTimeRatio", 0.55f, 0f, 1f, true);
@@ -36,6 +42,8 @@ public class GaitStyle
     public readonly JSONStorableFloat toeOffPitch = new JSONStorableFloat("ToeOffPitch", 40f, -90, 90, true);
     public readonly JSONStorableFloat midSwingPitch = new JSONStorableFloat("MidSwingPitch", 20f, -90, 90, true);
     public readonly JSONStorableFloat heelStrikePitch = new JSONStorableFloat("HeelStrikePitch", -40f, -90, 90, true);
+
+    public readonly JSONStorableFloat jumpTriggerDistance = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
 
     public readonly UnityEvent valueUpdated = new UnityEvent();
 
@@ -94,6 +102,7 @@ public class GaitStyle
     {
         plugin.RegisterFloat(stepDuration);
         plugin.RegisterFloat(stepHeight);
+        plugin.RegisterFloat(minStepHeightRatio);
         plugin.RegisterFloat(maxStepDistance);
 
         plugin.RegisterFloat(footFloorDistance);
@@ -147,6 +156,7 @@ public class GaitStyle
         ui.AddHeader("Step Configuration", 1);
         ui.AddFloat(stepDuration);
         ui.AddFloat(stepHeight);
+        ui.AddFloat(minStepHeightRatio);
         ui.AddFloat(maxStepDistance);
         ui.AddFloat(kneeForwardForce);
         ui.AddFloat(passingDistance);

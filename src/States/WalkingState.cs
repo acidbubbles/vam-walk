@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class MovingState : MonoBehaviour, IWalkState
+public class WalkingState : MonoBehaviour, IWalkState
 {
     public StateMachine stateMachine { get; set; }
 
@@ -22,7 +22,7 @@ public class MovingState : MonoBehaviour, IWalkState
     {
         var bodyCenter = _heading.GetFloorCenter();
         _gait.SelectStartFoot(bodyCenter);
-        PlotFootCourse(_style.maxStepDistance.val / 2f);
+        PlotFootCourse();
         _visualizer.gameObject.SetActive(true);
     }
 
@@ -36,15 +36,13 @@ public class MovingState : MonoBehaviour, IWalkState
     {
         var feetCenter = _gait.GetFloorFeetCenter();
 
-        var forward = Vector3.Dot(_heading.GetFloorCenter() - feetCenter, _heading.GetBodyForward());
         var distance = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
 
-        // TODO: Configurable min speed increase and max speed
-        _gait.speed = Mathf.Clamp(distance / (_style.maxStepDistance.val / 4f) + 1f, 1f, 4f);
+        _gait.speed = Mathf.Clamp((distance / _style.accelerationMinDistance.val) * _style.accelerationRate.val, 1f, _style.speedMax.val);
 
-        if (distance > _style.maxStepDistance.val * 1.5)
+        if (distance > _style.jumpTriggerDistance.val)
         {
-            stateMachine.currentState = stateMachine.teleportState;
+            stateMachine.currentState = stateMachine.jumpingState;
             return;
         }
 
@@ -58,13 +56,11 @@ public class MovingState : MonoBehaviour, IWalkState
             return;
         }
 
-        // TODO: Max half step from other foot on the z axis, max full step from current position
-        // TODO: If the step didn't reach the other foot (negative) don't switch
         _gait.SwitchFoot();
-        PlotFootCourse(_style.maxStepDistance.val);
+        PlotFootCourse();
     }
 
-    private void PlotFootCourse(float _)
+    private void PlotFootCourse()
     {
         var maxStepDistance = _style.maxStepDistance.val;
         var halfStepDistance = maxStepDistance / 2f;

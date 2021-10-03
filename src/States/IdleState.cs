@@ -24,11 +24,9 @@ public class IdleState : MonoBehaviour, IWalkState
 
         if (IsOffBalanceDistance(bodyCenter, feetCenter) || IsOffBalanceRotation())
         {
-            stateMachine.currentState = stateMachine.movingState;
+            stateMachine.currentState = stateMachine.walkingState;
             return;
         }
-
-        // TODO: Small movements, hips roll, in-place feet movements
     }
 
     private bool IsOffBalanceDistance(Vector3 bodyCenter, Vector3 feetCenter)

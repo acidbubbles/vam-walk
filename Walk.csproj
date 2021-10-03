@@ -70,10 +70,10 @@
     <Compile Include="src\States\IdleState.cs" />
     <Compile Include="src\States\IdleStateVisualizer.cs" />
     <Compile Include="src\States\IWalkState.cs" />
-    <Compile Include="src\States\MovingState.cs" />
+    <Compile Include="src\States\JumpingState.cs" />
     <Compile Include="src\States\MovingStateVisualizer.cs" />
     <Compile Include="src\States\StateMachine.cs" />
-    <Compile Include="src\States\TeleportState.cs" />
+    <Compile Include="src\States\WalkingState.cs" />
     <Compile Include="src\Style\GaitFootStyle.cs" />
     <Compile Include="src\Style\GaitStyle.cs" />
     <Compile Include="src\Style\UI.cs" />

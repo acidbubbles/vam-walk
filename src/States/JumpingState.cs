@@ -1,7 +1,6 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class TeleportState : MonoBehaviour, IWalkState
+public class JumpingState : MonoBehaviour, IWalkState
 {
     public StateMachine stateMachine { get; set; }
 
@@ -18,7 +17,7 @@ public class TeleportState : MonoBehaviour, IWalkState
     {
         if (_gait.FeetAreStable())
         {
-            stateMachine.currentState = stateMachine.movingState;
+            stateMachine.currentState = stateMachine.walkingState;
             return;
         }
 

@@ -96,7 +96,7 @@ public class FootController : MonoBehaviour
     {
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = footControl.control.position;
-        var up = Vector3.up * Mathf.Clamp(standToWalkRatio, 0.1f, 1f);
+        var up = Vector3.up * Mathf.Clamp(standToWalkRatio, _style.minStepHeightRatio.val, 1f);
         var forwardRatioAbs = Mathf.Abs(forwardRatio);
 
         var passingOffset = Vector3.right * (_footStyle.inverse * _style.passingDistance.val * standToWalkRatio * forwardRatioAbs);

@@ -14,21 +14,21 @@ public class StateMachine : MonoBehaviour
     }
 
     public IWalkState idleState { get; private set; }
-    public IWalkState movingState { get; private set; }
-    public IWalkState teleportState { get; private set; }
+    public IWalkState walkingState { get; private set; }
+    public IWalkState jumpingState { get; private set; }
 
     private IWalkState _currentState;
 
-    public void Configure(IWalkState idleState, IWalkState movingState, IWalkState teleportState)
+    public void Configure(IWalkState idleState, IWalkState walkingState, IWalkState jumpingState)
     {
         idleState.stateMachine = this;
         this.idleState = idleState;
 
-        movingState.stateMachine = this;
-        this.movingState = movingState;
+        walkingState.stateMachine = this;
+        this.walkingState = walkingState;
 
-        teleportState.stateMachine = this;
-        this.teleportState = teleportState;
+        jumpingState.stateMachine = this;
+        this.jumpingState = jumpingState;
     }
 
     public void Awake()
