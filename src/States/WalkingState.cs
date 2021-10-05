@@ -7,10 +7,10 @@ public class WalkingState : MonoBehaviour, IWalkState
     private GaitStyle _style;
     private HeadingTracker _heading;
     private GaitController _gait;
-    private MovingStateVisualizer _visualizer;
+    private WalkingStateVisualizer _visualizer;
 
 
-    public void Configure(GaitStyle style, HeadingTracker heading, GaitController gait, MovingStateVisualizer visualizer)
+    public void Configure(GaitStyle style, HeadingTracker heading, GaitController gait, WalkingStateVisualizer visualizer)
     {
         _style = style;
         _heading = heading;

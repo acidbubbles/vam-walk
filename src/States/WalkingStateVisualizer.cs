@@ -1,12 +1,12 @@
 ﻿using System;
 using UnityEngine;
 
-public class MovingStateVisualizer : MonoBehaviour
+public class WalkingStateVisualizer : MonoBehaviour
 {
     private readonly LineRenderer _unstableCircleLineRenderer;
     private readonly LineRenderer _projectedPositionLineRenderer;
 
-    public MovingStateVisualizer()
+    public WalkingStateVisualizer()
     {
         _unstableCircleLineRenderer = transform.CreateVisualizerLineRenderer(20, Color.red);
         _projectedPositionLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.magenta);

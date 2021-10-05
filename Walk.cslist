@@ -4,11 +4,11 @@ src\Controllers\GaitController.cs
 src\Controllers\GaitVisualizer.cs
 src\States\IdleState.cs
 src\States\IdleStateVisualizer.cs
-src\States\IWalkState.cs
+src\States\IState.cs
 src\States\JumpingState.cs
-src\States\MovingStateVisualizer.cs
 src\States\StateMachine.cs
 src\States\WalkingState.cs
+src\States\WalkingStateVisualizer.cs
 src\Style\GaitFootStyle.cs
 src\Style\GaitStyle.cs
 src\Style\UI.cs

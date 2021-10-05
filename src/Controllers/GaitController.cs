@@ -42,6 +42,8 @@ public class GaitController : MonoBehaviour
     {
         var headingRotation = _heading.GetPlanarRotation();
         var standingRatio = _heading.GetStandingRatio();
+        lFoot.standingRatio = standingRatio;
+        rFoot.standingRatio = standingRatio;
 
         var headPosition = _heading.GetFloorCenter();
         var feetCenter = GetFloorFeetCenter();

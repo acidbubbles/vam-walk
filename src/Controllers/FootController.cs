@@ -18,6 +18,7 @@ public class FootController : MonoBehaviour
     }
 
     public float speed = 1f;
+    public float standingRatio = 1f;
 
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
@@ -35,9 +36,11 @@ public class FootController : MonoBehaviour
     private FixedAnimationCurve _rotYCurve;
     private FixedAnimationCurve _rotZCurve;
     private FixedAnimationCurve _rotWCurve;
+    private Vector3 _toPosition;
+    private Quaternion _toRotation;
     private float _time;
     private float _hitFloorTime;
-    private bool _active;
+    private bool _animationActive;
     private float _standToWalkRatio;
 
     public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, FootStateVisualizer visualizer)
@@ -81,9 +84,11 @@ public class FootController : MonoBehaviour
         PlotPosition(toPosition, standToWalkRatio, forwardRatio);
         // TODO: Also animate the toes
         _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
-        gameObject.SetActive(true);
         _visualizer.gameObject.SetActive(true);
-        _active = true;
+        _animationActive = true;
+
+        _toPosition = toPosition;
+        _toRotation = toRotation;
     }
 
     private void SyncHitFloorTime()
@@ -186,31 +191,47 @@ public class FootController : MonoBehaviour
     public void CancelCourse()
     {
         _time = 0;
-        _active = false;
+        _animationActive = false;
         _visualizer.gameObject.SetActive(false);
-        gameObject.SetActive(false);
     }
 
     public void FixedUpdate()
     {
+        if (footControl.isGrabbing) return;
+
+        if (!_animationActive)
+        {
+            AssignFootPositionAndRotation(_toPosition, _toRotation);
+            return;
+        }
+
         // TODO: Skip if the animation is complete
         // TODO: Increment the time to allow accelerating if the distance is greater than the step length
         _time += Time.deltaTime * speed;
         if (_time >= stepTime)
         {
-            Sample(stepTime);
             CancelCourse();
+            AssignFootPositionAndRotation(_toPosition, _toRotation);
             return;
         }
+
         Sample(_time);
         var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + (Vector3.up * 0.2f);
         kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val * GetMidSwingStrength());
     }
 
+    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion toRotation)
+    {
+        var footOffset = new Vector3(0f, 0f, 0f);
+        var footRotate = Quaternion.Euler(0f, 0f, 0f);
+
+        footControl.control.SetPositionAndRotation(toPosition + footOffset, footRotate * toRotation);
+    }
+
     public float GetMidSwingStrength()
     {
         // TODO: This is not adjusted for mid swing, but rather for mid anim. Also, potentially bad code.
-        if (!_active) return 0f;
+        if (!_animationActive) return 0f;
         var midSwingRatio = _time / (_hitFloorTime / 2f);
         if (midSwingRatio > 1) midSwingRatio = 2f - midSwingRatio;
         return midSwingRatio * _standToWalkRatio;
@@ -218,7 +239,7 @@ public class FootController : MonoBehaviour
 
     private void Sample(float t)
     {
-        if (!_active) throw new InvalidOperationException("Cannot sample foot animation because it is currently inactive.");
+        if (!_animationActive) throw new InvalidOperationException("Cannot sample foot animation because it is currently inactive.");
 
         var footPosition = new Vector3(
             _xCurve.Evaluate(t),
@@ -231,16 +252,42 @@ public class FootController : MonoBehaviour
             _rotZCurve.Evaluate(t),
             _rotWCurve.Evaluate(t)
         );
-        footControl.control.SetPositionAndRotation(footPosition, footRotation);
+        AssignFootPositionAndRotation(footPosition, footRotation);
     }
 
     public bool FloorContact()
     {
-        return !_active || _time >= _hitFloorTime;
+        return !_animationActive || _time >= _hitFloorTime;
+    }
+
+    public void OnEnable()
+    {
+        SetToCurrent();
+        footControl.onGrabStartHandlers += OnGrabStart;
+        footControl.onGrabEndHandlers += OnGrabEnd;
+    }
+
+    private void SetToCurrent()
+    {
+        var footPosition = footControl.control.position;
+        _toPosition = new Vector3(footPosition.x, _style.footFloorDistance.val, footPosition.z);
+        _toRotation = footControl.control.rotation;
     }
 
     public void OnDisable()
     {
+        footControl.onGrabStartHandlers -= OnGrabStart;
+        footControl.onGrabEndHandlers -= OnGrabEnd;
         _visualizer.gameObject.SetActive(false);
+    }
+
+    private void OnGrabStart(FreeControllerV3 fcv3)
+    {
+        CancelCourse();
+    }
+
+    private void OnGrabEnd(FreeControllerV3 fcv3)
+    {
+        SetToCurrent();
     }
 }

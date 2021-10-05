@@ -53,7 +53,7 @@ public class Walk : MVRScript
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
             lFootStateVisualizer
-        ), false);
+        ));
 
         var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootControllerVisualizer", c => { }, false);
 
@@ -63,7 +63,7 @@ public class Walk : MVRScript
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
             rFootStateVisualizer
-        ), false);
+        ));
 
         var heading = AddWalkComponent<HeadingTracker>("HeadingTracker", c => c.Configure(
             style,
@@ -95,7 +95,7 @@ public class Walk : MVRScript
             idleStateVisualizer
         ), false);
 
-        var movingStateVisualizer = AddWalkComponent<MovingStateVisualizer>("MovingStateVisualizer", c => { }, false);
+        var movingStateVisualizer = AddWalkComponent<WalkingStateVisualizer>("MovingStateVisualizer", c => { }, false);
 
         var movingState = AddWalkComponent<WalkingState>("WalkingState", c => c.Configure(
             style,
