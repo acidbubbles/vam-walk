@@ -10,7 +10,7 @@ public class FootController : MonoBehaviour
     private GaitFootStyle _footStyle;
     private FootStateVisualizer _visualizer;
 
-    public Vector3 position => footControl.control.position;
+    public Vector3 position => _toPosition;
 
     public Vector3 floorPosition
     {
@@ -80,6 +80,7 @@ public class FootController : MonoBehaviour
         var controlPosition = footControl.control.position;
         toPosition.y = _style.footFloorDistance.val;
         var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
+        // TODO: Start from the current position
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
         PlotPosition(toPosition, standToWalkRatio, forwardRatio);
         // TODO: Also animate the toes
@@ -222,10 +223,16 @@ public class FootController : MonoBehaviour
 
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion toRotation)
     {
-        var footOffset = new Vector3(0f, 0f, 0f);
-        var footRotate = Quaternion.Euler(0f, 0f, 0f);
+        var crouchingRatio = Mathf.Clamp01(0.8f - standingRatio);
 
-        footControl.control.SetPositionAndRotation(toPosition + footOffset, footRotate * toRotation);
+        // TODO: Multiple harcoded numbers that could be configurable
+        var footRotate = Quaternion.Euler(crouchingRatio * 50f, 0f, 0f);
+        var rotation = footRotate * toRotation;
+
+        var footOffset = rotation * new Vector3(0f, crouchingRatio * 0.16f, crouchingRatio * -0.015f);
+
+        // TODO: Twist toes
+        footControl.control.SetPositionAndRotation(toPosition + footOffset, rotation);
     }
 
     public float GetMidSwingStrength()
@@ -262,6 +269,7 @@ public class FootController : MonoBehaviour
 
     public void OnEnable()
     {
+        footControl.control.rotation = _footStyle.footStandingRotationOffset * Quaternion.Euler(0f, footControl.control.eulerAngles.y, 0f);
         SetToCurrent();
         footControl.onGrabStartHandlers += OnGrabStart;
         footControl.onGrabEndHandlers += OnGrabEnd;
