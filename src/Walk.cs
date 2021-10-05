@@ -88,9 +88,7 @@ public class Walk : MVRScript
 
         var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { }, false);
 
-        var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(
-            style,
-            gait,
+        var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(gait,
             heading,
             idleStateVisualizer
         ), false);

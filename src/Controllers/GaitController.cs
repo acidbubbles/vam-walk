@@ -42,8 +42,12 @@ public class GaitController : MonoBehaviour
     {
         var headingRotation = _heading.GetPlanarRotation();
         var standingRatio = _heading.GetStandingRatio();
-        lFoot.standingRatio = standingRatio;
-        rFoot.standingRatio = standingRatio;
+        var crouchingRatio = 1f - standingRatio;
+
+        lFoot.crouchingRatio = crouchingRatio;
+        rFoot.crouchingRatio = crouchingRatio;
+
+        if (_hipControl.isGrabbing) return;
 
         var headPosition = _heading.GetFloorCenter();
         var feetCenter = GetFloorFeetCenter();
@@ -73,7 +77,7 @@ public class GaitController : MonoBehaviour
         var hipSide = lrRatio * -0.06f;
         _hipControl.control.SetPositionAndRotation(
             bodyCenter + headingRotation * new Vector3(hipSide, hipRaise, 0),
-            headingRotation * Quaternion.Euler(6f + ((1f-standingRatio) * 22f), lrRatio * -15f, lrRatio * 10f)
+            headingRotation * Quaternion.Euler(6f + (crouchingRatio * 42f), lrRatio * -15f, lrRatio * 10f)
         );
     }
 
@@ -131,7 +135,7 @@ public class GaitController : MonoBehaviour
 
     public Vector3 GetFloorFeetCenter()
     {
-        var center = (lFoot.footControl.control.position + rFoot.footControl.control.position) / 2f;
+        var center = (lFoot.position + rFoot.position) / 2f;
         center.y = 0;
         return center;
     }
@@ -139,7 +143,7 @@ public class GaitController : MonoBehaviour
     public Vector3 GetFeetForward()
     {
         // TODO: Cheap plane to get a perpendicular direction to the feet line, there is surely a better method
-        return Vector3.Cross(rFoot.footControl.control.position - lFoot.footControl.control.position, Vector3.up).normalized;
+        return Vector3.Cross(rFoot.position - lFoot.position, Vector3.up).normalized;
     }
 
     public bool FeetAreStable()

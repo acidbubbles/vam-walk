@@ -10,7 +10,7 @@ public class FootController : MonoBehaviour
     private GaitFootStyle _footStyle;
     private FootStateVisualizer _visualizer;
 
-    public Vector3 position => _toPosition;
+    public Vector3 position => _setPosition;
 
     public Vector3 floorPosition
     {
@@ -18,7 +18,7 @@ public class FootController : MonoBehaviour
     }
 
     public float speed = 1f;
-    public float standingRatio = 1f;
+    public float crouchingRatio;
 
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
@@ -36,8 +36,8 @@ public class FootController : MonoBehaviour
     private FixedAnimationCurve _rotYCurve;
     private FixedAnimationCurve _rotZCurve;
     private FixedAnimationCurve _rotWCurve;
-    private Vector3 _toPosition;
-    private Quaternion _toRotation;
+    private Vector3 _setPosition;
+    private Quaternion _setRotation;
     private float _time;
     private float _hitFloorTime;
     private bool _animationActive;
@@ -88,8 +88,8 @@ public class FootController : MonoBehaviour
         _visualizer.gameObject.SetActive(true);
         _animationActive = true;
 
-        _toPosition = toPosition;
-        _toRotation = toRotation;
+        _setPosition = toPosition;
+        _setRotation = toRotation;
     }
 
     private void SyncHitFloorTime()
@@ -101,7 +101,7 @@ public class FootController : MonoBehaviour
     private void PlotPosition(Vector3 toPosition, float standToWalkRatio, float forwardRatio)
     {
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
-        var currentPosition = footControl.control.position;
+        var currentPosition = _setPosition;
         var up = Vector3.up * Mathf.Clamp(standToWalkRatio, _style.minStepHeightRatio.val, 1f);
         var forwardRatioAbs = Mathf.Abs(forwardRatio);
 
@@ -134,7 +134,7 @@ public class FootController : MonoBehaviour
 
     private void PlotRotation(Quaternion rotation, float standToWalkRatio, float forwardRatio)
     {
-        var currentRotation = footControl.control.rotation;
+        var currentRotation = _setRotation;
         var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * standToWalkRatio, 0, 0) * Quaternion.Slerp(currentRotation, rotation, _style.toeOffTimeRatio.val);
         var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(currentRotation, rotation, _style.midSwingTimeRatio.val);
         var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(currentRotation, rotation, _style.heelStrikeTimeRatio.val);
@@ -202,7 +202,7 @@ public class FootController : MonoBehaviour
 
         if (!_animationActive)
         {
-            AssignFootPositionAndRotation(_toPosition, _toRotation);
+            AssignFootPositionAndRotation(_setPosition, _setRotation);
             return;
         }
 
@@ -212,7 +212,7 @@ public class FootController : MonoBehaviour
         if (_time >= stepTime)
         {
             CancelCourse();
-            AssignFootPositionAndRotation(_toPosition, _toRotation);
+            AssignFootPositionAndRotation(_setPosition, _setRotation);
             return;
         }
 
@@ -223,13 +223,11 @@ public class FootController : MonoBehaviour
 
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion toRotation)
     {
-        var crouchingRatio = Mathf.Clamp01(0.8f - standingRatio);
-
-        // TODO: Multiple harcoded numbers that could be configurable
+        // TODO: Multiple hardcoded numbers that could be configurable
         var footRotate = Quaternion.Euler(crouchingRatio * 50f, 0f, 0f);
-        var rotation = footRotate * toRotation;
+        var rotation = toRotation * footRotate;
 
-        var footOffset = rotation * new Vector3(0f, crouchingRatio * 0.16f, crouchingRatio * -0.015f);
+        var footOffset = rotation * new Vector3(0f, crouchingRatio * 0.12f, crouchingRatio * -0.055f);
 
         // TODO: Twist toes
         footControl.control.SetPositionAndRotation(toPosition + footOffset, rotation);
@@ -269,7 +267,6 @@ public class FootController : MonoBehaviour
 
     public void OnEnable()
     {
-        footControl.control.rotation = _footStyle.footStandingRotationOffset * Quaternion.Euler(0f, footControl.control.eulerAngles.y, 0f);
         SetToCurrent();
         footControl.onGrabStartHandlers += OnGrabStart;
         footControl.onGrabEndHandlers += OnGrabEnd;
@@ -278,8 +275,8 @@ public class FootController : MonoBehaviour
     private void SetToCurrent()
     {
         var footPosition = footControl.control.position;
-        _toPosition = new Vector3(footPosition.x, _style.footFloorDistance.val, footPosition.z);
-        _toRotation = footControl.control.rotation;
+        _setPosition = new Vector3(footPosition.x, _style.footFloorDistance.val, footPosition.z);
+        _setRotation = Quaternion.Euler(_footStyle.footStandingRotationOffset.eulerAngles.x, footControl.control.eulerAngles.y, _footStyle.footStandingRotationOffset.eulerAngles.z);
     }
 
     public void OnDisable()

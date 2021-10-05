@@ -72,7 +72,8 @@ public class HeadingTracker : MonoBehaviour
         // Offset for expected feet position
         var bodyForward = GetBodyForward();
         var standingFloorCenter = headPosition + bodyForward * -_style.footBackOffset.val;
-        return standingFloorCenter + (bodyForward * (-0.12f * (1f - GetStandingRatio())));
+        var crouchingRatio = 1f - GetStandingRatio();
+        return standingFloorCenter + (bodyForward * (-0.22f * crouchingRatio));
     }
 
     public Quaternion GetPlanarRotation()
