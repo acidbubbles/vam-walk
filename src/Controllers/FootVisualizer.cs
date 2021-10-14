@@ -6,13 +6,26 @@ public class FootStateVisualizer : MonoBehaviour
     private readonly LineRenderer _toeAngleLineRenderer;
     private readonly LineRenderer _midSwingAngleLineRenderer;
     private readonly LineRenderer _heelStrikeAngleLineRenderer;
+    private readonly GameObject _endSphere;
+    private readonly GameObject _conflictSphere;
 
     public FootStateVisualizer()
     {
-        _footPathLineRenderer = transform.CreateVisualizerLineRenderer(20, Color.blue);
-        _toeAngleLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.cyan);
-        _midSwingAngleLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.cyan);
-        _heelStrikeAngleLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.cyan);
+        var parent = transform;
+        _footPathLineRenderer = parent.CreateVisualizerLineRenderer(20, Color.blue);
+        _toeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
+        _midSwingAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
+        _heelStrikeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
+        _endSphere = Instantiate(CustomPrefabs.sphere, parent);
+        _endSphere.GetComponent<Renderer>().material.color = new Color(0.5f, 0.5f, 0.3f, 0.3f);
+        _conflictSphere = Instantiate(CustomPrefabs.sphere, parent);
+        _conflictSphere.GetComponent<Renderer>().material.color = new Color(1.0f, 0.2f, 0.3f, 0.5f);
+    }
+
+    public void Configure(GaitStyle style)
+    {
+        _endSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
+        _conflictSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
     }
 
     public void Sync(
@@ -26,6 +39,7 @@ public class FootStateVisualizer : MonoBehaviour
         )
     {
         var duration = xCurve.duration;
+
         var step = duration / _footPathLineRenderer.positionCount;
         for (var i = 0; i < _footPathLineRenderer.positionCount; i++)
         {
@@ -58,5 +72,23 @@ public class FootStateVisualizer : MonoBehaviour
         var rotation = new Quaternion(rotXCurve.GetValueAtKey(index), rotYCurve.GetValueAtKey(index), rotZCurve.GetValueAtKey(index), rotWCurve.GetValueAtKey(index));
         lineRenderer.SetPosition(0, position);
         lineRenderer.SetPosition(1, position + rotation * Vector3.forward * 0.04f);
+    }
+
+    public void SyncEndConflictCheck(Vector3 position)
+    {
+        _endSphere.SetActive(true);
+        _endSphere.transform.position = position;
+    }
+
+    public void SyncConflict(Vector3 position)
+    {
+        _conflictSphere.SetActive(true);
+        _conflictSphere.transform.position = position;
+    }
+
+    public void OnDisable()
+    {
+        _endSphere.gameObject.SetActive(false);
+        _conflictSphere.SetActive(false);
     }
 }

@@ -77,6 +77,7 @@
     <Compile Include="src\Style\GaitFootStyle.cs" />
     <Compile Include="src\Style\GaitStyle.cs" />
     <Compile Include="src\Style\UI.cs" />
+    <Compile Include="src\Utils\CustomPrefabs.cs" />
     <Compile Include="src\Utils\FixedAnimationCurve.cs" />
     <Compile Include="src\Utils\PersonMeasurements.cs" />
     <Compile Include="src\Utils\TransformExtensions.cs" />

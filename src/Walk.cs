@@ -45,23 +45,25 @@ public class Walk : MVRScript
         // TODO: Wait for model loaded
         personMeasurements.Sync();
 
-        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootControllerVisualizer", c => { }, false);
+        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootControllerVisualizer", c => { c.Configure(style); }, false);
 
         var lFootController = AddWalkComponent<FootController>("LeftFootController", c => c.Configure(
             style,
             new GaitFootStyle(style, -1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
+            new HashSet<Collider>(bones.First(b => b.name == "lThigh").GetComponentsInChildren<Collider>()),
             lFootStateVisualizer
         ));
 
-        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootControllerVisualizer", c => { }, false);
+        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootControllerVisualizer", c => { c.Configure(style); }, false);
 
         var rFootController = AddWalkComponent<FootController>("RightFootController", c => c.Configure(
             style,
             new GaitFootStyle(style, 1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
+            new HashSet<Collider>(bones.First(b => b.name == "rThigh").GetComponentsInChildren<Collider>()),
             rFootStateVisualizer
         ));
 
@@ -140,6 +142,7 @@ public class Walk : MVRScript
 
     public void OnDestroy()
     {
+        CustomPrefabs.Destroy();
         foreach(var c in _walkComponents)
             Destroy(c);
     }

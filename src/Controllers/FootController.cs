@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class FootController : MonoBehaviour
 {
     public FreeControllerV3 footControl;
     public FreeControllerV3 kneeControl;
+    public HashSet<Collider> colliders;
+    public FootStateVisualizer visualizer;
 
     private GaitStyle _style;
     private GaitFootStyle _footStyle;
-    private FootStateVisualizer _visualizer;
 
     public Vector3 position => _setPosition;
 
     public Vector3 floorPosition
     {
+        // TODO: This is accessed a lot, review usages and try to cache the value
         get { var footPosition = footControl.control.position; return new Vector3(footPosition.x, 0, footPosition.z); }
     }
 
@@ -43,13 +46,14 @@ public class FootController : MonoBehaviour
     private bool _animationActive;
     private float _standToWalkRatio;
 
-    public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, FootStateVisualizer visualizer)
+    public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, HashSet<Collider> colliders, FootStateVisualizer visualizer)
     {
         _style = style;
         _footStyle = footStyle;
         this.footControl = footControl;
         this.kneeControl = kneeControl;
-        _visualizer = visualizer;
+        this.colliders = colliders;
+        this.visualizer = visualizer;
 
         _xCurve = new FixedAnimationCurve();
         _yCurve = new FixedAnimationCurve();
@@ -74,6 +78,7 @@ public class FootController : MonoBehaviour
 
     public void PlotCourse(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
+        // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
         _standToWalkRatio = standToWalkRatio;
         _time = 0;
         SyncHitFloorTime();
@@ -84,8 +89,8 @@ public class FootController : MonoBehaviour
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
         PlotPosition(toPosition, standToWalkRatio, forwardRatio);
         // TODO: Also animate the toes
-        _visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
-        _visualizer.gameObject.SetActive(true);
+        visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
+        visualizer.gameObject.SetActive(true);
         _animationActive = true;
 
         _setPosition = toPosition;
@@ -193,7 +198,7 @@ public class FootController : MonoBehaviour
     {
         _time = 0;
         _animationActive = false;
-        _visualizer.gameObject.SetActive(false);
+        visualizer.gameObject.SetActive(false);
     }
 
     public void FixedUpdate()
@@ -283,7 +288,7 @@ public class FootController : MonoBehaviour
     {
         footControl.onGrabStartHandlers -= OnGrabStart;
         footControl.onGrabEndHandlers -= OnGrabEnd;
-        _visualizer.gameObject.SetActive(false);
+        visualizer.gameObject.SetActive(false);
     }
 
     private void OnGrabStart(FreeControllerV3 fcv3)

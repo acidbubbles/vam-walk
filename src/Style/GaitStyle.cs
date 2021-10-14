@@ -3,6 +3,10 @@ using UnityEngine.Events;
 
 public class GaitStyle
 {
+    // TODO: Should we move all constants here? Make them configurable?
+    public readonly float footCollisionRadius = 0.1f;
+    public readonly float footCollisionRecedeDistance = 0.02f;
+
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.03f, -0.1f, 0.1f, false);
     public readonly JSONStorableFloat footPitch = new JSONStorableFloat("Foot Pitch", 18.42f, -45f, 45f, false);
