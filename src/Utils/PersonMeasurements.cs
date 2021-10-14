@@ -24,8 +24,8 @@ public class PersonMeasurements
     {
         // TODO: Preview the exact hip ratio line
         // TODO: Fine tune the actual multipliers
-        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * 0.955f + _style.footFloorDistance.val;
-        var upper = MeasureToHip("head") * 0.971f;
+        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * 0.945f + _style.footFloorDistance.val;
+        var upper = MeasureToHip("head") * 0.892f;
         footToHead = floorToHip + upper;
         hipToHead = footToHead - floorToHip;
     }

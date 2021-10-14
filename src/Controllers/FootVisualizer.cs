@@ -25,7 +25,7 @@ public class FootStateVisualizer : MonoBehaviour
     public void Configure(GaitStyle style)
     {
         _endSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
-        _conflictSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
+        _conflictSphere.transform.localScale = Vector3.one * 0.05f;
     }
 
     public void Sync(

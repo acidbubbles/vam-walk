@@ -46,7 +46,13 @@ public class FootController : MonoBehaviour
     private bool _animationActive;
     private float _standToWalkRatio;
 
-    public void Configure(GaitStyle style, GaitFootStyle footStyle, FreeControllerV3 footControl, FreeControllerV3 kneeControl, HashSet<Collider> colliders, FootStateVisualizer visualizer)
+    public void Configure(
+        GaitStyle style,
+        GaitFootStyle footStyle,
+        FreeControllerV3 footControl,
+        FreeControllerV3 kneeControl,
+        HashSet<Collider> colliders,
+        FootStateVisualizer visualizer)
     {
         _style = style;
         _footStyle = footStyle;

@@ -99,7 +99,7 @@ public class WalkingState : MonoBehaviour, IWalkState
             for (var hitIndex = 0; hitIndex < collidersCount; hitIndex++)
             {
                 var collider = _colliders[hitIndex];
-                if (foot.colliders.Contains(collider)) continue;
+                if (!foot.colliders.Contains(collider)) continue;
                 // TODO: This will also detect collisions when feet are very close, i.e. 0
                 var collisionPoint = collider.ClosestPoint(foot.floorPosition);
                 foot.visualizer.SyncConflict(collisionPoint);
@@ -118,7 +118,7 @@ public class WalkingState : MonoBehaviour, IWalkState
             for (var hitIndex = 0; hitIndex < hitsCount; hitIndex++)
             {
                 var hit = _hits[hitIndex];
-                if (foot.colliders.Contains(hit.collider)) continue;
+                if (!foot.colliders.Contains(hit.collider)) continue;
                 // TODO: This will also detect collisions when feet are very close, i.e. 0
                 var travelDistanceDelta = hit.distance - _style.footCollisionRecedeDistance;
                 SuperController.LogMessage($"Collision path: {foot.footControl.name} -> {Explain(hit.collider)}, reduce from {Vector3.Distance(foot.floorPosition, toPosition):0.00} to {Vector3.Distance(foot.floorPosition, Vector3.MoveTowards(foot.floorPosition, toPosition, travelDistanceDelta)):0.00}");

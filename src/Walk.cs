@@ -45,40 +45,40 @@ public class Walk : MVRScript
         // TODO: Wait for model loaded
         personMeasurements.Sync();
 
-        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("LeftFootControllerVisualizer", c => { c.Configure(style); }, false);
+        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => { c.Configure(style); }, false);
 
-        var lFootController = AddWalkComponent<FootController>("LeftFootController", c => c.Configure(
+        var lFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
             new GaitFootStyle(style, -1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
-            new HashSet<Collider>(bones.First(b => b.name == "lThigh").GetComponentsInChildren<Collider>()),
+            new HashSet<Collider>(bones.First(b => b.name == "rThigh").GetComponentsInChildren<Collider>()),
             lFootStateVisualizer
         ));
 
-        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>("RightFootControllerVisualizer", c => { c.Configure(style); }, false);
+        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => { c.Configure(style); }, false);
 
-        var rFootController = AddWalkComponent<FootController>("RightFootController", c => c.Configure(
+        var rFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
             new GaitFootStyle(style, 1),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
-            new HashSet<Collider>(bones.First(b => b.name == "rThigh").GetComponentsInChildren<Collider>()),
+            new HashSet<Collider>(bones.First(b => b.name == "lThigh").GetComponentsInChildren<Collider>()),
             rFootStateVisualizer
         ));
 
-        var heading = AddWalkComponent<HeadingTracker>("HeadingTracker", c => c.Configure(
+        var heading = AddWalkComponent<HeadingTracker>(nameof(HeadingTracker), c => c.Configure(
             style,
             personMeasurements,
             containingAtom.rigidbodies.FirstOrDefault(fc => fc.name == "head"),
             bones.FirstOrDefault(fc => fc.name == "head")
         ));
 
-        var gaitVisualizer = AddWalkComponent<GaitVisualizer>("GaitVisualizer", c => c.Configure(
+        var gaitVisualizer = AddWalkComponent<GaitVisualizer>(nameof(GaitVisualizer), c => c.Configure(
             containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
         ));
 
-        var gait = AddWalkComponent<GaitController>("GaitController", c => c.Configure(
+        var gait = AddWalkComponent<GaitController>(nameof(GaitController), c => c.Configure(
             heading,
             personMeasurements,
             lFootController,
@@ -88,28 +88,28 @@ public class Walk : MVRScript
             gaitVisualizer
         ));
 
-        var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>("IdleStateVisualizer", c => { }, false);
+        var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>(nameof(IdleStateVisualizer), c => { }, false);
 
-        var idleState = AddWalkComponent<IdleState>("IdleState", c => c.Configure(gait,
+        var idleState = AddWalkComponent<IdleState>(nameof(IdleState), c => c.Configure(gait,
             heading,
             idleStateVisualizer
         ), false);
 
-        var movingStateVisualizer = AddWalkComponent<WalkingStateVisualizer>("MovingStateVisualizer", c => { }, false);
+        var movingStateVisualizer = AddWalkComponent<WalkingStateVisualizer>(nameof(WalkingStateVisualizer), c => { }, false);
 
-        var movingState = AddWalkComponent<WalkingState>("WalkingState", c => c.Configure(
+        var movingState = AddWalkComponent<WalkingState>(nameof(WalkingState), c => c.Configure(
             style,
             heading,
             gait,
             movingStateVisualizer
         ), false);
 
-        var teleportState = AddWalkComponent<JumpingState>("JumpingState", c => c.Configure(
+        var teleportState = AddWalkComponent<JumpingState>(nameof(JumpingState), c => c.Configure(
             gait,
             heading
         ), false);
 
-        _stateMachine = AddWalkComponent<StateMachine>("StateMachine", c => c.Configure(
+        _stateMachine = AddWalkComponent<StateMachine>(nameof(StateMachine), c => c.Configure(
             idleState,
             movingState,
             teleportState
