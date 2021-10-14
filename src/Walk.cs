@@ -83,7 +83,6 @@ public class Walk : MVRScript
             personMeasurements,
             lFootController,
             rFootController,
-            style,
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "hipControl"),
             gaitVisualizer
         ));

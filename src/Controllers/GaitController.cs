@@ -1,11 +1,9 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GaitController : MonoBehaviour
 {
     private HeadingTracker _heading;
     private PersonMeasurements _personMeasurements;
-    private GaitStyle _style;
     private FreeControllerV3 _hipControl;
     private GaitVisualizer _visualizer;
 
@@ -27,13 +25,18 @@ public class GaitController : MonoBehaviour
         }
     }
 
-    public void Configure(HeadingTracker heading, PersonMeasurements personMeasurements, FootController lFoot, FootController rFoot, GaitStyle style, FreeControllerV3 hipControl, GaitVisualizer visualizer)
+    public void Configure(
+        HeadingTracker heading,
+        PersonMeasurements personMeasurements,
+        FootController lFoot,
+        FootController rFoot,
+        FreeControllerV3 hipControl,
+        GaitVisualizer visualizer)
     {
         _heading = heading;
         _personMeasurements = personMeasurements;
         this.lFoot = lFoot;
         this.rFoot = rFoot;
-        _style = style;
         _hipControl = hipControl;
         _visualizer = visualizer;
     }
@@ -150,13 +153,15 @@ public class GaitController : MonoBehaviour
     {
         var projectedPosition = _heading.GetProjectedPosition();
         var bodyRotation = _heading.GetPlanarRotation();
+        return FootIsStable(projectedPosition, bodyRotation, currentFoot) && FootIsStable(projectedPosition, bodyRotation, otherFoot);
+    }
+
+    private static bool FootIsStable(Vector3 projectedPosition, Quaternion bodyRotation, FootController foot)
+    {
         // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
         const float footDistanceEpsilon = 0.02f;
-        var lFootDistance = Vector3.Distance(lFoot.position, lFoot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
-        if(lFootDistance > footDistanceEpsilon) return false;
-        var rFootDistance = Vector3.Distance(rFoot.position, rFoot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
-        if(rFootDistance > footDistanceEpsilon) return false;
-        return true;
+        var footDistance = Vector3.Distance(foot.floorPosition, foot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
+        return footDistance < footDistanceEpsilon;
     }
 
     public void OnEnable()

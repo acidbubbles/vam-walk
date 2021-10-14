@@ -16,8 +16,7 @@ public class FootController : MonoBehaviour
 
     public Vector3 floorPosition
     {
-        // TODO: This is accessed a lot, review usages and try to cache the value
-        get { var footPosition = footControl.control.position; return new Vector3(footPosition.x, 0, footPosition.z); }
+        get { var footPosition = footControl.control.position; footPosition.y = 0f; return footPosition; }
     }
 
     public float speed = 1f;
@@ -74,7 +73,9 @@ public class FootController : MonoBehaviour
 
     public Vector3 GetFootPositionRelativeToBody(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
-        return toPosition + (toRotation * _footStyle.footStandingPositionOffset) * (1 - standToWalkRatio) + (toRotation * _footStyle.footWalkingPositionOffset) * standToWalkRatio;
+        var finalPosition = toPosition + (toRotation * _footStyle.footStandingPositionFloorOffset) * (1 - standToWalkRatio) + (toRotation * _footStyle.footWalkingPositionFloorOffset) * standToWalkRatio;
+        finalPosition.y = 0;
+        return finalPosition;
     }
 
     public Quaternion GetFootRotationRelativeToBody(Quaternion toRotation, float standToWalkRatio)

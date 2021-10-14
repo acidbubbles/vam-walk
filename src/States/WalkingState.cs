@@ -64,14 +64,14 @@ public class WalkingState : MonoBehaviour, IWalkState
         var maxStepDistance = _style.maxStepDistance.val;
         var halfStepDistance = maxStepDistance / 2f;
         var foot = _gait.currentFoot;
+        var floorPosition = foot.floorPosition;
         var projectedCenter = _heading.GetProjectedPosition();
         var toRotation = _heading.GetPlanarRotation();
         var toPosition = foot.GetFootPositionRelativeToBody(projectedCenter,  toRotation, 0f);
         var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(foot.floorPosition, toPosition) / _style.maxStepDistance.val);
         toPosition = foot.GetFootPositionRelativeToBody(projectedCenter, toRotation, standToWalkRatio);
-        // TODO: This is an error and will drift towards floor. We should only use floot distance until the very end
         toPosition = Vector3.MoveTowards(
-            foot.floorPosition,
+            floorPosition,
             toPosition,
             maxStepDistance
         );
@@ -81,14 +81,16 @@ public class WalkingState : MonoBehaviour, IWalkState
             var extraDistance = finalFeetDistance - halfStepDistance;
             toPosition = Vector3.MoveTowards(
                 toPosition,
-                foot.floorPosition,
+                floorPosition,
                 extraDistance
             );
         }
+        foot.visualizer.SyncEndConflictCheck(toPosition);
 
+        /*
         // TODO: We currently check just over the floor; we should ignore floor collisions, check if we can either find items to mark as "floor" hover a little bit more?
         const int layerMask = ~(1 << 8);
-        var collisionHeightOffset = new Vector3(0, /*_style.footCollisionRadius * 1.1f*/ 0.08f, 0);
+        var collisionHeightOffset = new Vector3(0, 0.08f, 0); //_style.footCollisionRadius * 1.1f, 0);
 
         // TODO: Finish this
         var endConflictPosition = toPosition + collisionHeightOffset;
@@ -101,18 +103,19 @@ public class WalkingState : MonoBehaviour, IWalkState
                 var collider = _colliders[hitIndex];
                 if (!foot.colliders.Contains(collider)) continue;
                 // TODO: This will also detect collisions when feet are very close, i.e. 0
-                var collisionPoint = collider.ClosestPoint(foot.floorPosition);
+                var collisionPoint = collider.ClosestPoint(floorPosition);
                 foot.visualizer.SyncConflict(collisionPoint);
-                var travelDistanceDelta = Vector3.Distance(foot.floorPosition, collisionPoint) - _style.footCollisionRecedeDistance;
-                SuperController.LogMessage($"Collision end: {foot.footControl.name} -> {Explain(collider)}, reduce from {Vector3.Distance(foot.floorPosition, toPosition):0.00} to {Vector3.Distance(foot.floorPosition, Vector3.MoveTowards(foot.floorPosition, toPosition, travelDistanceDelta)):0.00}");
-                toPosition = Vector3.MoveTowards(foot.floorPosition, toPosition, travelDistanceDelta);
+                var travelDistanceDelta = Vector3.Distance(floorPosition, collisionPoint) - _style.footCollisionRecedeDistance;
+                SuperController.LogMessage($"Collision end: {foot.footControl.name} -> {Explain(collider)}, reduce from {Vector3.Distance(floorPosition, toPosition):0.00} to {Vector3.Distance(floorPosition, Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta)):0.00}");
+                toPosition = Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta);
                 break;
             }
         }
+        */
 
         //TODO: Finish this: Detect collisions in path (N iterations, ankle width, safe distance?) and define the passing value
         /*
-        var hitsCount = Physics.SphereCastNonAlloc(foot.floorPosition + collisionHeightOffset, _style.footCollisionRadius, (toPosition - foot.floorPosition).normalized, _hits, halfStepDistance, layerMask);
+        var hitsCount = Physics.SphereCastNonAlloc(floorPosition + collisionHeightOffset, _style.footCollisionRadius, (toPosition - floorPosition).normalized, _hits, halfStepDistance, layerMask);
         if (hitsCount > 0)
         {
             for (var hitIndex = 0; hitIndex < hitsCount; hitIndex++)
@@ -121,8 +124,8 @@ public class WalkingState : MonoBehaviour, IWalkState
                 if (!foot.colliders.Contains(hit.collider)) continue;
                 // TODO: This will also detect collisions when feet are very close, i.e. 0
                 var travelDistanceDelta = hit.distance - _style.footCollisionRecedeDistance;
-                SuperController.LogMessage($"Collision path: {foot.footControl.name} -> {Explain(hit.collider)}, reduce from {Vector3.Distance(foot.floorPosition, toPosition):0.00} to {Vector3.Distance(foot.floorPosition, Vector3.MoveTowards(foot.floorPosition, toPosition, travelDistanceDelta)):0.00}");
-                // toPosition = Vector3.MoveTowards(foot.floorPosition, toPosition, travelDistanceDelta);
+                SuperController.LogMessage($"Collision path: {foot.footControl.name} -> {Explain(hit.collider)}, reduce from {Vector3.Distance(floorPosition, toPosition):0.00} to {Vector3.Distance(floorPosition, Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta)):0.00}");
+                // toPosition = Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta);
                 break;
             }
         }
