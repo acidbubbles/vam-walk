@@ -13,6 +13,7 @@ public class FootController : MonoBehaviour
     private GaitFootStyle _footStyle;
 
     public Vector3 position => _setPosition;
+    public float inverse => _footStyle.inverse;
 
     public Vector3 floorPosition
     {
@@ -83,7 +84,7 @@ public class FootController : MonoBehaviour
         return toRotation * Quaternion.Slerp(_footStyle.footStandingRotationOffset, _footStyle.footWalkingRotationOffset, standToWalkRatio);
     }
 
-    public void PlotCourse(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
+    public void PlotCourse(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio, Vector3 passingOffset)
     {
         // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
         _standToWalkRatio = standToWalkRatio;
@@ -94,7 +95,7 @@ public class FootController : MonoBehaviour
         var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
         // TODO: Start from the current position
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
-        PlotPosition(toPosition, standToWalkRatio, forwardRatio);
+        PlotPosition(toPosition, standToWalkRatio, forwardRatio, passingOffset);
         // TODO: Also animate the toes
         visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
         visualizer.gameObject.SetActive(true);
@@ -110,14 +111,12 @@ public class FootController : MonoBehaviour
         _hitFloorTime = Mathf.Max((stepTime + heelStrikeTime) / 2f, 0.01f);
     }
 
-    private void PlotPosition(Vector3 toPosition, float standToWalkRatio, float forwardRatio)
+    private void PlotPosition(Vector3 toPosition, float standToWalkRatio, float forwardRatio, Vector3 passingOffset)
     {
         // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = _setPosition;
         var up = Vector3.up * Mathf.Clamp(standToWalkRatio, _style.minStepHeightRatio.val, 1f);
-        var forwardRatioAbs = Mathf.Abs(forwardRatio);
 
-        var passingOffset = Vector3.right * (_footStyle.inverse * _style.passingDistance.val * standToWalkRatio * forwardRatioAbs);
         var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + (GetRotationAtFrame(1) * passingOffset) * _style.toeOffTimeRatio.val;
         var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + (GetRotationAtFrame(2) * passingOffset) * _style.midSwingTimeRatio.val;
         var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + (GetRotationAtFrame(3) * passingOffset) * _style.heelStrikeTimeRatio.val;

@@ -94,24 +94,27 @@ public class Walk : MVRScript
             idleStateVisualizer
         ), false);
 
-        var movingStateVisualizer = AddWalkComponent<WalkingStateVisualizer>(nameof(WalkingStateVisualizer), c => { }, false);
+        var walkingStateVisualizer = AddWalkComponent<WalkingStateVisualizer>(nameof(WalkingStateVisualizer), c => { }, false);
 
-        var movingState = AddWalkComponent<WalkingState>(nameof(WalkingState), c => c.Configure(
+        var walkingState = AddWalkComponent<WalkingState>(nameof(WalkingState), c => c.Configure(
             style,
             heading,
             gait,
-            movingStateVisualizer
+            walkingStateVisualizer
         ), false);
 
-        var teleportState = AddWalkComponent<JumpingState>(nameof(JumpingState), c => c.Configure(
+        var jumpingStateVisualizer = AddWalkComponent<JumpingStateVisualizer>(nameof(JumpingStateVisualizer), c => { }, false);
+
+        var jumpingState = AddWalkComponent<JumpingState>(nameof(JumpingState), c => c.Configure(
             gait,
-            heading
+            heading,
+            jumpingStateVisualizer
         ), false);
 
         _stateMachine = AddWalkComponent<StateMachine>(nameof(StateMachine), c => c.Configure(
             idleState,
-            movingState,
-            teleportState
+            walkingState,
+            jumpingState
         ));
     }
 

@@ -6,6 +6,7 @@ src\States\IdleState.cs
 src\States\IdleStateVisualizer.cs
 src\States\IState.cs
 src\States\JumpingState.cs
+src\States\JumpingStateVisualizer.cs
 src\States\StateMachine.cs
 src\States\WalkingState.cs
 src\States\WalkingStateVisualizer.cs
