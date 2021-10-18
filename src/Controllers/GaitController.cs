@@ -80,6 +80,7 @@ public class GaitController : MonoBehaviour
         var hipSide = lrRatio * -0.06f;
         _hipControl.control.SetPositionAndRotation(
             bodyCenter + headingRotation * new Vector3(hipSide, hipRaise, 0),
+            // TODO: Moving backwards should also reverse hips rotation! Either use forwardRatio or check which feet is forward
             headingRotation * Quaternion.Euler(6f + (crouchingRatio * 42f), lrRatio * -15f, lrRatio * 10f)
         );
     }
@@ -151,16 +152,16 @@ public class GaitController : MonoBehaviour
 
     public bool FeetAreStable()
     {
-        var projectedPosition = _heading.GetProjectedPosition();
+        var floorCenter = _heading.GetFloorCenter();
         var bodyRotation = _heading.GetPlanarRotation();
-        return FootIsStable(projectedPosition, bodyRotation, currentFoot) && FootIsStable(projectedPosition, bodyRotation, otherFoot);
+        return FootIsStable(floorCenter, bodyRotation, currentFoot) && FootIsStable(floorCenter, bodyRotation, otherFoot);
     }
 
-    private static bool FootIsStable(Vector3 projectedPosition, Quaternion bodyRotation, FootController foot)
+    private bool FootIsStable(Vector3 floorCenter, Quaternion bodyRotation, FootController foot)
     {
         // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
         const float footDistanceEpsilon = 0.02f;
-        var footDistance = Vector3.Distance(foot.floorPosition, foot.GetFootPositionRelativeToBody(projectedPosition, bodyRotation, 0f));
+        var footDistance = Vector3.Distance(foot.floorPosition, foot.GetFootPositionRelativeToBody(floorCenter, bodyRotation, 0f));
         return footDistance < footDistanceEpsilon;
     }
 

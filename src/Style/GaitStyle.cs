@@ -7,6 +7,8 @@ public class GaitStyle
     public readonly float footCollisionRadius = 0.1f;
     public readonly float footCollisionRecedeDistance = 0.04f;
 
+    public float halfStepDistance => stepDistance.val / 2f;
+
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.03f, -0.1f, 0.1f, false);
     public readonly JSONStorableFloat footPitch = new JSONStorableFloat("Foot Pitch", 18.42f, -45f, 45f, false);
@@ -21,16 +23,16 @@ public class GaitStyle
     public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
     public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
     public readonly JSONStorableFloat minStepHeightRatio = new JSONStorableFloat("Min Step Height Ratio", 0.2f, 0f, 1f, true);
-    public readonly JSONStorableFloat maxStepDistance = new JSONStorableFloat("Max Step Distance", 0.8f, 0f, 3f, false);
+    public readonly JSONStorableFloat stepDistance = new JSONStorableFloat("Step Distance", 1.2f, 0f, 3f, false);
 
     public readonly JSONStorableFloat kneeForwardForce = new JSONStorableFloat("Knee Forward Force", 50f, 0f, 1000f, false);
 
     public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.08f, -0.1f, 0.5f, false);
 
     public readonly JSONStorableFloat predictionStrength = new JSONStorableFloat("Prediction Strength", 0.85f, 0f, 2f, false);
-    public readonly JSONStorableFloat accelerationMinDistance = new JSONStorableFloat("Accelerate Min Distance", 0.5f, 0f, 5f, false);
-    public readonly JSONStorableFloat distanceToAccelerationRate = new JSONStorableFloat("Dist. to Accelerate Rate", 1.1f, 1f, 5f, true);
-    public readonly JSONStorableFloat speedMax = new JSONStorableFloat("Accelerate Max Speed", 3f, 1f, 10f, true);
+
+    public readonly JSONStorableFloat lateAccelerateRate = new JSONStorableFloat("Late Accelerate Rate", 1.1f, 1f, 5f, true);
+    public readonly JSONStorableFloat lateAccelerateMaxSpeed = new JSONStorableFloat("Late Accelerate Max Speed", 3f, 1f, 10f, true);
 
     public readonly JSONStorableFloat toeOffTimeRatio = new JSONStorableFloat("ToeOffTimeRatio", 0.2f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingTimeRatio = new JSONStorableFloat("MidSwingTimeRatio", 0.55f, 0f, 1f, true);
@@ -108,7 +110,7 @@ public class GaitStyle
         plugin.RegisterFloat(stepDuration);
         plugin.RegisterFloat(stepHeight);
         plugin.RegisterFloat(minStepHeightRatio);
-        plugin.RegisterFloat(maxStepDistance);
+        plugin.RegisterFloat(stepDistance);
 
         plugin.RegisterFloat(footFloorDistance);
         plugin.RegisterFloat(footBackOffset);
@@ -160,17 +162,18 @@ public class GaitStyle
 
         ui.AddHeader("Step Configuration", 1);
         ui.AddFloat(stepDuration);
+        ui.AddFloat(stepDistance);
         ui.AddFloat(stepHeight);
         ui.AddFloat(minStepHeightRatio);
-        ui.AddFloat(maxStepDistance);
         ui.AddFloat(kneeForwardForce);
         ui.AddFloat(passingDistance);
 
-        ui.AddHeader("Catch-Up Behavior", 1);
+        ui.AddHeader("Prediction", 1);
         ui.AddFloat(predictionStrength);
-        ui.AddFloat(accelerationMinDistance);
-        ui.AddFloat(distanceToAccelerationRate);
-        ui.AddFloat(speedMax);
+
+        ui.AddHeader("Late Acceleration", 1);
+        ui.AddFloat(lateAccelerateRate);
+        ui.AddFloat(lateAccelerateMaxSpeed);
 
         ui.AddHeader("Animation Curve", 1, true);
 

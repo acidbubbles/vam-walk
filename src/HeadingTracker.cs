@@ -32,10 +32,12 @@ public class HeadingTracker : MonoBehaviour
         _lastVelocityMeasurePoint = velocityMeasurePoint;
     }
 
+    /// <summary>
+    /// Where is <see cref="GetFloorCenter"/> expected to be in <see cref="GaitStyle.stepDuration"/> seconds
+    /// </summary>
     public Vector3 GetProjectedPosition()
     {
         var velocity = GetPlanarVelocity();
-        // TODO: Make this an option, how much of the velocity is used for prediction
         var finalPosition = GetFloorCenter() + velocity * (_style.stepDuration.val * _style.predictionStrength.val);
         return finalPosition;
     }

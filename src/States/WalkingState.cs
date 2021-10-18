@@ -36,11 +36,12 @@ public class WalkingState : MonoBehaviour, IWalkState
     public void Update()
     {
         var feetCenter = _gait.GetFloorFeetCenter();
+        var distanceFromExpected = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
+        var behindDistance = Mathf.Max(distanceFromExpected / (_style.stepDistance.val / 2f), 1f);
+        // TODO: Smooth out, because we rely on feet center this value moves a lot
+        _gait.speed = Mathf.Min(behindDistance * _style.lateAccelerateRate.val, _style.lateAccelerateMaxSpeed.val);
 
-        var distance = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
-
-        _gait.speed = Mathf.Clamp((distance / _style.accelerationMinDistance.val) * _style.distanceToAccelerationRate.val, 1f, _style.speedMax.val);
-
+        // TODO: Bring this back, and figure out why it doesn't work
         /*
         if (distance > _style.jumpTriggerDistance.val)
         {
@@ -66,67 +67,53 @@ public class WalkingState : MonoBehaviour, IWalkState
     private void PlotFootCourse()
     {
         var foot = _gait.currentFoot;
-        var floorPosition = foot.floorPosition;
         var projectedCenter = _heading.GetProjectedPosition();
         var toRotation = _heading.GetPlanarRotation();
 
         // TODO: Sometimes it looks like the feet is stuck at zero? To confirm (try circle walk and reset home, reload Walk)
         // TODO: We get the foot position relative to the body _twice_
-        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(foot.floorPosition, foot.GetFootPositionRelativeToBody(projectedCenter,  toRotation, 0f)) / _style.maxStepDistance.val);
+        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetFloorCenter(), projectedCenter) / _style.halfStepDistance);
 
-        var toPosition = ComputeDesiredFootEndPosition(floorPosition, projectedCenter, toRotation, standToWalkRatio);
-        /*
-        // TODO: Enable again
-        toPosition = ResolveFreeArrivalPosition(toPosition, foot, floorPosition);
-        var passingOffset = ResolvePassingOffset(floorPosition, toPosition, toRotation, foot);
-        */
+        var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
+        // toPosition = ResolveAvailableArrivalPosition(toPosition, foot, floorPosition);
+        // TODO: Bring back passing detection and find why it doesn't work
+        //var passingOffset = ResolveAvailablePassingOffset(floorPosition, toPosition, toRotation, foot);
         var passingOffset = Vector3.zero;
         var rotation = foot.GetFootRotationRelativeToBody(toRotation, standToWalkRatio);
         foot.PlotCourse(toPosition, rotation, standToWalkRatio, passingOffset);
     }
 
     private Vector3 ComputeDesiredFootEndPosition(
-        Vector3 currentCenter,
         Vector3 projectedCenter,
         Quaternion toRotation,
         float standToWalkRatio)
     {
-        var maxStepDistance = _style.maxStepDistance.val;
-        var halfStepDistance = maxStepDistance / 2f;
 
         // Determine how far should the step go
-        var stepDistanceRatio = Mathf.Clamp01(Vector3.Distance(currentCenter, projectedCenter) / maxStepDistance);
 
         // Determine where the feet should land based on the current speed
-        var directionUnit = (projectedCenter - currentCenter).normalized;
-        var projectedStepCenter = projectedCenter + (directionUnit * halfStepDistance) * stepDistanceRatio;
+        var directionUnit = (projectedCenter - _gait.GetFloorFeetCenter()).normalized;
+        var projectedStepCenter = projectedCenter + (directionUnit * _style.halfStepDistance) * standToWalkRatio;
 
         // Move foot where it should end up
         var toPosition = _gait.currentFoot.GetFootPositionRelativeToBody(projectedStepCenter, toRotation, standToWalkRatio);
 
-       // return Vector3.MoveTowards(
-       //      _gait.currentFoot.floorPosition,
-       //      desiredPosition,
-       //      maxStepDistance
-       //  );
-
        // Make sure we can always catch up within the next step distance
        var resultingDistanceBetweenFeet = Vector3.Distance(_gait.otherFoot.floorPosition, toPosition);
-       if (resultingDistanceBetweenFeet > halfStepDistance)
-       {
-           var extraDistance = resultingDistanceBetweenFeet - halfStepDistance;
-           toPosition = Vector3.MoveTowards(
-               toPosition,
-               _gait.currentFoot.floorPosition,
-               extraDistance
-           );
-       }
+       if (resultingDistanceBetweenFeet <= _style.halfStepDistance) return toPosition;
+
+       var extraDistance = resultingDistanceBetweenFeet - _style.halfStepDistance;
+       toPosition = Vector3.MoveTowards(
+           toPosition,
+           _gait.currentFoot.floorPosition,
+           extraDistance
+       );
 
        return toPosition;
     }
 
     private readonly Collider[] _colliders = new Collider[4];
-    private Vector3 ResolveFreeArrivalPosition(Vector3 toPosition, FootController foot, Vector3 floorPosition)
+    private Vector3 ResolveAvailableArrivalPosition(Vector3 toPosition, FootController foot, Vector3 floorPosition)
     {
         var collisionHeightOffset = new Vector3(0, _style.footCollisionRadius, 0);
 
@@ -152,7 +139,7 @@ public class WalkingState : MonoBehaviour, IWalkState
     }
 
     private readonly RaycastHit[] _hits = new RaycastHit[10];
-    private Vector3 ResolvePassingOffset(Vector3 floorPosition, Vector3 toPosition, Quaternion toRotation, FootController foot)
+    private Vector3 ResolveAvailablePassingOffset(Vector3 floorPosition, Vector3 toPosition, Quaternion toRotation, FootController foot)
     {
         var collisionHeightOffset = new Vector3(0, _style.footCollisionRadius, 0);
         var passingCheckStart = floorPosition + collisionHeightOffset;
