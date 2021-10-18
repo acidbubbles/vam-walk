@@ -9,6 +9,7 @@ public class FootStateVisualizer : MonoBehaviour
     private readonly GameObject _endSphere;
     private readonly GameObject _conflictSphere;
     private readonly GameObject[] _collisionAvoidanceSpheres = new GameObject[10];
+    private readonly LineRenderer[] _collisionAvoidancePaths = new LineRenderer[10];
 
     public FootStateVisualizer()
     {
@@ -27,6 +28,11 @@ public class FootStateVisualizer : MonoBehaviour
             _collisionAvoidanceSpheres[i] = Instantiate(CustomPrefabs.sphere, parent);
             _collisionAvoidanceSpheres[i].GetComponent<Renderer>().material.color = new Color(0.8f, 0.5f, 0.1f, 0.5f);
             _collisionAvoidanceSpheres[i].transform.localScale = Vector3.one * 0.05f;
+        }
+
+        for (var i = 0; i < _collisionAvoidancePaths.Length; i++)
+        {
+            _collisionAvoidancePaths[i] = parent.CreateVisualizerLineRenderer(2, new Color(0.8f, 0.5f, 0.1f, 0.5f));
         }
     }
 
@@ -93,21 +99,28 @@ public class FootStateVisualizer : MonoBehaviour
         _conflictSphere.transform.position = position;
     }
 
-    public void SyncCollisionAvoidance(int index, Vector3 position)
+    public void SyncCollisionAvoidance(int index, Vector3 start, Vector3 end)
     {
         if (index >= _collisionAvoidanceSpheres.Length) return;
         _collisionAvoidanceSpheres[index].SetActive(true);
-        _collisionAvoidanceSpheres[index].transform.position = position;
+        _collisionAvoidanceSpheres[index].transform.position = end;
+        if (index >= _collisionAvoidancePaths.Length) return;
+        _collisionAvoidancePaths[index].gameObject.SetActive(true);
+        _collisionAvoidancePaths[index].SetPosition(0, start);
+        _collisionAvoidancePaths[index].SetPosition(1, end);
     }
 
     public void OnDisable()
     {
         _endSphere.gameObject.SetActive(false);
         _conflictSphere.SetActive(false);
-
         for (var i = 0; i < _collisionAvoidanceSpheres.Length; i++)
         {
             _collisionAvoidanceSpheres[i].SetActive(false);
+        }
+        for (var i = 0; i < _collisionAvoidancePaths.Length; i++)
+        {
+            _collisionAvoidancePaths[i].gameObject.SetActive(false);
         }
     }
 }
