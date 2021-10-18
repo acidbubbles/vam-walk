@@ -52,7 +52,7 @@ public class HeadingTracker : MonoBehaviour
         return Mathf.Clamp01(headHeightRatio);
     }
 
-    private Vector3 GetPlanarVelocity()
+    public Vector3 GetPlanarVelocity()
     {
         var sumVelocities = Vector3.zero;
         var sumDeltaTimes = 0f;

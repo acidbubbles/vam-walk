@@ -93,7 +93,6 @@ public class FootController : MonoBehaviour
         var controlPosition = footControl.control.position;
         toPosition.y = _style.footFloorDistance.val;
         var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
-        // TODO: Start from the current position
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
         PlotPosition(toPosition, standToWalkRatio, forwardRatio, passingOffset);
         // TODO: Also animate the toes
@@ -113,7 +112,6 @@ public class FootController : MonoBehaviour
 
     private void PlotPosition(Vector3 toPosition, float standToWalkRatio, float forwardRatio, Vector3 passingOffset)
     {
-        // TODO: Scan for potential routes and arrival if there are collisions, e.g. the other leg
         var currentPosition = _setPosition;
         var up = Vector3.up * Mathf.Clamp(standToWalkRatio, _style.minStepHeightRatio.val, 1f);
 
@@ -294,7 +292,7 @@ public class FootController : MonoBehaviour
     {
         footControl.onGrabStartHandlers -= OnGrabStart;
         footControl.onGrabEndHandlers -= OnGrabEnd;
-        visualizer.gameObject.SetActive(false);
+        CancelCourse();
     }
 
     private void OnGrabStart(FreeControllerV3 fcv3)

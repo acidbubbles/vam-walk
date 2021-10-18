@@ -37,18 +37,15 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         var feetCenter = _gait.GetFloorFeetCenter();
         var distanceFromExpected = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
-        var behindDistance = Mathf.Max(distanceFromExpected / (_style.stepDistance.val / 2f), 1f);
+        var behindDistance = Mathf.Max(distanceFromExpected / _style.halfStepDistance, 1f);
         // TODO: Smooth out, because we rely on feet center this value moves a lot
         _gait.speed = Mathf.Min(behindDistance * _style.lateAccelerateRate.val, _style.lateAccelerateMaxSpeed.val);
 
-        // TODO: Bring this back, and figure out why it doesn't work
-        /*
-        if (distance > _style.jumpTriggerDistance.val)
+        if (behindDistance > _style.triggerJumpAfterHalfStepsCount.val)
         {
             stateMachine.currentState = stateMachine.jumpingState;
             return;
         }
-        */
 
         _visualizer.Sync(_heading.GetFloorCenter(), _heading.GetProjectedPosition());
 

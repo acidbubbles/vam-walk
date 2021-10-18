@@ -50,7 +50,7 @@ public class GaitStyle
     public readonly JSONStorableFloat midSwingPitch = new JSONStorableFloat("MidSwingPitch", 20f, -90, 90, true);
     public readonly JSONStorableFloat heelStrikePitch = new JSONStorableFloat("HeelStrikePitch", -40f, -90, 90, true);
 
-    public readonly JSONStorableFloat jumpTriggerDistance = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
+    public readonly JSONStorableFloat triggerJumpAfterHalfStepsCount = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
 
     public readonly UnityEvent valueUpdated = new UnityEvent();
 
