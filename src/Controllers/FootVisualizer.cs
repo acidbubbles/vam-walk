@@ -8,7 +8,7 @@ public class FootStateVisualizer : MonoBehaviour
     private readonly LineRenderer _heelStrikeAngleLineRenderer;
     private readonly GameObject _endSphere;
     private readonly GameObject _conflictSphere;
-    private readonly GameObject _collisionAvoidanceSphere;
+    private readonly GameObject[] _collisionAvoidanceSpheres = new GameObject[10];
 
     public FootStateVisualizer()
     {
@@ -21,15 +21,18 @@ public class FootStateVisualizer : MonoBehaviour
         _endSphere.GetComponent<Renderer>().material.color = new Color(0.5f, 0.5f, 0.3f, 0.3f);
         _conflictSphere = Instantiate(CustomPrefabs.sphere, parent);
         _conflictSphere.GetComponent<Renderer>().material.color = new Color(1.0f, 0.2f, 0.3f, 0.5f);
-        _collisionAvoidanceSphere = Instantiate(CustomPrefabs.sphere, parent);
-        _collisionAvoidanceSphere.GetComponent<Renderer>().material.color = new Color(0.8f, 0.5f, 0.1f, 0.5f);
+        _conflictSphere.transform.localScale = Vector3.one * 0.05f;
+        for (var i = 0; i < _collisionAvoidanceSpheres.Length; i++)
+        {
+            _collisionAvoidanceSpheres[i] = Instantiate(CustomPrefabs.sphere, parent);
+            _collisionAvoidanceSpheres[i].GetComponent<Renderer>().material.color = new Color(0.8f, 0.5f, 0.1f, 0.5f);
+            _collisionAvoidanceSpheres[i].transform.localScale = Vector3.one * 0.05f;
+        }
     }
 
     public void Configure(GaitStyle style)
     {
         _endSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
-        _conflictSphere.transform.localScale = Vector3.one * 0.05f;
-        _collisionAvoidanceSphere.transform.localScale = Vector3.one * 0.05f;
     }
 
     public void Sync(
@@ -90,16 +93,21 @@ public class FootStateVisualizer : MonoBehaviour
         _conflictSphere.transform.position = position;
     }
 
-    public void SyncCollisionAvoidance(Vector3 position)
+    public void SyncCollisionAvoidance(int index, Vector3 position)
     {
-        _collisionAvoidanceSphere.SetActive(true);
-        _collisionAvoidanceSphere.transform.position = position;
+        if (index >= _collisionAvoidanceSpheres.Length) return;
+        _collisionAvoidanceSpheres[index].SetActive(true);
+        _collisionAvoidanceSpheres[index].transform.position = position;
     }
 
     public void OnDisable()
     {
         _endSphere.gameObject.SetActive(false);
         _conflictSphere.SetActive(false);
-        _collisionAvoidanceSphere.SetActive(false);
+
+        for (var i = 0; i < _collisionAvoidanceSpheres.Length; i++)
+        {
+            _collisionAvoidanceSpheres[i].SetActive(false);
+        }
     }
 }

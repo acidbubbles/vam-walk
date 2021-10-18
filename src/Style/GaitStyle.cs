@@ -21,15 +21,16 @@ public class GaitStyle
     public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
     public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
     public readonly JSONStorableFloat minStepHeightRatio = new JSONStorableFloat("Min Step Height Ratio", 0.2f, 0f, 1f, true);
-    public readonly JSONStorableFloat maxStepDistance = new JSONStorableFloat("Max Step Distance", 0.9f, 0f, 1f, false);
+    public readonly JSONStorableFloat maxStepDistance = new JSONStorableFloat("Max Step Distance", 0.8f, 0f, 3f, false);
 
     public readonly JSONStorableFloat kneeForwardForce = new JSONStorableFloat("Knee Forward Force", 50f, 0f, 1000f, false);
 
     public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.08f, -0.1f, 0.5f, false);
 
-    public readonly JSONStorableFloat accelerationMinDistance = new JSONStorableFloat("Accelerate Min Distance", 0.15f, 0f, 1f, false);
-    public readonly JSONStorableFloat accelerationRate = new JSONStorableFloat("Accelerate Rate", 1.4f, 1f, 10f, true);
-    public readonly JSONStorableFloat speedMax = new JSONStorableFloat("Accelerate Max Speed", 4f, 1f, 10f, true);
+    public readonly JSONStorableFloat predictionStrength = new JSONStorableFloat("Prediction Strength", 0.85f, 0f, 2f, false);
+    public readonly JSONStorableFloat accelerationMinDistance = new JSONStorableFloat("Accelerate Min Distance", 0.5f, 0f, 5f, false);
+    public readonly JSONStorableFloat distanceToAccelerationRate = new JSONStorableFloat("Dist. to Accelerate Rate", 1.1f, 1f, 5f, true);
+    public readonly JSONStorableFloat speedMax = new JSONStorableFloat("Accelerate Max Speed", 3f, 1f, 10f, true);
 
     public readonly JSONStorableFloat toeOffTimeRatio = new JSONStorableFloat("ToeOffTimeRatio", 0.2f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingTimeRatio = new JSONStorableFloat("MidSwingTimeRatio", 0.55f, 0f, 1f, true);
@@ -164,6 +165,12 @@ public class GaitStyle
         ui.AddFloat(maxStepDistance);
         ui.AddFloat(kneeForwardForce);
         ui.AddFloat(passingDistance);
+
+        ui.AddHeader("Catch-Up Behavior", 1);
+        ui.AddFloat(predictionStrength);
+        ui.AddFloat(accelerationMinDistance);
+        ui.AddFloat(distanceToAccelerationRate);
+        ui.AddFloat(speedMax);
 
         ui.AddHeader("Animation Curve", 1, true);
 
