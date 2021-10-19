@@ -2,15 +2,16 @@
 
 public class GaitController : MonoBehaviour
 {
+    private GaitStyle _style;
     private HeadingTracker _heading;
     private PersonMeasurements _personMeasurements;
     private FreeControllerV3 _hipControl;
     private GaitVisualizer _visualizer;
 
+    public FootController rFoot { get; private set; }
+    public FootController lFoot { get; private set; }
     public FootController currentFoot { get; private set; }
     public FootController otherFoot { get; private set; }
-    public FootController rFoot { get; set; }
-    public FootController lFoot { get; set; }
 
     public float speed
     {
@@ -26,6 +27,7 @@ public class GaitController : MonoBehaviour
     }
 
     public void Configure(
+        GaitStyle style,
         HeadingTracker heading,
         PersonMeasurements personMeasurements,
         FootController lFoot,
@@ -33,6 +35,7 @@ public class GaitController : MonoBehaviour
         FreeControllerV3 hipControl,
         GaitVisualizer visualizer)
     {
+        _style = style;
         _heading = heading;
         _personMeasurements = personMeasurements;
         this.lFoot = lFoot;
@@ -167,7 +170,8 @@ public class GaitController : MonoBehaviour
 
     public void OnEnable()
     {
-        _visualizer.gameObject.SetActive(true);
+        if (_style.debuggingEnabled.val)
+            _visualizer.gameObject.SetActive(true);
     }
 
     public void OnDisable()

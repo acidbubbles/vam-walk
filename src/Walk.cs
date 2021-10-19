@@ -76,9 +76,10 @@ public class Walk : MVRScript
 
         var gaitVisualizer = AddWalkComponent<GaitVisualizer>(nameof(GaitVisualizer), c => c.Configure(
             containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
-        ));
+        ), style.debuggingEnabled.val);
 
         var gait = AddWalkComponent<GaitController>(nameof(GaitController), c => c.Configure(
+            style,
             heading,
             personMeasurements,
             lFootController,
@@ -89,7 +90,9 @@ public class Walk : MVRScript
 
         var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>(nameof(IdleStateVisualizer), c => { }, false);
 
-        var idleState = AddWalkComponent<IdleState>(nameof(IdleState), c => c.Configure(gait,
+        var idleState = AddWalkComponent<IdleState>(nameof(IdleState), c => c.Configure(
+            style,
+            gait,
             heading,
             idleStateVisualizer
         ), false);
@@ -106,6 +109,7 @@ public class Walk : MVRScript
         var jumpingStateVisualizer = AddWalkComponent<JumpingStateVisualizer>(nameof(JumpingStateVisualizer), c => { }, false);
 
         var jumpingState = AddWalkComponent<JumpingState>(nameof(JumpingState), c => c.Configure(
+            style,
             gait,
             heading,
             jumpingStateVisualizer

@@ -9,6 +9,9 @@ public class GaitStyle
 
     public float halfStepDistance => stepDistance.val / 2f;
 
+    // TODO: When toggled, fire an event so visualizers can update themselves
+    public readonly JSONStorableBool debuggingEnabled = new JSONStorableBool("Debugging Enabled", false);
+
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.03f, -0.1f, 0.1f, false);
     public readonly JSONStorableFloat footPitch = new JSONStorableFloat("Foot Pitch", 18.42f, -45f, 45f, false);
@@ -29,7 +32,7 @@ public class GaitStyle
 
     public readonly JSONStorableFloat passingDistance = new JSONStorableFloat("Passing Distance", 0.08f, -0.1f, 0.5f, false);
 
-    public readonly JSONStorableFloat predictionStrength = new JSONStorableFloat("Prediction Strength", 0.85f, 0f, 2f, false);
+    public readonly JSONStorableFloat predictionStrength = new JSONStorableFloat("Prediction Strength", 0.72f, 0f, 2f, false);
 
     public readonly JSONStorableFloat lateAccelerateRate = new JSONStorableFloat("Late Accelerate Rate", 1.1f, 1f, 5f, true);
     public readonly JSONStorableFloat lateAccelerateMaxSpeed = new JSONStorableFloat("Late Accelerate Max Speed", 3f, 1f, 10f, true);
@@ -146,6 +149,9 @@ public class GaitStyle
 
     public void SetupUI(UI ui)
     {
+        ui.AddHeader("Debugging", 1);
+        ui.AddBool(debuggingEnabled);
+
         ui.AddHeader("Foot Position", 1);
         ui.AddFloat(footFloorDistance);
         ui.AddFloat(footBackOffset);

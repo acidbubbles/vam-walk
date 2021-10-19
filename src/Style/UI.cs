@@ -39,4 +39,9 @@ public class UI
     {
         _plugin.CreateSlider(jsf, rightSide);
     }
+
+    public void AddBool(JSONStorableBool jsf, bool rightSide = false)
+    {
+        _plugin.CreateToggle(jsf, rightSide);
+    }
 }

@@ -4,12 +4,14 @@ public class IdleState : MonoBehaviour, IWalkState
 {
     public StateMachine stateMachine { get; set; }
 
+    private GaitStyle _style;
     private HeadingTracker _heading;
     private GaitController _gait;
     private IdleStateVisualizer _visualizer;
 
-    public void Configure(GaitController gait, HeadingTracker heading, IdleStateVisualizer visualizer)
+    public void Configure(GaitStyle style, GaitController gait, HeadingTracker heading, IdleStateVisualizer visualizer)
     {
+        _style = style;
         _gait = gait;
         _heading = heading;
         _visualizer = visualizer;
@@ -33,7 +35,8 @@ public class IdleState : MonoBehaviour, IWalkState
         var normalized = Quaternion.Inverse(headingRotation) * (headingCenter - feetCenter);
         // X^2/a^2 + Y^2/b^2 <= 1
         var normalizedDistanceFromCenter = (normalized.x * normalized.x) / (radius.x * radius.x) + (normalized.z * normalized.z) / (radius.y * radius.y);
-        _visualizer.Sync(headingCenter, feetCenter, radius, headingRotation);
+        if (_style.debuggingEnabled.val)
+            _visualizer.Sync(headingCenter, feetCenter, radius, headingRotation);
         return normalizedDistanceFromCenter > 1f;
     }
 
@@ -45,7 +48,8 @@ public class IdleState : MonoBehaviour, IWalkState
 
     public void OnEnable()
     {
-        _visualizer.gameObject.SetActive(true);
+        if (_style.debuggingEnabled.val)
+            _visualizer.gameObject.SetActive(true);
     }
 
     public void OnDisable()

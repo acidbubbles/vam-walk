@@ -4,12 +4,14 @@ public class JumpingState : MonoBehaviour, IWalkState
 {
     public StateMachine stateMachine { get; set; }
 
-    private HeadingTracker _heading;
+    private GaitStyle _style;
     private GaitController _gait;
+    private HeadingTracker _heading;
     private JumpingStateVisualizer _visualizer;
 
-    public void Configure(GaitController gait, HeadingTracker heading, JumpingStateVisualizer visualizer)
+    public void Configure(GaitStyle style, GaitController gait, HeadingTracker heading, JumpingStateVisualizer visualizer)
     {
+        _style = style;
         _gait = gait;
         _heading = heading;
         _visualizer = visualizer;
@@ -39,7 +41,8 @@ public class JumpingState : MonoBehaviour, IWalkState
         _gait.lFoot.gameObject.SetActive(false);
         _gait.rFoot.gameObject.SetActive(false);
         _gait.speed = 1f;
-        _visualizer.gameObject.SetActive(true);
+        if (_style.debuggingEnabled.val)
+            _visualizer.gameObject.SetActive(true);
     }
 
     public void OnDisable()

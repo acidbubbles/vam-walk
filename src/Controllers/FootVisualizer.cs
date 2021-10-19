@@ -26,14 +26,19 @@ public class FootStateVisualizer : MonoBehaviour
         for (var i = 0; i < _collisionAvoidanceSpheres.Length; i++)
         {
             _collisionAvoidanceSpheres[i] = Instantiate(CustomPrefabs.sphere, parent);
-            _collisionAvoidanceSpheres[i].GetComponent<Renderer>().material.color = new Color(0.8f, 0.5f, 0.1f, 0.5f);
-            _collisionAvoidanceSpheres[i].transform.localScale = Vector3.one * 0.05f;
+            _collisionAvoidanceSpheres[i].GetComponent<Renderer>().material.color = GetColor(i / (float)_collisionAvoidanceSpheres.Length);
+            _collisionAvoidanceSpheres[i].transform.localScale = Vector3.one * 0.03f;
         }
 
         for (var i = 0; i < _collisionAvoidancePaths.Length; i++)
         {
-            _collisionAvoidancePaths[i] = parent.CreateVisualizerLineRenderer(2, new Color(0.8f, 0.5f, 0.1f, 0.5f));
+            _collisionAvoidancePaths[i] = parent.CreateVisualizerLineRenderer(2, GetColor(i / (float)_collisionAvoidancePaths.Length));
         }
+    }
+
+    private static Color GetColor(float progress)
+    {
+        return new Color(0.8f + 0.2f * progress, 0.5f - 0.5f * progress, 0.1f - 0.1f * progress, 0.5f);
     }
 
     public void Configure(GaitStyle style)
