@@ -134,6 +134,9 @@ public class WalkingState : MonoBehaviour, IWalkState
     private readonly RaycastHit[] _hits = new RaycastHit[10];
     private Vector3 ResolveAvailablePassingOffset(FootController foot, Vector3 fromPosition, Vector3 toPosition, Quaternion toRotation)
     {
+        const int maxIterations = 5;
+        const float distanceIncreasePerIteration = 0.05f;
+
         var collisionHeightOffset = new Vector3(0, _style.footCollisionRadius, 0);
         var passingCheckStart = fromPosition + collisionHeightOffset;
 
@@ -141,21 +144,19 @@ public class WalkingState : MonoBehaviour, IWalkState
         // TODO: Do we really need base passing?
         var passingOffset = Vector3.zero; // Vector3.right * (foot.inverse * _style.passingDistance.val * standToWalkRatio);
         // TODO: Linear iterations is costly, maybe instead do bisect?
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < maxIterations; i++)
         {
-            var passingCenter = (toPosition + fromPosition) / 2f;
+            var passingCenter = (fromPosition + toPosition) / 2f;
             passingCenter.y = _style.stepHeight.val;
             passingCenter += passingOffset;
 
             if (CheckPassingCollisionFree(i, foot, passingCheckStart, passingCenter))
                 return passingOffset;
 
-            SuperController.LogMessage($"Collision path [Iter {i}]: {foot.footControl.name}");
-
             // TODO: We should try passing on the other side (validate which cases)
             // TODO: Do not use rotation, instead check the perpendicular to the from/to line
-            if (i > 8) Time.timeScale = 0.1f;
-            passingOffset += (toRotation * Vector3.right) * (foot.inverse * 0.05f);
+            // if (i == maxIterations - 1) Time.timeScale = 0.001f;
+            passingOffset += (toRotation * Vector3.right) * (foot.inverse *  distanceIncreasePerIteration);
         }
 
         return passingOffset;
@@ -167,8 +168,6 @@ public class WalkingState : MonoBehaviour, IWalkState
         var passingDistance = passingDirection.magnitude;
 
         var checkOrigin = passingCheckStart + passingDirection * (passingDistance * 0.5f);
-
-        foot.visualizer.SyncCollisionAvoidance(i, checkOrigin, checkOrigin + passingDirection.normalized * (passingDistance * 0.5f));
 
         var hitsCount = Physics.SphereCastNonAlloc(
             checkOrigin,
@@ -185,6 +184,8 @@ public class WalkingState : MonoBehaviour, IWalkState
         {
             var hit = _hits[hitIndex];
             if (!foot.colliders.Contains(hit.collider)) continue;
+            SuperController.LogMessage($"Collision path [Iter {i}] {foot.footControl.name}: {hit.point}");
+            foot.visualizer.SyncCollisionAvoidance(i, checkOrigin, checkOrigin + passingDirection.normalized * (passingDistance * 0.5f), hit.point);
             return false;
         }
 

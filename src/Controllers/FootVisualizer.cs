@@ -99,11 +99,11 @@ public class FootStateVisualizer : MonoBehaviour
         _conflictSphere.transform.position = position;
     }
 
-    public void SyncCollisionAvoidance(int index, Vector3 start, Vector3 end)
+    public void SyncCollisionAvoidance(int index, Vector3 start, Vector3 end, Vector3 point)
     {
         if (index >= _collisionAvoidanceSpheres.Length) return;
         _collisionAvoidanceSpheres[index].SetActive(true);
-        _collisionAvoidanceSpheres[index].transform.position = end;
+        _collisionAvoidanceSpheres[index].transform.position = point;
         if (index >= _collisionAvoidancePaths.Length) return;
         _collisionAvoidancePaths[index].gameObject.SetActive(true);
         _collisionAvoidancePaths[index].SetPosition(0, start);
