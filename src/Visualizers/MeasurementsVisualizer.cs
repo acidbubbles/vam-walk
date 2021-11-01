@@ -21,7 +21,7 @@ public class MeasurementsVisualizer : MonoBehaviour
     public void Sync(float feetHeight, float hipHeight, float headHeight)
     {
         var right = Vector3.right;
-        var forward = Vector3.forward;
+        var forward = Vector3.back;
         var rightOffset = 0.2f;
         var forwardOffset = 0.15f;
         _feetLineRenderer.SetPositions(new[]

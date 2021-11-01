@@ -165,7 +165,7 @@ public class GaitController : MonoBehaviour
 
     public void OnEnable()
     {
-        if (_style.debuggingEnabled.val)
+        if (_style.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
     }
 

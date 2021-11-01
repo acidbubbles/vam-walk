@@ -16,7 +16,7 @@ public class GaitFootStyle
     {
         this.style = style;
         this.inverse = inverse;
-        style.valueUpdated.AddListener(Sync);
+        style.footOffsetChanged.AddListener(Sync);
         Sync();
     }
 

@@ -48,7 +48,7 @@ public class Walk : MVRScript
         var measurementsVisualizer = AddWalkComponent<MeasurementsVisualizer>(nameof(MeasurementsVisualizer), c => c.Configure(
             style,
             personMeasurements
-        ));
+        ), false);
 
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => c.Configure(
             style
@@ -86,7 +86,7 @@ public class Walk : MVRScript
 
         var gaitVisualizer = AddWalkComponent<GaitVisualizer>(nameof(GaitVisualizer), c => c.Configure(
             containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
-        ), style.debuggingEnabled.val);
+        ), style.visualizersEnabled.val);
 
         var gait = AddWalkComponent<GaitController>(nameof(GaitController), c => c.Configure(
             style,
@@ -130,6 +130,13 @@ public class Walk : MVRScript
             walkingState,
             jumpingState
         ));
+
+        style.visualizersEnabledChanged.AddListener(val =>
+        {
+            measurementsVisualizer.gameObject.SetActive(val);
+            gaitVisualizer.gameObject.SetActive(val);
+            _stateMachine.currentState.visualizer.gameObject.SetActive(val);
+        });
     }
 
     private static void InitUI(UI ui, GaitStyle style)

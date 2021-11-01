@@ -96,7 +96,7 @@ public class FootController : MonoBehaviour
         PlotRotation(toRotation, standToWalkRatio, forwardRatio);
         PlotPosition(toPosition, standToWalkRatio, forwardRatio, passingOffset);
         // TODO: Also animate the toes
-        if (_style.debuggingEnabled.val)
+        if (_style.visualizersEnabled.val)
         {
             visualizer.Sync(_xCurve, _yCurve, _zCurve, _rotXCurve, _rotYCurve, _rotZCurve, _rotWCurve);
             visualizer.gameObject.SetActive(true);

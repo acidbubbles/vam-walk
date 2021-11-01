@@ -10,7 +10,7 @@ public class GaitStyle
     public float halfStepDistance => stepDistance.val / 2f;
 
     // TODO: When toggled, fire an event so visualizers can update themselves
-    public readonly JSONStorableBool debuggingEnabled = new JSONStorableBool("Debugging Enabled", false);
+    public readonly JSONStorableBool visualizersEnabled = new JSONStorableBool("Visualizers Enabled", false);
     public readonly JSONStorableBool lockHeadHeight = new JSONStorableBool("Lock Head Height", false);
 
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
@@ -66,7 +66,9 @@ public class GaitStyle
 
     public readonly JSONStorableFloat triggerJumpAfterHalfStepsCount = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
 
-    public readonly UnityEvent valueUpdated = new UnityEvent();
+    public readonly UnityEvent footOffsetChanged = new UnityEvent();
+    public class UnityEventBool : UnityEvent<bool> { }
+    public readonly UnityEventBool visualizersEnabledChanged = new UnityEventBool();
 
     public GaitStyle()
     {
@@ -80,6 +82,8 @@ public class GaitStyle
 
         footStandingOutOffset.setCallbackFunction = OnFootOffsetChanged;
         footStandingYaw.setCallbackFunction = OnFootOffsetChanged;
+
+        visualizersEnabled.setCallbackFunction = OnVisualizersEnabledChanged;
 
         stepDuration.setCallbackFunction = val =>
         {
@@ -116,7 +120,12 @@ public class GaitStyle
 
     private void OnFootOffsetChanged(float _)
     {
-        valueUpdated.Invoke();
+        footOffsetChanged.Invoke();
+    }
+
+    private void OnVisualizersEnabledChanged(bool val)
+    {
+        visualizersEnabledChanged.Invoke(val);
     }
 
     public void RegisterStorables(MVRScript plugin)
@@ -173,7 +182,7 @@ public class GaitStyle
     public void SetupUI(UI ui)
     {
         ui.AddHeader("Debugging", 1);
-        ui.AddBool(debuggingEnabled);
+        ui.AddBool(visualizersEnabled);
         ui.AddBool(lockHeadHeight);
 
         ui.AddHeader("Foot Position", 1);

@@ -5,6 +5,7 @@ public class WalkingState : MonoBehaviour, IWalkState
     private const int _layerMask = ~(1 << 8);
 
     public StateMachine stateMachine { get; set; }
+    MonoBehaviour IWalkState.visualizer => _visualizer;
 
     private GaitStyle _style;
     private HeadingTracker _heading;
@@ -24,7 +25,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         var bodyCenter = _heading.GetFloorCenter();
         _gait.SelectStartFoot(bodyCenter);
         PlotFootCourse();
-        if(_style.debuggingEnabled.val)
+        if(_style.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
     }
 
@@ -112,7 +113,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         var collisionHeightOffset = new Vector3(0, _style.footCollisionRadius, 0);
 
         var endConflictPosition = toPosition + collisionHeightOffset;
-        if (_style.debuggingEnabled.val)
+        if (_style.visualizersEnabled.val)
             foot.visualizer.SyncEndConflictCheck(endConflictPosition);
         var collidersCount = Physics.OverlapSphereNonAlloc(endConflictPosition, _style.footCollisionRadius, _colliders, _layerMask);
 
@@ -123,7 +124,7 @@ public class WalkingState : MonoBehaviour, IWalkState
             var collider = _colliders[hitIndex];
             if (!foot.colliders.Contains(collider)) continue;
             var collisionPoint = collider.ClosestPoint(fromPosition);
-            if (_style.debuggingEnabled.val)
+            if (_style.visualizersEnabled.val)
                 foot.visualizer.SyncConflict(collisionPoint);
             var travelDistanceDelta = Vector3.Distance(fromPosition, collisionPoint) - _style.footCollisionRecedeDistance;
             // SuperController.LogMessage($"Collision end: {foot.footControl.name} -> {Explain(collider)}, reduce from {Vector3.Distance(floorPosition, toPosition):0.00} to {Vector3.Distance(floorPosition, Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta)):0.00}");
@@ -188,7 +189,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         {
             var hit = _hits[hitIndex];
             if (!foot.colliders.Contains(hit.collider)) continue;
-            if (_style.debuggingEnabled.val)
+            if (_style.visualizersEnabled.val)
             {
                 // SuperController.LogMessage($"Collision path [Iter {i}] {foot.footControl.name} will hit {hit.collider.transform.Identify()} at {hit.point}");
                 foot.visualizer.SyncCollisionAvoidance(i, checkOrigin, checkOrigin + passingDirection * (passingDistance * 0.5f), hit.point);
