@@ -57,8 +57,10 @@ public class Walk : MVRScript
         var lFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
             new GaitFootStyle(style, -1),
+            bones.FirstOrDefault(fc => fc.name == "lFoot"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lKneeControl"),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lToeControl"),
             new HashSet<Collider>(bones.First(b => b.name == "rThigh").GetComponentsInChildren<Collider>()),
             lFootStateVisualizer
         ));
@@ -70,8 +72,10 @@ public class Walk : MVRScript
         var rFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
             new GaitFootStyle(style, 1),
+            bones.FirstOrDefault(fc => fc.name == "rFoot"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rKneeControl"),
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rToeControl"),
             new HashSet<Collider>(bones.First(b => b.name == "lThigh").GetComponentsInChildren<Collider>()),
             rFootStateVisualizer
         ));

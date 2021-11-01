@@ -6,11 +6,13 @@ public class FootController : MonoBehaviour
 {
     public FreeControllerV3 footControl;
     public FreeControllerV3 kneeControl;
+    public FreeControllerV3 toeControl;
     public HashSet<Collider> colliders;
     public FootStateVisualizer visualizer;
 
     private GaitStyle _style;
     private GaitFootStyle _footStyle;
+    private DAZBone _footBone;
 
     public Vector3 position => _setPosition;
     public float inverse => _footStyle.inverse;
@@ -21,7 +23,9 @@ public class FootController : MonoBehaviour
     }
 
     public float speed = 1f;
+    // TODO: Get this from HeadingTracking and cache in Update instead of weirdly populating
     public float crouchingRatio;
+    public float onToesRatio;
 
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
@@ -49,15 +53,19 @@ public class FootController : MonoBehaviour
     public void Configure(
         GaitStyle style,
         GaitFootStyle footStyle,
+        DAZBone footBone,
         FreeControllerV3 footControl,
         FreeControllerV3 kneeControl,
+        FreeControllerV3 toeControl,
         HashSet<Collider> colliders,
         FootStateVisualizer visualizer)
     {
         _style = style;
         _footStyle = footStyle;
+        _footBone = footBone;
         this.footControl = footControl;
         this.kneeControl = kneeControl;
+        this.toeControl = toeControl;
         this.colliders = colliders;
         this.visualizer = visualizer;
 
@@ -236,13 +244,28 @@ public class FootController : MonoBehaviour
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion toRotation)
     {
         // TODO: Multiple hardcoded numbers that could be configurable
-        var footRotate = Quaternion.Euler(crouchingRatio * 50f, 0f, 0f);
-        var rotation = toRotation * footRotate;
 
-        var footOffset = rotation * new Vector3(0f, crouchingRatio * 0.12f, crouchingRatio * -0.055f);
+        var planarRotation = Quaternion.Euler(0, toRotation.eulerAngles.y, 0);
+        footControl.control.position = toPosition + new Vector3(0f, Mathf.Max(crouchingRatio, onToesRatio) * 0.12f, 0);
 
-        // TODO: Twist toes
-        footControl.control.SetPositionAndRotation(toPosition + footOffset, rotation);
+        var floorDistance = _footBone.transform.position.y - _style.footFloorDistance.val - 0.0123f;
+        var floorDistanceRatio = Mathf.Clamp01(floorDistance / 0.075f);
+
+        // ReSharper disable once Unity.InefficientPropertyAccess
+        footControl.control.position += planarRotation * new Vector3(0f, 0f, floorDistanceRatio * 0.04f);
+
+        // TODO: Reduce outside rotation (toe point straight)
+        var footRotate = Quaternion.Euler(floorDistanceRatio * 45f, 0f, 0f);
+        footControl.control.rotation = toRotation * footRotate;
+
+        // var toeRotation = toeControl.control.localRotation.eulerAngles;
+        // toeControl.control.localRotation = Quaternion.Euler(/*12.6f + floorDistanceRatio * (00f * _footStyle.inverse)*/ toeRotation.x, toeRotation.y, toeRotation.z);
+
+        // if (_footBone.name == "rFoot")
+        // {
+        //     SuperController.singleton.ClearMessages();
+        //     SuperController.LogMessage($"{floorDistance:0.000} ({floorDistanceRatio:0.000}) - {toeControl.control.localRotation.eulerAngles.x:0.00}");
+        // }
     }
 
     public float GetMidSwingStrength()
@@ -287,6 +310,7 @@ public class FootController : MonoBehaviour
     private void SetToCurrent()
     {
         var footPosition = footControl.control.position;
+        // TODO: Cancel the forward movement when feet are higher
         _setPosition = new Vector3(footPosition.x, _style.footFloorDistance.val, footPosition.z);
         _setRotation = Quaternion.Euler(_footStyle.footStandingRotationOffset.eulerAngles.x, footControl.control.eulerAngles.y, _footStyle.footStandingRotationOffset.eulerAngles.z);
     }

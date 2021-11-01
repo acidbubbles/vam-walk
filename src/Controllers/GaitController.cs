@@ -59,9 +59,12 @@ public class GaitController : MonoBehaviour
         var headingRotation = _heading.GetPlanarRotation();
         var standingRatio = _heading.GetStandingRatio();
         var crouchingRatio = 1f - standingRatio;
+        var onToesRatio = _heading.GetOnToesRatio();
 
         lFoot.crouchingRatio = crouchingRatio;
+        lFoot.onToesRatio = onToesRatio;
         rFoot.crouchingRatio = crouchingRatio;
+        rFoot.onToesRatio = onToesRatio;
 
         if (_hipControl.isGrabbing) return;
 
