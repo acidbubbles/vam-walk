@@ -11,6 +11,7 @@ public class GaitStyle
 
     // TODO: When toggled, fire an event so visualizers can update themselves
     public readonly JSONStorableBool debuggingEnabled = new JSONStorableBool("Debugging Enabled", false);
+    public readonly JSONStorableBool lockHeadHeight = new JSONStorableBool("Lock Head Height", false);
 
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.03f, -0.1f, 0.1f, false);
@@ -24,9 +25,9 @@ public class GaitStyle
     public readonly JSONStorableFloat footWalkingYaw = new JSONStorableFloat("Foot Walking Yaw", 1.5f, -45f, 45f, false);
 
     public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
+    public readonly JSONStorableFloat stepDistance = new JSONStorableFloat("Step Distance", 1.2f, 0f, 3f, false);
     public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
     public readonly JSONStorableFloat minStepHeightRatio = new JSONStorableFloat("Min Step Height Ratio", 0.2f, 0f, 1f, true);
-    public readonly JSONStorableFloat stepDistance = new JSONStorableFloat("Step Distance", 1.2f, 0f, 3f, false);
 
     public readonly JSONStorableFloat kneeForwardForce = new JSONStorableFloat("Knee Forward Force", 50f, 0f, 1000f, false);
 
@@ -52,6 +53,16 @@ public class GaitStyle
     public readonly JSONStorableFloat toeOffPitch = new JSONStorableFloat("ToeOffPitch", 40f, -90, 90, true);
     public readonly JSONStorableFloat midSwingPitch = new JSONStorableFloat("MidSwingPitch", 20f, -90, 90, true);
     public readonly JSONStorableFloat heelStrikePitch = new JSONStorableFloat("HeelStrikePitch", -40f, -90, 90, true);
+
+    public readonly JSONStorableFloat hipStandingForward = new JSONStorableFloat("HipStandingForward", 0.05f, -1f, 1f, false);
+    public readonly JSONStorableFloat hipStandingPitch = new JSONStorableFloat("HipStandingPitch", -15f, -70f, 70f, false);
+    public readonly JSONStorableFloat hipCrouchingUp = new JSONStorableFloat("HipCrouchingUp", 0.06f, -0.2f, 0.2f, false);
+    public readonly JSONStorableFloat hipCrouchingForward = new JSONStorableFloat("HipCrouchingForward", -0.12f, -1f, 1f, false);
+    public readonly JSONStorableFloat hipCrouchingPitch = new JSONStorableFloat("HipCrouchingPitch", 60f, 0f, 90f, false);
+    public readonly JSONStorableFloat hipStepSide = new JSONStorableFloat("HipStepSide", -0.06f, -0.1f, 0.1f, false);
+    public readonly JSONStorableFloat hipStepRaise = new JSONStorableFloat("HipStepRaise", 0.04f, 0f, 0.1f, false);
+    public readonly JSONStorableFloat hipStepYaw = new JSONStorableFloat("HipStepYaw", -15f, -30f, 30f, false);
+    public readonly JSONStorableFloat hipStepRoll = new JSONStorableFloat("HipStepRoll", 10f, -30f, 30f, false);
 
     public readonly JSONStorableFloat triggerJumpAfterHalfStepsCount = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
 
@@ -145,12 +156,25 @@ public class GaitStyle
         plugin.RegisterFloat(toeOffPitch);
         plugin.RegisterFloat(midSwingPitch);
         plugin.RegisterFloat(heelStrikePitch);
+
+        plugin.RegisterFloat(hipStandingForward);
+        plugin.RegisterFloat(hipStandingPitch);
+        plugin.RegisterFloat(hipCrouchingUp);
+        plugin.RegisterFloat(hipCrouchingForward);
+        plugin.RegisterFloat(hipCrouchingPitch);
+        plugin.RegisterFloat(hipStepSide);
+        plugin.RegisterFloat(hipStepRaise);
+        plugin.RegisterFloat(hipStepYaw);
+        plugin.RegisterFloat(hipStepRoll);
+
+        plugin.RegisterFloat(triggerJumpAfterHalfStepsCount);
     }
 
     public void SetupUI(UI ui)
     {
         ui.AddHeader("Debugging", 1);
         ui.AddBool(debuggingEnabled);
+        ui.AddBool(lockHeadHeight);
 
         ui.AddHeader("Foot Position", 1);
         ui.AddFloat(footFloorDistance);
@@ -202,5 +226,25 @@ public class GaitStyle
         ui.AddFloat(toeOffPitch, true);
         ui.AddFloat(midSwingPitch, true);
         ui.AddFloat(heelStrikePitch, true);
+
+        ui.AddHeader("Hip", 1, true);
+
+        ui.AddHeader("While Standing", 2);
+        ui.AddFloat(hipStandingForward, true);
+        ui.AddFloat(hipStandingPitch, true);
+
+        ui.AddHeader("While Crouching", 2);
+        ui.AddFloat(hipCrouchingUp, true);
+        ui.AddFloat(hipCrouchingForward, true);
+        ui.AddFloat(hipCrouchingPitch, true);
+
+        ui.AddHeader("While Walking", 2);
+        ui.AddFloat(hipStepSide, true);
+        ui.AddFloat(hipStepRaise, true);
+        ui.AddFloat(hipStepYaw, true);
+        ui.AddFloat(hipStepRoll, true);
+
+        ui.AddHeader("Misc", 1, true);
+        ui.AddFloat(triggerJumpAfterHalfStepsCount, true);
     }
 }

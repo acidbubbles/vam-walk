@@ -64,17 +64,12 @@
   <ItemGroup>
     <!-- SourceFiles -->
     <Compile Include="src\Controllers\FootController.cs" />
-    <Compile Include="src\Controllers\FootVisualizer.cs" />
     <Compile Include="src\Controllers\GaitController.cs" />
-    <Compile Include="src\Controllers\GaitVisualizer.cs" />
     <Compile Include="src\States\IdleState.cs" />
-    <Compile Include="src\States\IdleStateVisualizer.cs" />
     <Compile Include="src\States\IState.cs" />
     <Compile Include="src\States\JumpingState.cs" />
-    <Compile Include="src\States\JumpingStateVisualizer.cs" />
     <Compile Include="src\States\StateMachine.cs" />
     <Compile Include="src\States\WalkingState.cs" />
-    <Compile Include="src\States\WalkingStateVisualizer.cs" />
     <Compile Include="src\Style\GaitFootStyle.cs" />
     <Compile Include="src\Style\GaitStyle.cs" />
     <Compile Include="src\Style\UI.cs" />
@@ -83,6 +78,12 @@
     <Compile Include="src\Utils\PersonMeasurements.cs" />
     <Compile Include="src\Utils\TransformExtensions.cs" />
     <Compile Include="src\Utils\Vector3Extensions.cs" />
+    <Compile Include="src\Visualizers\FootVisualizer.cs" />
+    <Compile Include="src\Visualizers\GaitVisualizer.cs" />
+    <Compile Include="src\Visualizers\IdleStateVisualizer.cs" />
+    <Compile Include="src\Visualizers\JumpingStateVisualizer.cs" />
+    <Compile Include="src\Visualizers\MeasurementsVisualizer.cs" />
+    <Compile Include="src\Visualizers\WalkingStateVisualizer.cs" />
     <Compile Include="src\HeadingTracker.cs" />
     <Compile Include="src\Walk.cs" />
     <!-- /SourceFiles -->

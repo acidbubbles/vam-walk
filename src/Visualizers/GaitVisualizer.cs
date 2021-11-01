@@ -17,10 +17,10 @@ public class GaitVisualizer : MonoBehaviour
 
     public void Update()
     {
-        var transform = _hipRB.transform;
-        var position = transform.position;
-        var right = transform.right;
-        var forward = transform.forward;
+        var t = _hipRB.transform;
+        var position = t.position;
+        var right = t.right;
+        var forward = t.forward;
         _hipLineRenderer.SetPositions(new[]
         {
             position + right * 0.2f + forward * 0.15f,

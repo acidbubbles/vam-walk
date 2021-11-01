@@ -45,7 +45,14 @@ public class Walk : MVRScript
         // TODO: Wait for model loaded
         personMeasurements.Sync();
 
-        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => { c.Configure(style); }, false);
+        var measurementsVisualizer = AddWalkComponent<MeasurementsVisualizer>(nameof(MeasurementsVisualizer), c => c.Configure(
+            style,
+            personMeasurements
+        ));
+
+        var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => c.Configure(
+            style
+        ), false);
 
         var lFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
@@ -56,7 +63,9 @@ public class Walk : MVRScript
             lFootStateVisualizer
         ));
 
-        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => { c.Configure(style); }, false);
+        var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => c.Configure(
+            style
+        ), false);
 
         var rFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
@@ -70,6 +79,7 @@ public class Walk : MVRScript
         var heading = AddWalkComponent<HeadingTracker>(nameof(HeadingTracker), c => c.Configure(
             style,
             personMeasurements,
+            containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl"),
             containingAtom.rigidbodies.FirstOrDefault(fc => fc.name == "head"),
             bones.FirstOrDefault(fc => fc.name == "head")
         ));

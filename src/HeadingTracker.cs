@@ -2,6 +2,8 @@
 
 public class HeadingTracker : MonoBehaviour
 {
+    public FreeControllerV3 headControl;
+
     private GaitStyle _style;
     private PersonMeasurements _personMeasurements;
     private Rigidbody _headRB;
@@ -13,10 +15,11 @@ public class HeadingTracker : MonoBehaviour
     private readonly Vector3[] _lastVelocities = new Vector3[30];
     private int _currentVelocityIndex;
 
-    public void Configure(GaitStyle style, PersonMeasurements personMeasurements, Rigidbody headRB, DAZBone headBone)
+    public void Configure(GaitStyle style, PersonMeasurements personMeasurements, FreeControllerV3 headControl, Rigidbody headRB, DAZBone headBone)
     {
         _style = style;
         _personMeasurements = personMeasurements;
+        this.headControl = headControl;
         _headRB = headRB;
         _headBone = headBone;
         _neckBone = headBone.parentBone;
@@ -25,6 +28,13 @@ public class HeadingTracker : MonoBehaviour
 
     public void Update()
     {
+        if (_style.lockHeadHeight.val)
+        {
+            var headPosition = headControl.control.position;
+            headPosition.y = _personMeasurements.floorToHead;
+            headControl.control.position = headPosition;
+        }
+
         var velocityMeasurePoint = _neckBone.transform.position;
         _lastVelocities[_currentVelocityIndex] = velocityMeasurePoint - _lastVelocityMeasurePoint;
         _lastDeltaTimes[_currentVelocityIndex] = Time.deltaTime;
@@ -44,12 +54,11 @@ public class HeadingTracker : MonoBehaviour
 
     public float GetStandingRatio()
     {
-        var standingFloorToHead = _personMeasurements.footToHead + _style.footFloorDistance.val;
-        var actualFloorToHead = _headBone.transform.position.y;
-        // TODO: There are many way to compute that, find one that makes sense
-        var maxCrouch = _personMeasurements.hipToHead * 2.2f;
-        var headHeightRatio = (actualFloorToHead - maxCrouch) / (standingFloorToHead - maxCrouch);
-        return Mathf.Clamp01(headHeightRatio);
+        // NOTE: We use the head control instead of the head bone because otherwise the hip can pull the head, forcing the model to a crouching position
+        var headHeightRatio = headControl.transform.position.y / _personMeasurements.floorToHead;
+        // TODO: Configurable?
+        var standingRatio = Mathf.Clamp01((headHeightRatio * 1.02f - 0.7f) / 0.3f);
+        return standingRatio;
     }
 
     public Vector3 GetPlanarVelocity()

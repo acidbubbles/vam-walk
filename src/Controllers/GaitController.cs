@@ -46,6 +46,16 @@ public class GaitController : MonoBehaviour
 
     public void FixedUpdate()
     {
+        var hipHeightCrouchingAdjust = _style.hipCrouchingUp.val;
+        var hipForwardCrouching = _style.hipCrouchingForward.val;
+        var hipForwardStanding = _style.hipStandingForward.val;
+        var hipStepSide = _style.hipStepSide.val;
+        var hipStepRaise = _style.hipStepRaise.val;
+        var hipPitchStanding = _style.hipStandingPitch.val;
+        var hipPitchCrouching = _style.hipCrouchingPitch.val;
+        var hipStepYaw = _style.hipStepYaw.val;
+        var hipStepRoll = _style.hipStepRoll.val;
+
         var headingRotation = _heading.GetPlanarRotation();
         var standingRatio = _heading.GetStandingRatio();
         var crouchingRatio = 1f - standingRatio;
@@ -55,36 +65,21 @@ public class GaitController : MonoBehaviour
 
         if (_hipControl.isGrabbing) return;
 
-        var headPosition = _heading.GetFloorCenter();
-        var feetCenter = GetFloorFeetCenter();
-        // TODO: Compute this from bones instead
         // TODO: Deal with when bending down, the hip should stay back (rely on the hip-to-head angle)
         var hipLocalPosition = headingRotation * new Vector3(
             0,
-            // TODO: Make the crouch ratio effect on Y configurable
-            (_heading.GetHeadPosition().y - _personMeasurements.hipToHead) * (0.8f + standingRatio * 0.2f),
-            // TODO: Make the crouch ratio effect on Z configurable
-            Mathf.Lerp(-0.12f, 0.10f, standingRatio)
+            (_heading.GetHeadPosition().y - _personMeasurements.hipToHead) + (hipHeightCrouchingAdjust * crouchingRatio),
+            Mathf.Lerp(hipForwardCrouching, hipForwardStanding, standingRatio)
         );
-        var hipPositionFromFeet = feetCenter + hipLocalPosition;
-        var hipPositionFromHead = headPosition + hipLocalPosition;
-        // TODO: Make the hip catch up speed configurable, and consider other approaches. We want the hip to stay straight, so maybe it should be part of the moving state?
-        // TODO: The hip should track passing, not leg height.
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
-        var bodyCenter = Vector3.Lerp(
-            hipPositionFromFeet,
-            hipPositionFromHead,
-            0.9f
-        );
+        var bodyCenter = _heading.GetFloorCenter() + hipLocalPosition;
 
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
         var lrRatio = -lFoot.GetMidSwingStrength() + rFoot.GetMidSwingStrength();
-        var hipRaise = lrRatio * 0.04f;
-        var hipSide = lrRatio * -0.06f;
         _hipControl.control.SetPositionAndRotation(
-            bodyCenter + headingRotation * new Vector3(hipSide, hipRaise, 0),
+            bodyCenter + headingRotation * new Vector3(lrRatio * hipStepSide, lrRatio * hipStepRaise, 0),
             // TODO: Moving backwards should also reverse hips rotation! Either use forwardRatio or check which feet is forward
-            headingRotation * Quaternion.Euler(6f + (crouchingRatio * 42f), lrRatio * -15f, lrRatio * 10f)
+            headingRotation * Quaternion.Euler(hipPitchStanding + (crouchingRatio * hipPitchCrouching), lrRatio * hipStepYaw, lrRatio * hipStepRoll)
         );
     }
 

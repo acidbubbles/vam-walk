@@ -11,7 +11,7 @@ public class PersonMeasurements
 
     public float floorToHip { get; private set; }
     public float hipToHead { get; private set; }
-    public float footToHead { get; private set; }
+    public float floorToHead { get; private set; }
 
     public PersonMeasurements(DAZBone[] bones, GaitStyle style)
     {
@@ -24,10 +24,10 @@ public class PersonMeasurements
     {
         // TODO: Preview the exact hip ratio line
         // TODO: Fine tune the actual multipliers
-        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * 0.945f + _style.footFloorDistance.val;
-        var upper = MeasureToHip("head") * 0.892f;
-        footToHead = floorToHip + upper;
-        hipToHead = footToHead - floorToHip;
+        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * 0.992f + _style.footFloorDistance.val;
+        var upper = MeasureToHip("head") * 0.926f;
+        floorToHead = floorToHip + upper;
+        hipToHead = floorToHead - floorToHip;
     }
 
     private float MeasureToHip(string boneName)
