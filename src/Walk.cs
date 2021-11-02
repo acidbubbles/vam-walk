@@ -151,7 +151,7 @@ public class Walk : MVRScript
         {
             _personMeasurements.Sync();
         });
-        ui.AddAction("Optimize Controls", false, () =>
+        ui.AddAction("Configure Controls for Possession", false, () =>
         {
             foreach (var fc in containingAtom.freeControllers.Where(fc => fc.name != "control"))
             {
@@ -173,6 +173,18 @@ public class Walk : MVRScript
             var headPosition = headControl.control.position;
             headPosition.y = _personMeasurements.floorToHead;
             headControl.control.position = headPosition;
+        });
+        ui.AddAction("Hands Off", false, () =>
+        {
+            var lHandControl = containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lHandControl");
+            if (lHandControl == null) throw new NullReferenceException($"Could not find lHandControl");
+            lHandControl.currentPositionState = FreeControllerV3.PositionState.Off;
+            lHandControl.currentRotationState = FreeControllerV3.RotationState.Off;
+
+            var rHandControl = containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rHandControl");
+            if (rHandControl == null) throw new NullReferenceException($"Could not find rHandControl");
+            rHandControl.currentPositionState = FreeControllerV3.PositionState.Off;
+            rHandControl.currentRotationState = FreeControllerV3.RotationState.Off;
         });
 
         ui.AddHeader("Profiles", 1);
