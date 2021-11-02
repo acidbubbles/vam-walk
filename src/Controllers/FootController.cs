@@ -18,11 +18,7 @@ public class FootController : MonoBehaviour
     public float inverse => _footStyle.inverse;
 
     private Vector3 _setFloorPosition;
-    public Vector3 floorPosition
-    {
-        // get { var footPosition = footControl.control.position; footPosition.y = 0f; return footPosition; }
-        get { return _setFloorPosition;  }
-    }
+    public Vector3 setFloorPosition => _setFloorPosition;
 
     public float speed = 1f;
     // TODO: Get this from HeadingTracking and cache in Update instead of weirdly populating
@@ -239,7 +235,7 @@ public class FootController : MonoBehaviour
 
         Sample(_time);
         var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + (Vector3.up * 0.2f);
-        kneeControl.followWhenOffRB.AddForce(footForward * _style.kneeForwardForce.val * GetMidSwingStrength());
+        kneeControl.followWhenOffRB.AddForce(footForward * (_style.kneeForwardForce.val * GetMidSwingStrength()));
     }
 
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion toRotation)

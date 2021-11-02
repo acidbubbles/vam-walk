@@ -236,16 +236,16 @@ public class GaitStyle
 
         ui.AddHeader("Hip", 1, true);
 
-        ui.AddHeader("While Standing", 2);
+        ui.AddHeader("While Standing", 2, true);
         ui.AddFloat(hipStandingForward, true);
         ui.AddFloat(hipStandingPitch, true);
 
-        ui.AddHeader("While Crouching", 2);
+        ui.AddHeader("While Crouching", 2, true);
         ui.AddFloat(hipCrouchingUp, true);
         ui.AddFloat(hipCrouchingForward, true);
         ui.AddFloat(hipCrouchingPitch, true);
 
-        ui.AddHeader("While Walking", 2);
+        ui.AddHeader("While Walking", 2, true);
         ui.AddFloat(hipStepSide, true);
         ui.AddFloat(hipStepRaise, true);
         ui.AddFloat(hipStepYaw, true);

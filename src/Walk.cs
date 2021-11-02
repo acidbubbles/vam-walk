@@ -175,6 +175,16 @@ public class Walk : MVRScript
             headControl.control.position = headPosition;
         });
 
+        ui.AddHeader("Profiles", 1);
+        ui.AddAction("Import Profile", false, () =>
+        {
+            SuperController.LogMessage("Profiles are not yet implemented");
+        });
+        ui.AddAction("Export Profile", false, () =>
+        {
+            SuperController.LogMessage("Profiles are not yet implemented");
+        });
+
         style.SetupUI(ui);
     }
 

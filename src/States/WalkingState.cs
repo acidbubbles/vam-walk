@@ -68,7 +68,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         var foot = _gait.currentFoot;
         var projectedCenter = _heading.GetProjectedPosition();
         var toRotation = _heading.GetPlanarRotation();
-        var fromPosition = foot.floorPosition;
+        var fromPosition = foot.setFloorPosition;
 
         // TODO: Sometimes it looks like the feet is stuck at zero? To confirm (try circle walk and reset home, reload Walk)
         // TODO: We get the foot position relative to the body _twice_
@@ -94,13 +94,13 @@ public class WalkingState : MonoBehaviour, IWalkState
         var toPosition = _gait.currentFoot.GetFootPositionRelativeToBody(projectedStepCenter, toRotation, standToWalkRatio);
 
        // Make sure we can always catch up within the next step distance
-       var resultingDistanceBetweenFeet = Vector3.Distance(_gait.otherFoot.floorPosition, toPosition);
+       var resultingDistanceBetweenFeet = Vector3.Distance(_gait.otherFoot.setFloorPosition, toPosition);
        if (resultingDistanceBetweenFeet <= _style.halfStepDistance) return toPosition;
 
        var extraDistance = resultingDistanceBetweenFeet - _style.halfStepDistance;
        toPosition = Vector3.MoveTowards(
            toPosition,
-           _gait.currentFoot.floorPosition,
+           _gait.currentFoot.setFloorPosition,
            extraDistance
        );
 
