@@ -17,9 +17,11 @@ public class FootController : MonoBehaviour
     public Vector3 position => _setPosition;
     public float inverse => _footStyle.inverse;
 
+    private Vector3 _setFloorPosition;
     public Vector3 floorPosition
     {
-        get { var footPosition = footControl.control.position; footPosition.y = 0f; return footPosition; }
+        // get { var footPosition = footControl.control.position; footPosition.y = 0f; return footPosition; }
+        get { return _setFloorPosition;  }
     }
 
     public float speed = 1f;
@@ -112,6 +114,7 @@ public class FootController : MonoBehaviour
         _animationActive = true;
 
         _setPosition = toPosition;
+        _setFloorPosition = new Vector3(toPosition.x, 0f, toPosition.z);
         _setRotation = toRotation;
     }
 
@@ -226,8 +229,6 @@ public class FootController : MonoBehaviour
             return;
         }
 
-        // TODO: Skip if the animation is complete
-        // TODO: Increment the time to allow accelerating if the distance is greater than the step length
         _time += Time.deltaTime * speed;
         if (_time >= stepTime)
         {
@@ -244,7 +245,6 @@ public class FootController : MonoBehaviour
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion toRotation)
     {
         // TODO: Multiple hardcoded numbers that could be configurable
-
         var planarRotation = Quaternion.Euler(0, toRotation.eulerAngles.y, 0);
         footControl.control.position = toPosition + new Vector3(0f, Mathf.Max(crouchingRatio, onToesRatio) * 0.12f, 0);
 
@@ -312,7 +312,9 @@ public class FootController : MonoBehaviour
         var footPosition = footControl.control.position;
         // TODO: Cancel the forward movement when feet are higher
         _setPosition = new Vector3(footPosition.x, _style.footFloorDistance.val, footPosition.z);
+        _setFloorPosition = new Vector3(footPosition.x, 0f, footPosition.z);
         _setRotation = Quaternion.Euler(_footStyle.footStandingRotationOffset.eulerAngles.x, footControl.control.eulerAngles.y, _footStyle.footStandingRotationOffset.eulerAngles.z);
+
     }
 
     public void OnDisable()
