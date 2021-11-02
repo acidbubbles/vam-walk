@@ -11,8 +11,10 @@ public class HeadingTracker : MonoBehaviour
     private DAZBone _neckBone;
 
     private Vector3 _lastVelocityMeasurePoint;
-    private readonly float[] _lastDeltaTimes = new float[30];
-    private readonly Vector3[] _lastVelocities = new Vector3[30];
+    // TODO: We might want to use a little bit more (this is in render frames)
+    private const int _velocityFrames = 30;
+    private readonly float[] _lastDeltaTimes = new float[_velocityFrames];
+    private readonly Vector3[] _lastVelocities = new Vector3[_velocityFrames];
     private int _currentVelocityIndex;
 
     public void Configure(GaitStyle style, PersonMeasurements personMeasurements, FreeControllerV3 headControl, Rigidbody headRB, DAZBone headBone)
@@ -87,7 +89,12 @@ public class HeadingTracker : MonoBehaviour
         var bodyForward = GetBodyForward();
         var standingFloorCenter = headPosition + bodyForward * -_style.footBackOffset.val;
         var crouchingRatio = 1f - GetStandingRatio();
-        return standingFloorCenter + (bodyForward * (-0.22f * crouchingRatio));
+        // TODO: Variable
+        // TODO: Head looking down pushes the body center backwards, this should be fine but to think through
+        // TODO: The floor center could be calculated at the same time as the hips? Where is the weight?
+        var headBendForward = headControl.control.localRotation.eulerAngles.x;
+        var headBendForwardRatio = Mathf.Clamp01((headBendForward > 90 ? 0 : headBendForward) / 45f);
+        return standingFloorCenter + (bodyForward * (-0.22f * crouchingRatio)) + (bodyForward * (-0.10f * headBendForwardRatio));
     }
 
     public Quaternion GetPlanarRotation()

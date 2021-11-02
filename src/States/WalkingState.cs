@@ -24,6 +24,7 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         var bodyCenter = _heading.GetFloorCenter();
         _gait.SelectStartFoot(bodyCenter);
+        // TODO: Try to make the first step smaller, even if it means catching up after
         PlotFootCourse();
         if(_style.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
@@ -53,6 +54,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         if (!_gait.currentFoot.FloorContact()) return;
 
+        // TODO: There's a lot of small steps at the end of a movement, can we avoid that?
         if (_gait.FeetAreStable())
         {
             stateMachine.currentState = stateMachine.idleState;
