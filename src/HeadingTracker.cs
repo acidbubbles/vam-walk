@@ -28,13 +28,6 @@ public class HeadingTracker : MonoBehaviour
 
     public void Update()
     {
-        if (_style.lockHeadHeight.val)
-        {
-            var headPosition = headControl.control.position;
-            headPosition.y = _personMeasurements.floorToHead;
-            headControl.control.position = headPosition;
-        }
-
         var velocityMeasurePoint = _neckBone.transform.position;
         _lastVelocities[_currentVelocityIndex] = velocityMeasurePoint - _lastVelocityMeasurePoint;
         _lastDeltaTimes[_currentVelocityIndex] = Time.deltaTime;

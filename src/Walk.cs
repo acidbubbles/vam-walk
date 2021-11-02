@@ -8,6 +8,7 @@ public class Walk : MVRScript
     private readonly List<GameObject> _walkComponents = new List<GameObject>();
     private readonly List<GameObject> _defaultActiveComponents = new List<GameObject>();
     private StateMachine _stateMachine;
+    private PersonMeasurements _personMeasurements;
 
     public override void Init()
     {
@@ -40,14 +41,14 @@ public class Walk : MVRScript
         var bones = containingAtom.transform.Find("rescale2").GetComponentsInChildren<DAZBone>();
 
         // TODO: Refresh when style.footFloorDistance changes or when the model changes
-        var personMeasurements = new PersonMeasurements(bones, style);
+        _personMeasurements = new PersonMeasurements(bones, style);
 
         // TODO: Wait for model loaded
-        personMeasurements.Sync();
+        _personMeasurements.Sync();
 
         var measurementsVisualizer = AddWalkComponent<MeasurementsVisualizer>(nameof(MeasurementsVisualizer), c => c.Configure(
             style,
-            personMeasurements
+            _personMeasurements
         ), false);
 
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => c.Configure(
@@ -82,7 +83,7 @@ public class Walk : MVRScript
 
         var heading = AddWalkComponent<HeadingTracker>(nameof(HeadingTracker), c => c.Configure(
             style,
-            personMeasurements,
+            _personMeasurements,
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl"),
             containingAtom.rigidbodies.FirstOrDefault(fc => fc.name == "head"),
             bones.FirstOrDefault(fc => fc.name == "head")
@@ -95,7 +96,7 @@ public class Walk : MVRScript
         var gait = AddWalkComponent<GaitController>(nameof(GaitController), c => c.Configure(
             style,
             heading,
-            personMeasurements,
+            _personMeasurements,
             lFootController,
             rFootController,
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "hipControl"),
@@ -143,9 +144,48 @@ public class Walk : MVRScript
         });
     }
 
-    private static void InitUI(UI ui, GaitStyle style)
+    private void InitUI(UI ui, GaitStyle style)
     {
+        ui.AddHeader("Control", 1);
+        ui.AddAction("Refresh Measurements", false, () =>
+        {
+            _personMeasurements.Sync();
+        });
+        ui.AddAction("Optimize Controls", false, () =>
+        {
+            foreach (var fc in containingAtom.freeControllers.Where(fc => fc.name != "control"))
+            {
+                fc.currentPositionState = FreeControllerV3.PositionState.Off;
+                fc.currentRotationState = FreeControllerV3.RotationState.Off;
+            }
+
+            SetControlOptions("headControl");
+            SetControlOptions("lHandControl");
+            SetControlOptions("rHandControl");
+            SetControlOptions("hipControl");
+            SetControlOptions("lFootControl");
+            SetControlOptions("rFootControl");
+        });
+        ui.AddAction("Optimize Head Height", false, () =>
+        {
+            var headControl = containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl");
+            if (headControl == null) throw new NullReferenceException($"Could not find headControl");
+            var headPosition = headControl.control.position;
+            headPosition.y = _personMeasurements.floorToHead;
+            headControl.control.position = headPosition;
+        });
+
         style.SetupUI(ui);
+    }
+
+    private void SetControlOptions(string controlName)
+    {
+        var control = containingAtom.freeControllers.FirstOrDefault(fc => fc.name == controlName);
+        if (control == null) throw new NullReferenceException($"Could not find control {controlName}");
+        control.currentPositionState = FreeControllerV3.PositionState.On;
+        control.currentRotationState = FreeControllerV3.RotationState.On;
+        control.RBHoldPositionSpring = 10000f;
+        control.RBHoldRotationSpring = 1000f;
     }
 
     public void OnEnable()

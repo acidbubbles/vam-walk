@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class UI
@@ -43,5 +45,10 @@ public class UI
     public void AddBool(JSONStorableBool jsf, bool rightSide = false)
     {
         _plugin.CreateToggle(jsf, rightSide);
+    }
+
+    public void AddAction(string label, bool rightSide, UnityAction action)
+    {
+        _plugin.CreateButton(label, rightSide).button.onClick.AddListener(action);
     }
 }

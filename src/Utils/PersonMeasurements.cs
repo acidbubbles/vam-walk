@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class PersonMeasurements
 {
-    private const float _skeletonSumToStandHeightRatio = 0.945f;
-
     private readonly DAZBone[] _bones;
     private readonly GaitStyle _style;
     private readonly DAZBone _hipBone;
@@ -22,10 +20,10 @@ public class PersonMeasurements
 
     public void Sync()
     {
-        // TODO: Preview the exact hip ratio line
-        // TODO: Fine tune the actual multipliers
-        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * 0.992f + _style.footFloorDistance.val;
-        var upper = MeasureToHip("head") * 0.926f;
+        const float feetToHipHeightRatio = 0.992f;
+        const float hipToHeadHeightRatio = 0.926f;
+        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * feetToHipHeightRatio + _style.footFloorDistance.val;
+        var upper = MeasureToHip("head") * hipToHeadHeightRatio;
         floorToHead = floorToHip + upper;
         hipToHead = floorToHead - floorToHip;
     }
@@ -36,6 +34,7 @@ public class PersonMeasurements
         return Measure(from, _hipBone);
     }
 
+    // ReSharper disable once SuggestBaseTypeForParameter
     private static float Measure(DAZBone from, DAZBone to)
     {
         var bone = from;
