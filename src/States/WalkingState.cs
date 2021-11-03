@@ -22,7 +22,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
     public void OnEnable()
     {
-        var bodyCenter = _heading.GetFloorCenter();
+        var bodyCenter = _heading.GetGravityCenter();
         _gait.SelectStartFoot(bodyCenter);
         // TODO: Try to make the first step smaller, even if it means catching up after
         PlotFootCourse();
@@ -39,10 +39,12 @@ public class WalkingState : MonoBehaviour, IWalkState
     public void Update()
     {
         var feetCenter = _gait.GetFloorFeetCenter();
-        var distanceFromExpected = Vector3.Distance(_heading.GetFloorCenter(), feetCenter);
+        var distanceFromExpected = Vector3.Distance(_heading.GetGravityCenter(), feetCenter);
         var behindDistance = Mathf.Max(distanceFromExpected / _style.halfStepDistance, 1f);
         // TODO: Smooth out, because we rely on feet center this value moves a lot
         _gait.speed = Mathf.Min(behindDistance * _style.lateAccelerateRate.val, _style.lateAccelerateMaxSpeed.val);
+
+        // TODO: Here we should also detect whenever the current step is going too far because of sudden stop; cancel the course in that case.
 
         if (behindDistance > _style.triggerJumpAfterHalfStepsCount.val)
         {
@@ -50,7 +52,7 @@ public class WalkingState : MonoBehaviour, IWalkState
             return;
         }
 
-        _visualizer.Sync(_heading.GetFloorCenter(), _heading.GetProjectedPosition());
+        _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition());
 
         if (!_gait.currentFoot.FloorContact()) return;
 
@@ -74,7 +76,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         // TODO: Sometimes it looks like the feet is stuck at zero? To confirm (try circle walk and reset home, reload Walk)
         // TODO: We get the foot position relative to the body _twice_
-        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetFloorCenter(), projectedCenter) / _style.halfStepDistance);
+        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _style.halfStepDistance);
 
         var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
         toPosition = ResolveAvailableArrivalPosition(foot, fromPosition, toPosition);

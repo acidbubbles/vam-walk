@@ -20,7 +20,7 @@ public class JumpingState : MonoBehaviour, IWalkState
 
     public void FixedUpdate()
     {
-        var bodyCenter = _heading.GetFloorCenter();
+        var bodyCenter = _heading.GetGravityCenter();
         var bodyRotation = _heading.GetPlanarRotation();
         _visualizer.Sync(bodyCenter);
         MoveAndRotateFoot(bodyCenter, bodyRotation, _gait.lFoot);

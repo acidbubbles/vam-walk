@@ -75,7 +75,7 @@ public class GaitController : MonoBehaviour
             Mathf.Lerp(hipForwardCrouching, hipForwardStanding, standingRatio)
         );
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
-        var bodyCenter = _heading.GetFloorCenter() + hipLocalPosition;
+        var bodyCenter = _heading.GetGravityCenter() + hipLocalPosition;
 
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
         var lrRatio = -lFoot.GetMidSwingStrength() + rFoot.GetMidSwingStrength();
@@ -88,7 +88,7 @@ public class GaitController : MonoBehaviour
 
     public void SelectStartFoot(Vector3 toPosition)
     {
-        var currentPosition = _heading.GetFloorCenter();
+        var currentPosition = _heading.GetGravityCenter();
         var forwardRatio = Vector3.Dot(toPosition - currentPosition, GetFeetForward());
 
         var lFootDistance = lFoot.setFloorPosition.PlanarDistance(currentPosition);
@@ -153,7 +153,7 @@ public class GaitController : MonoBehaviour
 
     public bool FeetAreStable()
     {
-        var floorCenter = _heading.GetFloorCenter();
+        var floorCenter = _heading.GetGravityCenter();
         var bodyRotation = _heading.GetPlanarRotation();
         return FootIsStable(floorCenter, bodyRotation, currentFoot) && FootIsStable(floorCenter, bodyRotation, otherFoot);
     }

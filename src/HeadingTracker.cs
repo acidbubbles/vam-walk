@@ -38,12 +38,12 @@ public class HeadingTracker : MonoBehaviour
     }
 
     /// <summary>
-    /// Where is <see cref="GetFloorCenter"/> expected to be in <see cref="GaitStyle.stepDuration"/> seconds
+    /// Where is <see cref="GetGravityCenter"/> expected to be in <see cref="GaitStyle.stepDuration"/> seconds
     /// </summary>
     public Vector3 GetProjectedPosition()
     {
         var velocity = GetPlanarVelocity();
-        var finalPosition = GetFloorCenter() + velocity * (_style.stepDuration.val * _style.predictionStrength.val);
+        var finalPosition = GetGravityCenter() + velocity * (_style.stepDuration.val * _style.predictionStrength.val);
         return finalPosition;
     }
 
@@ -80,7 +80,7 @@ public class HeadingTracker : MonoBehaviour
         // TODO: Clamp the velocity
     }
 
-    public Vector3 GetFloorCenter()
+    public Vector3 GetGravityCenter()
     {
         var headPosition = _neckBone.transform.position;
         // Find the floor level
@@ -94,7 +94,7 @@ public class HeadingTracker : MonoBehaviour
         // TODO: The floor center could be calculated at the same time as the hips? Where is the weight?
         var headBendForward = headControl.control.localRotation.eulerAngles.x;
         var headBendForwardRatio = Mathf.Clamp01((headBendForward > 90 ? 0 : headBendForward) / 45f);
-        return standingFloorCenter + (bodyForward * (-0.22f * crouchingRatio)) + (bodyForward * (-0.10f * headBendForwardRatio));
+        return standingFloorCenter + bodyForward * Mathf.Max(-0.22f * crouchingRatio, -0.15f * headBendForwardRatio);
     }
 
     public Quaternion GetPlanarRotation()

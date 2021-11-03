@@ -30,7 +30,7 @@ public class IdleState : MonoBehaviour, IWalkState
     private bool IsOffBalanceDistance()
     {
         var headingRotation = _heading.GetPlanarRotation();
-        var headingCenter = _heading.GetFloorCenter();
+        var headingCenter = _heading.GetGravityCenter();
         var feetCenter = _gait.GetFloorFeetCenter();
         var radius = new Vector2(0.25f, 0.12f);
         var normalized = Quaternion.Inverse(headingRotation) * (headingCenter - feetCenter);
