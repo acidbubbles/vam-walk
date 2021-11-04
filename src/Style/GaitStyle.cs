@@ -63,7 +63,7 @@ public class GaitStyle
     public readonly JSONStorableFloat hipStepYaw = new JSONStorableFloat("HipStepYaw", -15f, -30f, 30f, false);
     public readonly JSONStorableFloat hipStepRoll = new JSONStorableFloat("HipStepRoll", 10f, -30f, 30f, false);
 
-    public readonly JSONStorableFloat triggerJumpAfterHalfStepsCount = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
+    public readonly JSONStorableFloat jumpTriggerDistance = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
 
     public readonly UnityEvent footOffsetChanged = new UnityEvent();
     public class UnityEventBool : UnityEvent<bool> { }
@@ -175,7 +175,7 @@ public class GaitStyle
         plugin.RegisterFloat(hipStepYaw);
         plugin.RegisterFloat(hipStepRoll);
 
-        plugin.RegisterFloat(triggerJumpAfterHalfStepsCount);
+        plugin.RegisterFloat(jumpTriggerDistance);
     }
 
     public void SetupUI(UI ui)
@@ -252,6 +252,6 @@ public class GaitStyle
         ui.AddFloat(hipStepRoll, true);
 
         ui.AddHeader("Misc", 1, true);
-        ui.AddFloat(triggerJumpAfterHalfStepsCount, true);
+        ui.AddFloat(jumpTriggerDistance, true);
     }
 }

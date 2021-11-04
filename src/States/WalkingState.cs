@@ -40,17 +40,18 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         var feetCenter = _gait.GetFloorFeetCenter();
         var distanceFromExpected = Vector3.Distance(_heading.GetGravityCenter(), feetCenter);
+
+        if (distanceFromExpected > _style.jumpTriggerDistance.val)
+        {
+            stateMachine.currentState = stateMachine.jumpingState;
+            return;
+        }
+
         var behindDistance = Mathf.Max(distanceFromExpected / _style.halfStepDistance, 1f);
         // TODO: Smooth out, because we rely on feet center this value moves a lot
         _gait.speed = Mathf.Min(behindDistance * _style.lateAccelerateRate.val, _style.lateAccelerateMaxSpeed.val);
 
         // TODO: Here we should also detect whenever the current step is going too far because of sudden stop; cancel the course in that case.
-
-        if (behindDistance > _style.triggerJumpAfterHalfStepsCount.val)
-        {
-            stateMachine.currentState = stateMachine.jumpingState;
-            return;
-        }
 
         _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition());
 
