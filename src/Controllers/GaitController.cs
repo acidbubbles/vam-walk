@@ -140,7 +140,12 @@ public class GaitController : MonoBehaviour
 
     public Vector3 GetFloorFeetCenter()
     {
-        var center = (lFoot.position + rFoot.position) / 2f;
+        return (lFoot.setFloorPosition + rFoot.setFloorPosition) / 2f;
+    }
+
+    public Vector3 GetCurrentFloorFeetCenter()
+    {
+        var center = (lFoot.footControl.control.position + rFoot.footControl.control.position) / 2f;
         center.y = 0;
         return center;
     }

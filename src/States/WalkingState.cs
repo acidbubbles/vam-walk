@@ -38,8 +38,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
     public void Update()
     {
-        var feetCenter = _gait.GetFloorFeetCenter();
-        var distanceFromExpected = Vector3.Distance(_heading.GetGravityCenter(), feetCenter);
+        var distanceFromExpected = Vector3.Distance(_heading.GetGravityCenter(), _gait.GetCurrentFloorFeetCenter());
 
         if (distanceFromExpected > _style.jumpTriggerDistance.val)
         {
@@ -47,9 +46,8 @@ public class WalkingState : MonoBehaviour, IWalkState
             return;
         }
 
-        var behindDistance = Mathf.Max(distanceFromExpected / _style.halfStepDistance, 1f);
-        // TODO: Smooth out, because we rely on feet center this value moves a lot
-        _gait.speed = Mathf.Min(behindDistance * _style.lateAccelerateRate.val, _style.lateAccelerateMaxSpeed.val);
+        var stepsToTarget = distanceFromExpected / _style.halfStepDistance * 2f;
+        _gait.speed = Mathf.Clamp(_gait.speed + (stepsToTarget - 1f) * _style.lateAccelerateSpeedToStepRatio.val * Time.deltaTime, 1f, _style.lateAccelerateMaxSpeed.val);
 
         // TODO: Here we should also detect whenever the current step is going too far because of sudden stop; cancel the course in that case.
 
