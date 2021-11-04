@@ -11,8 +11,7 @@ public class HeadingTracker : MonoBehaviour
     private DAZBone _neckBone;
 
     private Vector3 _lastVelocityMeasurePoint;
-    // TODO: We might want to use a little bit more (this is in render frames)
-    private const int _velocityFrames = 30;
+    private const int _velocityFrames = 15;
     private readonly float[] _lastDeltaTimes = new float[_velocityFrames];
     private readonly Vector3[] _lastVelocities = new Vector3[_velocityFrames];
     private int _currentVelocityIndex;
