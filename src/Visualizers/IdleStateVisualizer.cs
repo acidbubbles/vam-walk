@@ -13,11 +13,7 @@ public class IdleStateVisualizer : MonoBehaviour
 
     public void Sync(Vector3 headingCenter, Vector3 feetCenter, Vector2 stableRadius, Quaternion headingRotation)
     {
-        for (var i = 0; i < _stableCircleLineRenderer.positionCount; i++)
-        {
-            var angle = i / (float) _stableCircleLineRenderer.positionCount * 2.0f * Mathf.PI;
-            _stableCircleLineRenderer.SetPosition(i, feetCenter + headingRotation * new Vector3( stableRadius.x * Mathf.Cos(angle), 0, stableRadius.y * Mathf.Sin(angle)));
-        }
+        _stableCircleLineRenderer.FloorCircle(feetCenter, stableRadius, headingRotation);
 
         _bodyCenterLineRenderer.SetPositions(new[]
         {

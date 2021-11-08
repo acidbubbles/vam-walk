@@ -1,5 +1,6 @@
 src\Controllers\FootController.cs
 src\Controllers\GaitController.cs
+src\Controllers\HeadingTracker.cs
 src\States\IdleState.cs
 src\States\IState.cs
 src\States\JumpingState.cs
@@ -10,14 +11,15 @@ src\Style\GaitStyle.cs
 src\Style\UI.cs
 src\Utils\CustomPrefabs.cs
 src\Utils\FixedAnimationCurve.cs
+src\Utils\LineRendererExtensions.cs
 src\Utils\PersonMeasurements.cs
 src\Utils\TransformExtensions.cs
 src\Utils\Vector3Extensions.cs
 src\Visualizers\FootVisualizer.cs
 src\Visualizers\GaitVisualizer.cs
+src\Visualizers\HeadingTrackerVisualizer.cs
 src\Visualizers\IdleStateVisualizer.cs
 src\Visualizers\JumpingStateVisualizer.cs
 src\Visualizers\MeasurementsVisualizer.cs
 src\Visualizers\WalkingStateVisualizer.cs
-src\HeadingTracker.cs
 src\Walk.cs

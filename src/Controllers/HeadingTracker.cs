@@ -27,6 +27,7 @@ public class HeadingTracker : MonoBehaviour
         _lastVelocityMeasurePoint = _neckBone.transform.position;
     }
 
+
     public void Update()
     {
         var velocityMeasurePoint = _neckBone.transform.position;

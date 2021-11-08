@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class WalkingStateVisualizer : MonoBehaviour
 {
@@ -14,11 +13,7 @@ public class WalkingStateVisualizer : MonoBehaviour
 
     public void Sync(Vector3 bodyCenter, Vector3 projectedCenter)
     {
-        for (var i = 0; i < _unstableCircleLineRenderer.positionCount; i++)
-        {
-            var angle = i / (float) _unstableCircleLineRenderer.positionCount * 2.0f * Mathf.PI;
-            _unstableCircleLineRenderer.SetPosition(i, projectedCenter + new Vector3( 0.1f * Mathf.Cos(angle), 0, 0.1f * Mathf.Sin(angle)));
-        }
+        _unstableCircleLineRenderer.FloorCircle(projectedCenter, 0.1f);
 
         _projectedPositionLineRenderer.SetPositions(new[]
         {

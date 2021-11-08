@@ -65,6 +65,7 @@
     <!-- SourceFiles -->
     <Compile Include="src\Controllers\FootController.cs" />
     <Compile Include="src\Controllers\GaitController.cs" />
+    <Compile Include="src\Controllers\HeadingTracker.cs" />
     <Compile Include="src\States\IdleState.cs" />
     <Compile Include="src\States\IState.cs" />
     <Compile Include="src\States\JumpingState.cs" />
@@ -75,6 +76,7 @@
     <Compile Include="src\Style\UI.cs" />
     <Compile Include="src\Utils\CustomPrefabs.cs" />
     <Compile Include="src\Utils\FixedAnimationCurve.cs" />
+    <Compile Include="src\Utils\LineRendererExtensions.cs" />
     <Compile Include="src\Utils\PersonMeasurements.cs" />
     <Compile Include="src\Utils\TransformExtensions.cs" />
     <Compile Include="src\Utils\Vector3Extensions.cs" />
@@ -84,7 +86,6 @@
     <Compile Include="src\Visualizers\JumpingStateVisualizer.cs" />
     <Compile Include="src\Visualizers\MeasurementsVisualizer.cs" />
     <Compile Include="src\Visualizers\WalkingStateVisualizer.cs" />
-    <Compile Include="src\HeadingTracker.cs" />
     <Compile Include="src\Walk.cs" />
     <!-- /SourceFiles -->
   </ItemGroup>
