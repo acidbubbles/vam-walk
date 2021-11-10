@@ -6,6 +6,7 @@ public class FootStateVisualizer : MonoBehaviour
     private readonly LineRenderer _toeAngleLineRenderer;
     private readonly LineRenderer _midSwingAngleLineRenderer;
     private readonly LineRenderer _heelStrikeAngleLineRenderer;
+    private readonly LineRenderer _arrivalLineRenderer;
     private readonly GameObject _endSphere;
     private readonly GameObject _conflictSphere;
     private readonly GameObject[] _collisionAvoidanceSpheres = new GameObject[10];
@@ -18,6 +19,7 @@ public class FootStateVisualizer : MonoBehaviour
         _toeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
         _midSwingAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
         _heelStrikeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
+        _arrivalLineRenderer = parent.CreateVisualizerLineRenderer(LineRendererExtensions.CirclePositions, new Color(1f, 0.5f, 0.5f));
         _endSphere = Instantiate(CustomPrefabs.sphere, parent);
         _endSphere.GetComponent<Renderer>().material.color = new Color(0.5f, 0.5f, 0.3f, 0.3f);
         _conflictSphere = Instantiate(CustomPrefabs.sphere, parent);
@@ -46,48 +48,24 @@ public class FootStateVisualizer : MonoBehaviour
         _endSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
     }
 
-    public void Sync(
-        FixedAnimationCurve xCurve,
-        FixedAnimationCurve yCurve,
-        FixedAnimationCurve zCurve,
-        FixedAnimationCurve rotXCurve,
-        FixedAnimationCurve rotYCurve,
-        FixedAnimationCurve rotZCurve,
-        FixedAnimationCurve rotWCurve
-        )
+    public void Sync(FootPath path)
     {
-        var duration = xCurve.duration;
+        var duration = path.duration;
 
         var step = duration / _footPathLineRenderer.positionCount;
         for (var i = 0; i < _footPathLineRenderer.positionCount; i++)
         {
             var t = i * step;
-            _footPathLineRenderer.SetPosition(i, new Vector3
-            (
-                xCurve.Evaluate(t),
-                yCurve.Evaluate(t),
-                zCurve.Evaluate(t)
-            ));
+            _footPathLineRenderer.SetPosition(i, path.EvaluatePosition(t));
         }
 
-        SyncCueLine(_toeAngleLineRenderer, 1, xCurve, yCurve, zCurve, rotXCurve, rotYCurve, rotZCurve, rotWCurve);
-        SyncCueLine(_midSwingAngleLineRenderer, 2, xCurve, yCurve, zCurve, rotXCurve, rotYCurve, rotZCurve, rotWCurve);
-        SyncCueLine(_heelStrikeAngleLineRenderer, 3, xCurve, yCurve, zCurve, rotXCurve, rotYCurve, rotZCurve, rotWCurve);
+        SyncCueLine(_toeAngleLineRenderer, path.GetPositionAtIndex(1), path.GetRotationAtIndex(1));
+        SyncCueLine(_midSwingAngleLineRenderer, path.GetPositionAtIndex(2), path.GetRotationAtIndex(2));
+        SyncCueLine(_heelStrikeAngleLineRenderer, path.GetPositionAtIndex(3), path.GetRotationAtIndex(3));
     }
 
-    private static void SyncCueLine(
-        LineRenderer lineRenderer,
-        int index,
-        FixedAnimationCurve xCurve,
-        FixedAnimationCurve yCurve,
-        FixedAnimationCurve zCurve,
-        FixedAnimationCurve rotXCurve,
-        FixedAnimationCurve rotYCurve,
-        FixedAnimationCurve rotZCurve,
-        FixedAnimationCurve rotWCurve)
+    private static void SyncCueLine(LineRenderer lineRenderer, Vector3 position, Quaternion rotation)
     {
-        var position = new Vector3(xCurve.GetValueAtKey(index), yCurve.GetValueAtKey(index), zCurve.GetValueAtKey(index));
-        var rotation = new Quaternion(rotXCurve.GetValueAtKey(index), rotYCurve.GetValueAtKey(index), rotZCurve.GetValueAtKey(index), rotWCurve.GetValueAtKey(index));
         lineRenderer.SetPosition(0, position);
         lineRenderer.SetPosition(1, position + rotation * Vector3.forward * 0.04f);
     }
@@ -127,5 +105,10 @@ public class FootStateVisualizer : MonoBehaviour
         {
             _collisionAvoidancePaths[i].gameObject.SetActive(false);
         }
+    }
+
+    public void SyncArrival(Vector3 position, Quaternion rotation)
+    {
+        _arrivalLineRenderer.FloorCircle(position, new Vector2(0.02f, 0.04f), rotation);
     }
 }

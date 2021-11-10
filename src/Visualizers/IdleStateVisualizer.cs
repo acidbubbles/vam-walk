@@ -7,7 +7,7 @@ public class IdleStateVisualizer : MonoBehaviour
 
     public IdleStateVisualizer()
     {
-        _stableCircleLineRenderer = transform.CreateVisualizerLineRenderer(20, Color.green);
+        _stableCircleLineRenderer = transform.CreateVisualizerLineRenderer(LineRendererExtensions.CirclePositions, Color.green);
         _bodyCenterLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.green);
     }
 

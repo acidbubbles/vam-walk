@@ -2,6 +2,8 @@
 
 public static class LineRendererExtensions
 {
+    public const int CirclePositions = 20;
+
     public static void FloorCircle(this LineRenderer line, Vector3 center, float radius)
     {
         for (var i = 0; i < line.positionCount; i++)

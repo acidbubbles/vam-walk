@@ -49,9 +49,12 @@ public class WalkingState : MonoBehaviour, IWalkState
         var stepsToTarget = distanceFromExpected / _style.halfStepDistance * 2f;
         _gait.speed = Mathf.Clamp(_gait.speed + (stepsToTarget - 1f) * _style.lateAccelerateSpeedToStepRatio.val * Time.deltaTime, 1f, _style.lateAccelerateMaxSpeed.val);
 
+        _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition(), _gait.speed / _style.lateAccelerateMaxSpeed.val);
+
         // TODO: Here we should also detect whenever the current step is going too far because of sudden stop; cancel the course in that case.
 
-        _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition());
+        #warning This is what we want
+        //PlotFootCourse2();
 
         if (!_gait.currentFoot.FloorContact()) return;
 
@@ -64,6 +67,22 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         _gait.SwitchFoot();
         PlotFootCourse();
+    }
+
+    private void PlotFootCourse2()
+    {
+        var foot = _gait.currentFoot;
+        var projectedCenter = _heading.GetProjectedPosition();
+        var toRotation = _heading.GetPlanarRotation();
+        var fromPosition = foot.setFloorPosition;
+
+        // TODO: Sometimes it looks like the feet is stuck at zero? To confirm (try circle walk and reset home, reload Walk)
+        // TODO: We get the foot position relative to the body _twice_
+        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _style.halfStepDistance);
+
+        var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
+
+        _gait.currentFoot.SetContactPosition(toPosition, toRotation);
     }
 
     private void PlotFootCourse()
