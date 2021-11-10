@@ -75,27 +75,35 @@ public class FootController : MonoBehaviour
         return toRotation * Quaternion.Slerp(_footStyle.footStandingRotationOffset, _footStyle.footWalkingRotationOffset, standToWalkRatio);
     }
 
-    public void PlotCourse(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio, Vector3 passingOffset)
+    public void StartCourse()
     {
-        // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
-        _standToWalkRatio = standToWalkRatio;
         _time = 0;
         SyncHitFloorTime();
+        _animationActive = true;
+    }
+
+    public void SetContactPosition(Vector3 floorPosition, Quaternion floorRotation, float standToWalkRatio)
+    {
+        // TODO: Does this need to be a member?
+        _standToWalkRatio = standToWalkRatio;
+        // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
         var controlPosition = footControl.control.position;
-        toPosition.y = _style.footFloorDistance.val;
-        var forwardRatio = Vector3.Dot(toPosition - controlPosition, footControl.control.forward);
-        SyncPath(toPosition, toRotation, standToWalkRatio, forwardRatio, passingOffset);
+        floorPosition.y = _style.footFloorDistance.val;
+        var forwardRatio = Vector3.Dot(floorPosition - controlPosition, footControl.control.forward);
+        // TODO: Passing offset here (last argument)
+        SyncPath(floorPosition, floorRotation, forwardRatio, Vector3.zero);
         // TODO: Also animate the toes
         if (_style.visualizersEnabled.val)
         {
             visualizer.Sync(_path);
             visualizer.gameObject.SetActive(true);
         }
-        _animationActive = true;
 
-        _setPosition = toPosition;
-        _setFloorPosition = new Vector3(toPosition.x, 0f, toPosition.z);
-        _setRotation = toRotation;
+        visualizer.SyncArrival(floorPosition, floorRotation);
+
+        _setPosition = floorPosition;
+        _setFloorPosition = new Vector3(floorPosition.x, 0f, floorPosition.z);
+        _setRotation = floorRotation;
     }
 
     private void SyncHitFloorTime()
@@ -104,19 +112,19 @@ public class FootController : MonoBehaviour
         _hitFloorTime = Mathf.Max((stepTime + heelStrikeTime) / 2f, 0.01f);
     }
 
-    private void SyncPath(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio, float forwardRatio, Vector3 passingOffset)
+    private void SyncPath(Vector3 toPosition, Quaternion toRotation, float forwardRatio, Vector3 passingOffset)
     {
         var currentPosition = _setPosition;
         var currentRotation = _setRotation;
-        var up = Vector3.up * Mathf.Clamp(standToWalkRatio, _style.minStepHeightRatio.val, 1f);
+        var up = Vector3.up * Mathf.Clamp(_standToWalkRatio, _style.minStepHeightRatio.val, 1f);
 
         var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + (_path.GetRotationAtIndex(1) * passingOffset) * _style.toeOffTimeRatio.val;
         var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + (_path.GetRotationAtIndex(2) * passingOffset) * _style.midSwingTimeRatio.val;
         var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + (_path.GetRotationAtIndex(3) * passingOffset) * _style.heelStrikeTimeRatio.val;
 
-        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * standToWalkRatio, 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.toeOffTimeRatio.val);
-        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.midSwingTimeRatio.val);
-        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.heelStrikeTimeRatio.val);
+        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * _standToWalkRatio, 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.toeOffTimeRatio.val);
+        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.midSwingTimeRatio.val);
+        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.heelStrikeTimeRatio.val);
 
         EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);
@@ -140,12 +148,6 @@ public class FootController : MonoBehaviour
     {
         _time = 0;
         _animationActive = false;
-    }
-
-    #warning Temporary
-    public void SetContactPosition(Vector3 floorPosition, Quaternion floorRotation)
-    {
-        visualizer.SyncArrival(floorPosition, floorRotation);
     }
 
     public void FixedUpdate()

@@ -24,8 +24,8 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         var bodyCenter = _heading.GetGravityCenter();
         _gait.SelectStartFoot(bodyCenter);
-        // TODO: Try to make the first step smaller, even if it means catching up after
-        PlotFootCourse();
+        SyncFootCourse();
+        _gait.currentFoot.StartCourse();
         if(_style.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
     }
@@ -54,7 +54,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         // TODO: Here we should also detect whenever the current step is going too far because of sudden stop; cancel the course in that case.
 
         #warning This is what we want
-        //PlotFootCourse2();
+        SyncFootCourse();
 
         if (!_gait.currentFoot.FloorContact()) return;
 
@@ -66,10 +66,12 @@ public class WalkingState : MonoBehaviour, IWalkState
         }
 
         _gait.SwitchFoot();
-        PlotFootCourse();
+        SyncFootCourse();
+        _gait.currentFoot.StartCourse();
+        //PlotFootCourse();
     }
 
-    private void PlotFootCourse2()
+    private void SyncFootCourse()
     {
         var foot = _gait.currentFoot;
         var projectedCenter = _heading.GetProjectedPosition();
@@ -82,9 +84,10 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
 
-        _gait.currentFoot.SetContactPosition(toPosition, toRotation);
+        _gait.currentFoot.SetContactPosition(toPosition, toRotation, standToWalkRatio);
     }
 
+    /*
     private void PlotFootCourse()
     {
         var foot = _gait.currentFoot;
@@ -100,8 +103,9 @@ public class WalkingState : MonoBehaviour, IWalkState
         toPosition = ResolveAvailableArrivalPosition(foot, fromPosition, toPosition);
         var passingOffset = standToWalkRatio > 0.1f ? ResolveAvailablePassingOffset(foot, fromPosition, toPosition, toRotation) : Vector3.zero;
         var rotation = foot.GetFootRotationRelativeToBody(toRotation, standToWalkRatio);
-        foot.PlotCourse(toPosition, rotation, standToWalkRatio, passingOffset);
+        foot.StartCourse(toPosition, rotation, standToWalkRatio, passingOffset);
     }
+    */
 
     private Vector3 ComputeDesiredFootEndPosition(
         Vector3 projectedCenter,
