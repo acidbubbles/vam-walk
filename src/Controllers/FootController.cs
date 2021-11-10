@@ -40,6 +40,8 @@ public class FootController : MonoBehaviour
     private float _hitFloorTime;
     private bool _animationActive;
     private float _standToWalkRatio;
+    private Vector3 _startFloorPosition;
+    private Quaternion _startRotation;
 
     public void Configure(
         GaitStyle style,
@@ -79,6 +81,9 @@ public class FootController : MonoBehaviour
     {
         _time = 0;
         SyncHitFloorTime();
+        // TODO: This should always be floor position/rotation. Remove setFloorPosition and project rotation onto the xz plane
+        _startFloorPosition = _setFloorPosition;
+        _startRotation = _setRotation;
         _animationActive = true;
     }
 
@@ -114,24 +119,24 @@ public class FootController : MonoBehaviour
 
     private void SyncPath(Vector3 toPosition, Quaternion toRotation, float forwardRatio, Vector3 passingOffset)
     {
-        var currentPosition = _setPosition;
-        var currentRotation = _setRotation;
+        var startPosition = _startFloorPosition;
+        var startRotation = _startRotation;
         var up = Vector3.up * Mathf.Clamp(_standToWalkRatio, _style.minStepHeightRatio.val, 1f);
 
-        var toeOffPosition = Vector3.Lerp(currentPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + (_path.GetRotationAtIndex(1) * passingOffset) * _style.toeOffTimeRatio.val;
-        var midSwingPosition = Vector3.Lerp(currentPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + (_path.GetRotationAtIndex(2) * passingOffset) * _style.midSwingTimeRatio.val;
-        var heelStrikePosition = Vector3.Lerp(currentPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + (_path.GetRotationAtIndex(3) * passingOffset) * _style.heelStrikeTimeRatio.val;
+        var toeOffPosition = Vector3.Lerp(startPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight + (_path.GetRotationAtIndex(1) * passingOffset) * _style.toeOffTimeRatio.val;
+        var midSwingPosition = Vector3.Lerp(startPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight + (_path.GetRotationAtIndex(2) * passingOffset) * _style.midSwingTimeRatio.val;
+        var heelStrikePosition = Vector3.Lerp(startPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight + (_path.GetRotationAtIndex(3) * passingOffset) * _style.heelStrikeTimeRatio.val;
 
-        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * _standToWalkRatio, 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.toeOffTimeRatio.val);
-        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.midSwingTimeRatio.val);
-        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(currentRotation, toRotation, _style.heelStrikeTimeRatio.val);
+        var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * _standToWalkRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.toeOffTimeRatio.val);
+        var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.midSwingTimeRatio.val);
+        var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.heelStrikeTimeRatio.val);
 
-        EnsureQuaternionContinuity(ref toeOffRotation, currentRotation);
+        EnsureQuaternionContinuity(ref toeOffRotation, startRotation);
         EnsureQuaternionContinuity(ref midSwingRotation, toeOffRotation);
         EnsureQuaternionContinuity(ref heelStrikeRotation, midSwingRotation);
         EnsureQuaternionContinuity(ref toRotation, heelStrikeRotation);
 
-        _path.Set(0, 0f, currentPosition, currentRotation);
+        _path.Set(0, 0f, startPosition, startRotation);
         _path.Set(1, toeOffTime, toeOffPosition, toeOffRotation);
         _path.Set(2, midSwingTime, midSwingPosition, midSwingRotation);
         _path.Set(3, heelStrikeTime, heelStrikePosition, heelStrikeRotation);
@@ -187,7 +192,8 @@ public class FootController : MonoBehaviour
 
         // TODO: Reduce outside rotation (toe point straight)
         var footRotate = Quaternion.Euler(floorDistanceRatio * 45f, 0f, 0f);
-        footControl.control.rotation = toRotation * footRotate;
+        #warning Bring back
+        // footControl.control.rotation = toRotation * footRotate;
 
         // var toeRotation = toeControl.control.localRotation.eulerAngles;
         // toeControl.control.localRotation = Quaternion.Euler(/*12.6f + floorDistanceRatio * (00f * _footStyle.inverse)*/ toeRotation.x, toeRotation.y, toeRotation.z);
@@ -235,7 +241,9 @@ public class FootController : MonoBehaviour
         // TODO: Cancel the forward movement when feet are higher
         _setPosition = new Vector3(footPosition.x, _style.footFloorDistance.val, footPosition.z);
         _setFloorPosition = new Vector3(footPosition.x, 0f, footPosition.z);
+        _startFloorPosition = _setFloorPosition;
         _setRotation = Quaternion.Euler(_footStyle.footStandingRotationOffset.eulerAngles.x, footControl.control.eulerAngles.y, _footStyle.footStandingRotationOffset.eulerAngles.z);
+        _startRotation = _setRotation;
 
     }
 

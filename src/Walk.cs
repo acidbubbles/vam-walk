@@ -46,10 +46,12 @@ public class Walk : MVRScript
         // TODO: Wait for model loaded
         _personMeasurements.Sync();
 
+        #if(VIZ_MEASUREMENTS)
         var measurementsVisualizer = AddWalkComponent<MeasurementsVisualizer>(nameof(MeasurementsVisualizer), c => c.Configure(
             style,
             _personMeasurements
         ), false);
+        #endif
 
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => c.Configure(
             style
@@ -138,7 +140,9 @@ public class Walk : MVRScript
 
         style.visualizersEnabledChanged.AddListener(val =>
         {
+            #if(VIZ_MEASUREMENTS)
             measurementsVisualizer.gameObject.SetActive(val);
+            #endif
             gaitVisualizer.gameObject.SetActive(val);
             _stateMachine.currentState.visualizer.gameObject.SetActive(val);
         });

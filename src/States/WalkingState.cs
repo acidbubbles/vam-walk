@@ -24,8 +24,8 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         var bodyCenter = _heading.GetGravityCenter();
         _gait.SelectStartFoot(bodyCenter);
-        SyncFootCourse();
         _gait.currentFoot.StartCourse();
+        SyncFootCourse();
         if(_style.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
     }
@@ -66,8 +66,8 @@ public class WalkingState : MonoBehaviour, IWalkState
         }
 
         _gait.SwitchFoot();
-        SyncFootCourse();
         _gait.currentFoot.StartCourse();
+        SyncFootCourse();
         //PlotFootCourse();
     }
 

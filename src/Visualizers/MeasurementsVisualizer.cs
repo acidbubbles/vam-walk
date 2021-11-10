@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if(VIZ_MEASUREMENTS)
+using UnityEngine;
 
 public class MeasurementsVisualizer : MonoBehaviour
 {
@@ -8,9 +9,9 @@ public class MeasurementsVisualizer : MonoBehaviour
 
     public MeasurementsVisualizer()
     {
-        _feetLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.white);
-        _hipLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.white);
-        _headLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.white);
+        _feetLineRenderer = transform.CreateVisualizerLineRenderer(2, new Color(0f, 0f, 0.2f));
+        _hipLineRenderer = transform.CreateVisualizerLineRenderer(2, new Color(0f, 0f, 0.2f));
+        _headLineRenderer = transform.CreateVisualizerLineRenderer(2, new Color(0f, 0f, 0.2f));
     }
 
     public void Configure(GaitStyle style, PersonMeasurements personMeasurements)
@@ -22,22 +23,23 @@ public class MeasurementsVisualizer : MonoBehaviour
     {
         var right = Vector3.right;
         var forward = Vector3.back;
-        var rightOffset = 0.2f;
+        var radius = 10f;
         var forwardOffset = 0.15f;
         _feetLineRenderer.SetPositions(new[]
         {
-            new Vector3(0, feetHeight, 0) + right * rightOffset + forward * forwardOffset,
-            new Vector3(0, feetHeight, 0) + right * -rightOffset + forward * forwardOffset
+            new Vector3(0, feetHeight, 0) + right * radius + forward * forwardOffset,
+            new Vector3(0, feetHeight, 0) + right * -radius + forward * forwardOffset
         });
         _hipLineRenderer.SetPositions(new[]
         {
-            new Vector3(0, hipHeight, 0) + right * rightOffset + forward * forwardOffset,
-            new Vector3(0, hipHeight, 0) + right * -rightOffset + forward * forwardOffset
+            new Vector3(0, hipHeight, 0) + right * radius + forward * forwardOffset,
+            new Vector3(0, hipHeight, 0) + right * -radius + forward * forwardOffset
         });
         _headLineRenderer.SetPositions(new[]
         {
-            new Vector3(0, headHeight, 0) + right * rightOffset + forward * forwardOffset,
-            new Vector3(0, headHeight, 0) + right * -rightOffset + forward * forwardOffset
+            new Vector3(0, headHeight, 0) + right * radius + forward * forwardOffset,
+            new Vector3(0, headHeight, 0) + right * -radius + forward * forwardOffset
         });
     }
 }
+#endif

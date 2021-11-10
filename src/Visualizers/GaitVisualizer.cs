@@ -21,10 +21,12 @@ public class GaitVisualizer : MonoBehaviour
         var position = t.position;
         var right = t.right;
         var forward = t.forward;
+        const float width = 0.2f;
+        const float forwardOffset = 0.11f;
         _hipLineRenderer.SetPositions(new[]
         {
-            position + right * 0.2f + forward * 0.15f,
-            position + right * -0.2f + forward * 0.15f
+            position + right * width + forward * forwardOffset,
+            position + right * -width + forward * forwardOffset
         });
     }
 }
