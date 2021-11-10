@@ -103,6 +103,12 @@ public class HeadingTracker : MonoBehaviour
         return Quaternion.Euler(0, _headRB.transform.eulerAngles.y, 0);
     }
 
+    public Quaternion GetYaw()
+    {
+        var headRBTransform = _headRB.transform;
+        return Quaternion.LookRotation(headRBTransform.forward, headRBTransform.up);
+    }
+
     public Vector3 GetBodyForward()
     {
         return Vector3.ProjectOnPlane(_headRB.transform.forward, Vector3.up).normalized;

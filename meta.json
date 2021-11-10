@@ -22,6 +22,7 @@
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Style\\UI.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\CustomPrefabs.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\FixedAnimationCurve.cs",
+    "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\FloatExtensions.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\FootPath.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\LineRendererExtensions.cs",
     "Custom\\Scripts\\AcidBubbles\\Walk\\src\\Utils\\PersonMeasurements.cs",

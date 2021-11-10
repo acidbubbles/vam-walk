@@ -11,6 +11,7 @@ src\Style\GaitStyle.cs
 src\Style\UI.cs
 src\Utils\CustomPrefabs.cs
 src\Utils\FixedAnimationCurve.cs
+src\Utils\FloatExtensions.cs
 src\Utils\FootPath.cs
 src\Utils\LineRendererExtensions.cs
 src\Utils\PersonMeasurements.cs

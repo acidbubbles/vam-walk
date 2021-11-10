@@ -3,9 +3,9 @@
 public class FootStateVisualizer : MonoBehaviour
 {
     private readonly LineRenderer _footPathLineRenderer;
-    private readonly LineRenderer _toeAngleLineRenderer;
-    private readonly LineRenderer _midSwingAngleLineRenderer;
-    private readonly LineRenderer _heelStrikeAngleLineRenderer;
+    // private readonly LineRenderer _toeAngleLineRenderer;
+    // private readonly LineRenderer _midSwingAngleLineRenderer;
+    // private readonly LineRenderer _heelStrikeAngleLineRenderer;
     private readonly LineRenderer _arrivalLineRenderer;
     private readonly GameObject _endSphere;
     private readonly GameObject _conflictSphere;
@@ -16,9 +16,9 @@ public class FootStateVisualizer : MonoBehaviour
     {
         var parent = transform;
         _footPathLineRenderer = parent.CreateVisualizerLineRenderer(20, Color.blue);
-        _toeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
-        _midSwingAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
-        _heelStrikeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
+        // _toeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
+        // _midSwingAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
+        // _heelStrikeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
         _arrivalLineRenderer = parent.CreateVisualizerLineRenderer(LineRendererExtensions.CirclePositions, new Color(1f, 0.5f, 0.5f));
         _endSphere = Instantiate(CustomPrefabs.sphere, parent);
         _endSphere.GetComponent<Renderer>().material.color = new Color(0.5f, 0.5f, 0.3f, 0.3f);
@@ -59,16 +59,16 @@ public class FootStateVisualizer : MonoBehaviour
             _footPathLineRenderer.SetPosition(i, path.EvaluatePosition(t));
         }
 
-        SyncCueLine(_toeAngleLineRenderer, path.GetPositionAtIndex(1), path.GetRotationAtIndex(1));
-        SyncCueLine(_midSwingAngleLineRenderer, path.GetPositionAtIndex(2), path.GetRotationAtIndex(2));
-        SyncCueLine(_heelStrikeAngleLineRenderer, path.GetPositionAtIndex(3), path.GetRotationAtIndex(3));
+        // SyncCueLine(_toeAngleLineRenderer, path.GetPositionAtIndex(1), path.GetRotationAtIndex(1));
+        // SyncCueLine(_midSwingAngleLineRenderer, path.GetPositionAtIndex(2), path.GetRotationAtIndex(2));
+        // SyncCueLine(_heelStrikeAngleLineRenderer, path.GetPositionAtIndex(3), path.GetRotationAtIndex(3));
     }
 
-    private static void SyncCueLine(LineRenderer lineRenderer, Vector3 position, Quaternion rotation)
-    {
-        lineRenderer.SetPosition(0, position);
-        lineRenderer.SetPosition(1, position + rotation * Vector3.forward * 0.04f);
-    }
+    // private static void SyncCueLine(LineRenderer lineRenderer, Vector3 position, Quaternion rotation)
+    // {
+    //     lineRenderer.SetPosition(0, position);
+    //     lineRenderer.SetPosition(1, position + rotation * Vector3.forward * 0.04f);
+    // }
 
     public void SyncEndConflictCheck(Vector3 position)
     {
@@ -107,8 +107,8 @@ public class FootStateVisualizer : MonoBehaviour
         }
     }
 
-    public void SyncArrival(Vector3 position, Quaternion rotation)
+    public void SyncArrival(Vector3 position, Quaternion yaw)
     {
-        _arrivalLineRenderer.FloorCircle(position, new Vector2(0.02f, 0.04f), rotation);
+        _arrivalLineRenderer.FloorCircle(position, new Vector2(0.02f, 0.04f), yaw);
     }
 }

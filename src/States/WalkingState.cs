@@ -84,7 +84,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
 
-        _gait.currentFoot.SetContactPosition(toPosition, toRotation, standToWalkRatio);
+        _gait.currentFoot.SetContactPosition(toPosition, _heading.GetYaw(), standToWalkRatio);
     }
 
     /*

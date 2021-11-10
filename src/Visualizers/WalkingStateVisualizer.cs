@@ -1,9 +1,18 @@
-﻿using UnityEngine;
+﻿using System.Security.Cryptography;
+using UnityEngine;
 
 public class WalkingStateVisualizer : MonoBehaviour
 {
     private readonly LineRenderer _unstableCircleLineRenderer;
     private readonly LineRenderer _projectedPositionLineRenderer;
+
+    private static readonly GradientColorKey[] _gradientColorKeys = new[] { new GradientColorKey(Color.black, 0f) };
+    private static readonly GradientAlphaKey[] _gradientAlphaKeys = new[] { new GradientAlphaKey(1f, 0f) };
+    private readonly Gradient _colorGradient = new Gradient
+    {
+        colorKeys = _gradientColorKeys,
+        alphaKeys = _gradientAlphaKeys
+    };
 
     public WalkingStateVisualizer()
     {
@@ -13,16 +22,17 @@ public class WalkingStateVisualizer : MonoBehaviour
 
     public void Sync(Vector3 bodyCenter, Vector3 projectedCenter, float late)
     {
-        var color = Color.Lerp(Color.green, Color.red, late);
+        _gradientColorKeys[0] = new GradientColorKey(Color.Lerp(Color.green, Color.red, late), 0f);
+        _colorGradient.SetKeys(_gradientColorKeys, _gradientAlphaKeys);
 
         _unstableCircleLineRenderer.FloorCircle(projectedCenter, 0.1f);
-        _unstableCircleLineRenderer.material.color = color;
+        _unstableCircleLineRenderer.colorGradient = _colorGradient;
 
         _projectedPositionLineRenderer.SetPositions(new[]
         {
             projectedCenter,
             bodyCenter + Vector3.up * 0.1f
         });
-        _projectedPositionLineRenderer.material.color = color;
+        _projectedPositionLineRenderer.colorGradient = _colorGradient;
     }
 }
