@@ -190,6 +190,10 @@ public class Walk : MVRScript
             rHandControl.currentPositionState = FreeControllerV3.PositionState.Off;
             rHandControl.currentRotationState = FreeControllerV3.RotationState.Off;
         });
+        ui.AddAction("Force Walk", false, () =>
+        {
+            _stateMachine.currentState = _stateMachine.walkingState;
+        });
 
         ui.AddHeader("Profiles", 1);
         ui.AddAction("Import Profile", false, () =>

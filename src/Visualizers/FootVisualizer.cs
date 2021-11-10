@@ -3,6 +3,7 @@
 public class FootStateVisualizer : MonoBehaviour
 {
     private readonly LineRenderer _footPathLineRenderer;
+    private readonly LineRenderer _footLineRenderer;
     // private readonly LineRenderer _toeAngleLineRenderer;
     // private readonly LineRenderer _midSwingAngleLineRenderer;
     // private readonly LineRenderer _heelStrikeAngleLineRenderer;
@@ -16,6 +17,7 @@ public class FootStateVisualizer : MonoBehaviour
     {
         var parent = transform;
         _footPathLineRenderer = parent.CreateVisualizerLineRenderer(20, Color.blue);
+        _footLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.white);
         // _toeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
         // _midSwingAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
         // _heelStrikeAngleLineRenderer = parent.CreateVisualizerLineRenderer(2, Color.cyan);
@@ -46,6 +48,12 @@ public class FootStateVisualizer : MonoBehaviour
     public void Configure(GaitStyle style)
     {
         _endSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
+    }
+
+    public void Sync(Vector3 position, Quaternion rotation)
+    {
+        _footLineRenderer.SetPosition(0, position);
+        _footLineRenderer.SetPosition(1, position + rotation * Vector3.forward * 0.2f);
     }
 
     public void Sync(FootPath path)

@@ -95,7 +95,7 @@ public class FootController : MonoBehaviour
         var controlPosition = footControl.control.position;
         floorPosition.y = _style.footFloorDistance.val;
         var forwardRatio = Vector3.Dot(floorPosition - controlPosition, footControl.control.forward);
-        var yaw = Quaternion.Euler(0, Mathf.Lerp(_style.footStandingYaw.val, _style.footWalkingYaw.val, standToWalkRatio), 0) * headingYaw;
+        var yaw = Quaternion.Euler(0, Mathf.Lerp(_style.footStandingYaw.val, _style.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
         // TODO: Passing offset here (last argument)
         SyncPath(floorPosition, yaw, forwardRatio, Vector3.zero);
         // TODO: Also animate the toes
@@ -129,15 +129,15 @@ public class FootController : MonoBehaviour
         var midSwingPosition = Vector3.Lerp(startPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight;
         var heelStrikePosition = Vector3.Lerp(startPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight;
 
-        // var toeOffRotation = Quaternion.Euler(_style.toeOffPitch.val * _standToWalkRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.toeOffTimeRatio.val);
+        // var toeOffRotation = Quaternion.Euler( * _standToWalkRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.toeOffTimeRatio.val);
         // var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.midSwingTimeRatio.val);
         // var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.heelStrikeTimeRatio.val);
 
-        _path.Set(0, 0f, startPosition, _startYaw);
-        _path.Set(1, toeOffTime, toeOffPosition, _startYaw);
-        _path.Set(2, midSwingTime, midSwingPosition, Quaternion.Lerp(_startYaw, yaw, 0.5f));
-        _path.Set(3, heelStrikeTime, heelStrikePosition, yaw);
-        _path.Set(4, stepTime, toPosition, yaw);
+        _path.Set(0, 0f, startPosition, _startYaw, Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio), 0f);
+        _path.Set(1, toeOffTime, toeOffPosition, _startYaw, Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio), 1f);
+        _path.Set(2, midSwingTime, midSwingPosition, Quaternion.Lerp(_startYaw, yaw, 0.5f), Mathf.Lerp(_style.footPitch.val, _style.midSwingPitch.val, _standToWalkRatio), 1f);
+        _path.Set(3, heelStrikeTime, heelStrikePosition, yaw, Mathf.Lerp(_style.footPitch.val, _style.heelStrikePitch.val, _standToWalkRatio), 1f);
+        _path.Set(4, stepTime, toPosition, yaw, _style.footPitch.val, 0f);
     }
 
     public void CancelCourse()
@@ -152,7 +152,7 @@ public class FootController : MonoBehaviour
 
         if (!_animationActive)
         {
-            AssignFootPositionAndRotation(_setPosition, _setYaw);
+            AssignFootPositionAndRotation(_setPosition, _setYaw, _style.footPitch.val, 0f);
             return;
         }
 
@@ -160,7 +160,7 @@ public class FootController : MonoBehaviour
         if (_time >= stepTime)
         {
             CancelCourse();
-            AssignFootPositionAndRotation(_setPosition, _setYaw);
+            AssignFootPositionAndRotation(_setPosition, _setYaw, _style.footPitch.val, 0f);
             return;
         }
 
@@ -169,22 +169,24 @@ public class FootController : MonoBehaviour
         kneeControl.followWhenOffRB.AddForce(footForward * (_style.kneeForwardForce.val * GetMidSwingStrength()));
     }
 
-    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw)
+    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float pitch, float pitchWeight)
     {
         // TODO: Multiple hardcoded numbers that could be configurable
-        var planarRotation = yaw * Quaternion.Euler(_style.footPitch.val, 0f, 0f);
         footControl.control.position = toPosition + new Vector3(0f, Mathf.Max(crouchingRatio, onToesRatio) * 0.12f, 0);
 
         var floorDistance = _footBone.transform.position.y - _style.footFloorDistance.val - 0.0123f;
         var floorDistanceRatio = Mathf.Clamp01(floorDistance / 0.075f);
 
         // ReSharper disable once Unity.InefficientPropertyAccess
-        footControl.control.position += planarRotation * new Vector3(0f, 0f, floorDistanceRatio * 0.04f);
+        footControl.control.position += yaw * new Vector3(0f, 0f, floorDistanceRatio * 0.04f);
 
         // TODO: Reduce outside rotation (toe point straight)
-        var footRotate = Quaternion.Euler(floorDistanceRatio * 45f, 0f, 0f);
-        #warning Bring back
-        footControl.control.rotation = planarRotation * footRotate;
+        #warning Replace by calculating toes position and finding back where the feet should be
+        var footRotate = Quaternion.Euler(Mathf.Lerp(_style.footPitch.val + floorDistanceRatio * 45f, pitch, pitchWeight), 0f, 0f);
+        footControl.control.rotation = yaw * footRotate;
+
+        if (_style.visualizersEnabled.val)
+            visualizer.Sync(footControl.control.position, footControl.control.rotation);
 
         // var toeRotation = toeControl.control.localRotation.eulerAngles;
         // toeControl.control.localRotation = Quaternion.Euler(/*12.6f + floorDistanceRatio * (00f * _footStyle.inverse)*/ toeRotation.x, toeRotation.y, toeRotation.z);
@@ -209,10 +211,12 @@ public class FootController : MonoBehaviour
     {
         if (!_animationActive) throw new InvalidOperationException("Cannot sample foot animation because it is currently inactive.");
 
-        var footPosition = _path.EvaluatePosition(t);
-        var yaw = _path.EvaluateYaw(t);
-        // TODO: Untangle actual rotation v.s. generic rotation
-        AssignFootPositionAndRotation(footPosition, yaw);
+        AssignFootPositionAndRotation(
+            _path.EvaluatePosition(t),
+            _path.EvaluateYaw(t),
+            _path.EvaluatePitch(t),
+            _path.EvaluatePitchWeight(t)
+        );
     }
 
     public bool FloorContact()
