@@ -130,11 +130,46 @@ public class FootController : MonoBehaviour
         // var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.midSwingTimeRatio.val);
         // var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.heelStrikeTimeRatio.val);
 
-        _path.Set(0, 0f, startPosition, _startYaw, Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio), 0f);
-        _path.Set(1, toeOffTime, toeOffPosition, _startYaw, Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio), 1f);
-        _path.Set(2, midSwingTime, midSwingPosition, Quaternion.Lerp(_startYaw, yaw, 0.5f), Mathf.Lerp(_style.footPitch.val, _style.midSwingPitch.val, _standToWalkRatio), 1f);
-        _path.Set(3, heelStrikeTime, heelStrikePosition, yaw, Mathf.Lerp(_style.footPitch.val, _style.heelStrikePitch.val, _standToWalkRatio), 1f);
-        _path.Set(4, stepTime, toPosition, yaw, _style.footPitch.val, 0f);
+        _path.Set(0,
+            0f,
+            startPosition,
+            _startYaw,
+            Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio),
+            0f,
+            0f
+        );
+        _path.Set(1,
+            toeOffTime,
+            toeOffPosition,
+            _startYaw,
+            Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio),
+            1f,
+            0f
+        );
+        _path.Set(2,
+            midSwingTime,
+            midSwingPosition,
+            Quaternion.Lerp(_startYaw, yaw, 0.5f),
+            Mathf.Lerp(_style.footPitch.val, _style.midSwingPitch.val, _standToWalkRatio),
+            1f,
+            5f * _standToWalkRatio
+        );
+        _path.Set(3,
+            heelStrikeTime,
+            heelStrikePosition,
+            yaw,
+            Mathf.Lerp(_style.footPitch.val, _style.heelStrikePitch.val, _standToWalkRatio),
+            1f,
+            10f * _standToWalkRatio
+        );
+        _path.Set(4,
+            stepTime,
+            toPosition,
+            yaw,
+            _style.footPitch.val,
+            0f,
+            0f
+        );
     }
 
     public void CancelCourse()
@@ -149,7 +184,7 @@ public class FootController : MonoBehaviour
 
         if (!_animationActive)
         {
-            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f);
+            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f, 0f);
             return;
         }
 
@@ -157,7 +192,7 @@ public class FootController : MonoBehaviour
         if (_time >= stepTime)
         {
             CancelCourse();
-            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f);
+            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f, 0f);
             return;
         }
 
@@ -166,7 +201,7 @@ public class FootController : MonoBehaviour
         kneeControl.followWhenOffRB.AddForce(footForward * (_style.kneeForwardForce.val * GetMidSwingStrength()));
     }
 
-    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float pitch, float pitchWeight)
+    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float footPitch, float pitchWeight, float toePitch)
     {
         // TODO: Multiple hardcoded numbers that could be configurable
         const float maxOverHeight = 0.09f;
@@ -182,14 +217,18 @@ public class FootController : MonoBehaviour
 
         // TODO: Reduce outside rotation (toe point straight)
         #warning Replace by calculating toes position and finding back where the feet should be
-        var footRotate = Quaternion.Euler(Mathf.Lerp(_style.footPitch.val + plantarFlexionAngle, pitch, pitchWeight), 0f, 0f);
+        var footRotate = Quaternion.Euler(Mathf.Lerp(_style.footPitch.val + plantarFlexionAngle, footPitch, pitchWeight), 0f, 0f);
         footControl.control.rotation = yaw * footRotate;
 
         if (_style.visualizersEnabled.val)
             visualizer.Sync(footControl.control.position, footControl.control.rotation);
 
-        // var toeRotation = toeControl.control.localRotation.eulerAngles;
-        // toeControl.control.localRotation = Quaternion.Euler(/*12.6f + floorDistanceRatio * (00f * _footStyle.inverse)*/ toeRotation.x, toeRotation.y, toeRotation.z);
+        if (toePitch > 0)
+        {
+            // toeControl.followWhenOffRB.AddRelativeTorque(-45f * Time.deltaTime, 0, 0);
+            var toeRotation = toeControl.followWhenOffRB.transform.localRotation.eulerAngles;
+            toeControl.followWhenOffRB.transform.localRotation = Quaternion.Euler(toeRotation + new Vector3(-toePitch, 0, 0));
+        }
 
         // if (_footBone.name == "rFoot")
         // {
@@ -214,8 +253,9 @@ public class FootController : MonoBehaviour
         AssignFootPositionAndRotation(
             _path.EvaluatePosition(t),
             _path.EvaluateYaw(t),
-            _path.EvaluatePitch(t),
-            _path.EvaluatePitchWeight(t)
+            _path.EvaluateFootPitch(t),
+            _path.EvaluateFootPitchWeight(t),
+            _path.EvaluateToePitch(t)
         );
     }
 

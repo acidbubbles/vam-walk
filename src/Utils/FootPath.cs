@@ -12,8 +12,9 @@ public class FootPath
     private readonly float[] _times = new float[_keyframes];
     private readonly Vector3[] _positions = new Vector3[_keyframes];
     private readonly Quaternion[] _yaws = new Quaternion[_keyframes];
-    private readonly float[] _pitches = new float[_keyframes];
-    private readonly float[] _pitchWeight = new float[_keyframes];
+    private readonly float[] _footPitches = new float[_keyframes];
+    private readonly float[] _footPitchWeight = new float[_keyframes];
+    private readonly float[] _toePitches = new float[_keyframes];
 
     public Vector3 GetPositionAtIndex(int i)
     {
@@ -31,23 +32,29 @@ public class FootPath
         return Evaluate(t, _yaws, Quaternion.Slerp);
     }
 
-    public float EvaluatePitch(float t)
+    public float EvaluateFootPitch(float t)
     {
-        return Evaluate(t, _pitches, Mathf.Lerp);
+        return Evaluate(t, _footPitches, Mathf.Lerp);
     }
 
-    public float EvaluatePitchWeight(float t)
+    public float EvaluateFootPitchWeight(float t)
     {
-        return Evaluate(t, _pitchWeight, Mathf.Lerp);
+        return Evaluate(t, _footPitchWeight, Mathf.Lerp);
     }
 
-    public void Set(int i, float t, Vector3 position, Quaternion yaw, float pitch, float pitchWeight)
+    public float EvaluateToePitch(float t)
+    {
+        return Evaluate(t, _toePitches, Mathf.Lerp);
+    }
+
+    public void Set(int i, float t, Vector3 position, Quaternion yaw, float pitch, float pitchWeight, float toePitch)
     {
         _times[i] = t;
         _positions[i] = position;
         _yaws[i] = yaw;
-        _pitches[i] = pitch;
-        _pitchWeight[i] = pitchWeight;
+        _footPitches[i] = pitch;
+        _footPitchWeight[i] = pitchWeight;
+        _toePitches[i] = toePitch;
     }
 
     private T Evaluate<T>(float t, IList<T> values, Func<T, T, float, T> lerp)
