@@ -56,14 +56,9 @@ public class HeadingTracker : MonoBehaviour
         return standingRatio;
     }
 
-    public float GetOnToesRatio()
+    public float GetOverHeight()
     {
-        // TODO: Shared code with Standing Ratio
-        var headHeightRatio = headControl.transform.position.y / _personMeasurements.floorToHead;
-        // TODO: Configurable?
-        // TODO: Rework
-        var onToesRatio = Mathf.Clamp01((headHeightRatio - 1f) / 0.08f);
-        return onToesRatio;
+        return Mathf.Max(0, headControl.transform.position.y - _personMeasurements.floorToHead);
     }
 
     public Vector3 GetPlanarVelocity()

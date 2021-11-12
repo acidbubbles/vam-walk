@@ -59,12 +59,12 @@ public class GaitController : MonoBehaviour
         var headingRotation = _heading.GetPlanarRotation();
         var standingRatio = _heading.GetStandingRatio();
         var crouchingRatio = 1f - standingRatio;
-        var onToesRatio = _heading.GetOnToesRatio();
+        var overHeight = _heading.GetOverHeight();
 
         lFoot.crouchingRatio = crouchingRatio;
-        lFoot.onToesRatio = onToesRatio;
+        lFoot.overHeight = overHeight;
         rFoot.crouchingRatio = crouchingRatio;
-        rFoot.onToesRatio = onToesRatio;
+        rFoot.overHeight = overHeight;
 
         if (_hipControl.isGrabbing) return;
 
@@ -91,8 +91,8 @@ public class GaitController : MonoBehaviour
         var currentPosition = _heading.GetGravityCenter();
         var forwardRatio = Vector3.Dot(toPosition - currentPosition, GetFeetForward());
 
-        var lFootDistance = lFoot.setFloorPosition.PlanarDistance(currentPosition);
-        var rFootDistance = rFoot.setFloorPosition.PlanarDistance(currentPosition);
+        var lFootDistance = lFoot.floorPosition.PlanarDistance(currentPosition);
+        var rFootDistance = rFoot.floorPosition.PlanarDistance(currentPosition);
 
         if(Mathf.Abs(forwardRatio) > 0.2)
         {
@@ -140,7 +140,7 @@ public class GaitController : MonoBehaviour
 
     public Vector3 GetFloorFeetCenter()
     {
-        return (lFoot.setFloorPosition + rFoot.setFloorPosition) / 2f;
+        return (lFoot.floorPosition + rFoot.floorPosition) / 2f;
     }
 
     public Vector3 GetCurrentFloorFeetCenter()
@@ -153,7 +153,7 @@ public class GaitController : MonoBehaviour
     public Vector3 GetFeetForward()
     {
         // TODO: Cheap plane to get a perpendicular direction to the feet line, there is surely a better method
-        return Vector3.Cross(rFoot.position - lFoot.position, Vector3.up).normalized;
+        return Vector3.Cross(rFoot.floorPosition - lFoot.floorPosition, Vector3.up).normalized;
     }
 
     public bool FeetAreStable()
@@ -167,7 +167,7 @@ public class GaitController : MonoBehaviour
     {
         // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
         const float footDistanceEpsilon = 0.02f;
-        var footDistance = Vector3.Distance(foot.setFloorPosition, foot.GetFootPositionRelativeToBody(floorCenter, bodyRotation, 0f));
+        var footDistance = Vector3.Distance(foot.floorPosition, foot.GetFootPositionRelativeToBody(floorCenter, bodyRotation, 0f));
         return footDistance < footDistanceEpsilon;
     }
 

@@ -14,16 +14,14 @@ public class FootController : MonoBehaviour
     private GaitFootStyle _footStyle;
     private DAZBone _footBone;
 
-    public Vector3 position => _setPosition;
-    public float inverse => _footStyle.inverse;
+    public Vector3 floorPosition { get; private set; }
 
-    private Vector3 _setFloorPosition;
-    public Vector3 setFloorPosition => _setFloorPosition;
+    public float inverse => _footStyle.inverse;
 
     public float speed = 1f;
     // TODO: Get this from HeadingTracking and cache in Update instead of weirdly populating
     public float crouchingRatio;
-    public float onToesRatio;
+    public float overHeight;
 
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
@@ -34,7 +32,6 @@ public class FootController : MonoBehaviour
     private float heelStrikeHeight => _style.stepHeight.val * _style.heelStrikeHeightRatio.val;
 
     private readonly FootPath _path = new FootPath();
-    private Vector3 _setPosition;
     private Quaternion _setYaw;
     private float _time;
     private float _hitFloorTime;
@@ -82,22 +79,23 @@ public class FootController : MonoBehaviour
         _time = 0;
         SyncHitFloorTime();
         // TODO: This should always be floor position/rotation. Remove setFloorPosition and project rotation onto the xz plane
-        _startFloorPosition = _setFloorPosition;
+        _startFloorPosition = floorPosition;
         _startYaw = _setYaw;
         _animationActive = true;
     }
 
-    public void SetContactPosition(Vector3 floorPosition, Quaternion headingYaw, float standToWalkRatio)
+    public void SetContactPosition(Vector3 targetFloorPosition, Quaternion headingYaw, float standToWalkRatio)
     {
+        if (targetFloorPosition.y != 0) throw new InvalidOperationException("Contact position should always be at floor level");
+
         // TODO: Does this need to be a member?
         _standToWalkRatio = standToWalkRatio;
         // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
         var controlPosition = footControl.control.position;
-        floorPosition.y = _style.footFloorDistance.val;
-        var forwardRatio = Vector3.Dot(floorPosition - controlPosition, footControl.control.forward);
+        var forwardRatio = Vector3.Dot(targetFloorPosition - controlPosition, footControl.control.forward);
         var yaw = Quaternion.Euler(0, Mathf.Lerp(_style.footStandingYaw.val, _style.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
         // TODO: Passing offset here (last argument)
-        SyncPath(floorPosition, yaw, forwardRatio, Vector3.zero);
+        SyncPath(targetFloorPosition, yaw, forwardRatio, Vector3.zero);
         // TODO: Also animate the toes
         if (_style.visualizersEnabled.val)
         {
@@ -105,10 +103,9 @@ public class FootController : MonoBehaviour
             visualizer.gameObject.SetActive(true);
         }
 
-        visualizer.SyncArrival(floorPosition, yaw);
+        visualizer.SyncArrival(targetFloorPosition, yaw);
 
-        _setPosition = floorPosition;
-        _setFloorPosition = new Vector3(floorPosition.x, 0f, floorPosition.z);
+        floorPosition = targetFloorPosition;
         _setYaw = yaw;
     }
 
@@ -152,7 +149,7 @@ public class FootController : MonoBehaviour
 
         if (!_animationActive)
         {
-            AssignFootPositionAndRotation(_setPosition, _setYaw, _style.footPitch.val, 0f);
+            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f);
             return;
         }
 
@@ -160,7 +157,7 @@ public class FootController : MonoBehaviour
         if (_time >= stepTime)
         {
             CancelCourse();
-            AssignFootPositionAndRotation(_setPosition, _setYaw, _style.footPitch.val, 0f);
+            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f);
             return;
         }
 
@@ -172,17 +169,20 @@ public class FootController : MonoBehaviour
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float pitch, float pitchWeight)
     {
         // TODO: Multiple hardcoded numbers that could be configurable
-        footControl.control.position = toPosition + new Vector3(0f, Mathf.Max(crouchingRatio, onToesRatio) * 0.12f, 0);
+        const float maxOverHeight = 0.09f;
+        const float maxPlantarFlexionAngle = 65f;
+        // TODO: Instead of doing a linear interpolation, use a sin interpolation so the angle does a circle around the toes (calculate the bone length and cancel the base height)
+        const float maxPlantarFlexionForward = 0.10f;
 
-        var floorDistance = _footBone.transform.position.y - _style.footFloorDistance.val - 0.0123f;
-        var floorDistanceRatio = Mathf.Clamp01(floorDistance / 0.075f);
+        var plantarFlexionHeight = Mathf.Min(Mathf.Max(crouchingRatio * maxOverHeight, overHeight), maxOverHeight);
+        var plantarFlexionRatio = Mathf.Clamp01(plantarFlexionHeight / maxOverHeight);
+        var plantarFlexionAngle = plantarFlexionRatio * maxPlantarFlexionAngle;
 
-        // ReSharper disable once Unity.InefficientPropertyAccess
-        footControl.control.position += yaw * new Vector3(0f, 0f, floorDistanceRatio * 0.04f);
+        footControl.control.position = toPosition + yaw * new Vector3(0f, _style.footFloorDistance.val + plantarFlexionHeight, plantarFlexionRatio * maxPlantarFlexionForward);
 
         // TODO: Reduce outside rotation (toe point straight)
         #warning Replace by calculating toes position and finding back where the feet should be
-        var footRotate = Quaternion.Euler(Mathf.Lerp(_style.footPitch.val + floorDistanceRatio * 45f, pitch, pitchWeight), 0f, 0f);
+        var footRotate = Quaternion.Euler(Mathf.Lerp(_style.footPitch.val + plantarFlexionAngle, pitch, pitchWeight), 0f, 0f);
         footControl.control.rotation = yaw * footRotate;
 
         if (_style.visualizersEnabled.val)
@@ -235,10 +235,9 @@ public class FootController : MonoBehaviour
     {
         var footPosition = footControl.control.position;
         // TODO: Cancel the forward movement when feet are higher
-        _setPosition = new Vector3(footPosition.x, _style.footFloorDistance.val, footPosition.z);
-        _setFloorPosition = new Vector3(footPosition.x, 0f, footPosition.z);
-        _startFloorPosition = _setFloorPosition;
-        _setYaw = Quaternion.LookRotation(footControl.control.forward, footControl.control.up);
+        floorPosition = new Vector3(footPosition.x, 0f, footPosition.z);
+        _startFloorPosition = floorPosition;
+        _setYaw = Quaternion.Euler(0, footControl.control.rotation.eulerAngles.y, 0);
         _startYaw = _setYaw;
 
     }
