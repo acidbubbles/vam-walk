@@ -87,8 +87,8 @@ public class HeadingTracker : MonoBehaviour
         // TODO: Variable
         // TODO: Head looking down pushes the body center backwards, this should be fine but to think through
         // TODO: The floor center could be calculated at the same time as the hips? Where is the weight?
-        var headBendForward = headControl.control.localRotation.eulerAngles.x;
-        var headBendForwardRatio = Mathf.Clamp01((headBendForward > 90 ? 0 : headBendForward) / 45f);
+        var headBendForwardAngle = headControl.control.localRotation.eulerAngles.x;
+        var headBendForwardRatio = Mathf.Clamp01((headBendForwardAngle > 90 ? 0 : headBendForwardAngle) / 45f);
         return standingFloorCenter + bodyForward * Mathf.Max(-0.22f * crouchingRatio, -0.15f * headBendForwardRatio);
     }
 

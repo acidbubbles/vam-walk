@@ -11,14 +11,14 @@ public class IdleStateVisualizer : MonoBehaviour
         _bodyCenterLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.green);
     }
 
-    public void Sync(Vector3 headingCenter, Vector3 feetCenter, Vector2 stableRadius, Quaternion headingRotation)
+    public void Sync(Vector3 gravityCenter, Vector3 feetCenter, Vector2 stableRadius, Quaternion headingRotation)
     {
         _stableCircleLineRenderer.FloorCircle(feetCenter, stableRadius, headingRotation);
 
         _bodyCenterLineRenderer.SetPositions(new[]
         {
-            headingCenter,
-            headingCenter + Vector3.up * 0.2f
+            gravityCenter,
+            gravityCenter + Vector3.up * 0.2f
         });
     }
 }

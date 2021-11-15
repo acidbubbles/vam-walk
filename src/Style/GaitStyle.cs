@@ -51,8 +51,8 @@ public class GaitStyle
     public readonly JSONStorableFloat heelStrikeDistanceRatio = new JSONStorableFloat("HeelStrikeDistanceRatio", 0.8f, 0f, 1f, true);
 
     // TODO: This pitch should always be calculated from toe position
-    public readonly JSONStorableFloat toeOffPitch = new JSONStorableFloat("ToeOffPitch", 40f, -90, 90, true);
-    public readonly JSONStorableFloat midSwingPitch = new JSONStorableFloat("MidSwingPitch", 20f, -90, 90, true);
+    public readonly JSONStorableFloat toeOffPitch = new JSONStorableFloat("ToeOffPitch", 60f, -90, 90, true);
+    public readonly JSONStorableFloat midSwingPitch = new JSONStorableFloat("MidSwingPitch", 40f, -90, 90, true);
     public readonly JSONStorableFloat heelStrikePitch = new JSONStorableFloat("HeelStrikePitch", -10f, -90, 90, true);
 
     public readonly JSONStorableFloat hipStandingForward = new JSONStorableFloat("HipStandingForward", 0.05f, -1f, 1f, false);

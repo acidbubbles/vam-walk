@@ -30,14 +30,14 @@ public class IdleState : MonoBehaviour, IWalkState
     private bool IsOffBalanceDistance()
     {
         var headingRotation = _heading.GetPlanarRotation();
-        var headingCenter = _heading.GetGravityCenter();
+        var gravityCenter = _heading.GetGravityCenter();
         var feetCenter = _gait.GetFloorFeetCenter();
         var radius = new Vector2(0.25f, 0.12f);
-        var normalized = Quaternion.Inverse(headingRotation) * (headingCenter - feetCenter);
+        var normalized = Quaternion.Inverse(headingRotation) * (gravityCenter - feetCenter);
         // X^2/a^2 + Y^2/b^2 <= 1
         var normalizedDistanceFromCenter = (normalized.x * normalized.x) / (radius.x * radius.x) + (normalized.z * normalized.z) / (radius.y * radius.y);
         if (_style.visualizersEnabled.val)
-            _visualizer.Sync(headingCenter, feetCenter, radius, headingRotation);
+            _visualizer.Sync(gravityCenter, feetCenter, radius, headingRotation);
         return normalizedDistanceFromCenter > 1f;
     }
 

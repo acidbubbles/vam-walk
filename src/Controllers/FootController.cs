@@ -134,7 +134,7 @@ public class FootController : MonoBehaviour
             0f,
             startPosition,
             _startYaw,
-            Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio),
+            _style.footPitch.val,
             0f,
             0f
         );
