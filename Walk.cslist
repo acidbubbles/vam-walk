@@ -15,6 +15,7 @@ src\Utils\FloatExtensions.cs
 src\Utils\FootPath.cs
 src\Utils\LineRendererExtensions.cs
 src\Utils\PersonMeasurements.cs
+src\Utils\QuaternionExtensions.cs
 src\Utils\TransformExtensions.cs
 src\Utils\Vector3Extensions.cs
 src\Visualizers\FootVisualizer.cs

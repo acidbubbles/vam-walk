@@ -60,11 +60,15 @@ public class GaitController : MonoBehaviour
         var standingRatio = _heading.GetStandingRatio();
         var crouchingRatio = 1f - standingRatio;
         var overHeight = _heading.GetOverHeight();
+        var gravityCenter = _heading.GetGravityCenter();
 
+        // TODO: Everywhere we just get things on the fly except here; instead, precalculate everything in a shared state object?
         lFoot.crouchingRatio = crouchingRatio;
         lFoot.overHeight = overHeight;
+        lFoot.gravityCenter = gravityCenter;
         rFoot.crouchingRatio = crouchingRatio;
         rFoot.overHeight = overHeight;
+        rFoot.gravityCenter = gravityCenter;
 
         if (_hipControl.isGrabbing) return;
 
@@ -75,7 +79,7 @@ public class GaitController : MonoBehaviour
             Mathf.Lerp(hipForwardCrouching, hipForwardStanding, standingRatio)
         );
         // TODO: React to foot down, e.g. down even adds instant weight that gets back up quickly (tracked separately from animation), weight relative to step distance
-        var bodyCenter = _heading.GetGravityCenter() + hipLocalPosition;
+        var bodyCenter = gravityCenter + hipLocalPosition;
 
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
         var lrRatio = -lFoot.GetMidSwingStrength() + rFoot.GetMidSwingStrength();

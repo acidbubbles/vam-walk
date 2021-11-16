@@ -10,7 +10,8 @@ public class GaitStyle
     public float halfStepDistance => stepDistance.val / 2f;
 
     // TODO: When toggled, fire an event so visualizers can update themselves
-    public readonly JSONStorableBool visualizersEnabled = new JSONStorableBool("Visualizers Enabled", false);
+    public readonly JSONStorableBool visualizersEnabled = new JSONStorableBool("Visualizers Enabled", true);
+    public readonly JSONStorableBool allowWalk = new JSONStorableBool("Allow Walk", false);
 
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.03f, -0.1f, 0.1f, false);
@@ -182,6 +183,9 @@ public class GaitStyle
 
     public void SetupUI(UI ui)
     {
+        ui.AddHeader("Behavior", 1);
+        ui.AddBool(allowWalk);
+
         ui.AddHeader("Debugging", 1);
         ui.AddBool(visualizersEnabled);
 

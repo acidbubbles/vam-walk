@@ -13,6 +13,7 @@ public class FootController : MonoBehaviour
     private GaitStyle _style;
     private GaitFootStyle _footStyle;
     private DAZBone _footBone;
+    private DAZBone _toeBone;
 
     public Vector3 floorPosition { get; private set; }
 
@@ -22,6 +23,7 @@ public class FootController : MonoBehaviour
     // TODO: Get this from HeadingTracking and cache in Update instead of weirdly populating
     public float crouchingRatio;
     public float overHeight;
+    public Vector3 gravityCenter;
 
     private float stepTime => _style.stepDuration.val;
     private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
@@ -44,6 +46,7 @@ public class FootController : MonoBehaviour
         GaitStyle style,
         GaitFootStyle footStyle,
         DAZBone footBone,
+        DAZBone toeBone,
         FreeControllerV3 footControl,
         FreeControllerV3 kneeControl,
         FreeControllerV3 toeControl,
@@ -53,6 +56,7 @@ public class FootController : MonoBehaviour
         _style = style;
         _footStyle = footStyle;
         _footBone = footBone;
+        _toeBone = toeBone;
         this.footControl = footControl;
         this.kneeControl = kneeControl;
         this.toeControl = toeControl;
@@ -203,6 +207,67 @@ public class FootController : MonoBehaviour
 
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float footPitch, float pitchWeight, float toePitch)
     {
+        // TODO: This should be configurable, and validate the value
+        const float floorOffset = 0.0175f;
+        var footFloorDistance = _style.footFloorDistance.val - floorOffset;
+
+        var footBoneLength = Vector3.Distance(_footBone.worldPosition, _toeBone.worldPosition);
+        var toePosition = floorPosition + yaw * new Vector3(0, 0, footBoneLength / 2f);
+        var heelPosition = floorPosition + yaw * new Vector3(0, 0, -footBoneLength / 2f);
+        var weightOnZ = gravityCenter.GetPercentageAlong(heelPosition, toePosition);
+
+        var basePitch = 90f - (Mathf.Acos(footFloorDistance / footBoneLength) * Mathf.Rad2Deg);
+        var pitch2 = basePitch;
+
+        if (weightOnZ > 1)
+        {
+            const float maxPitchForwardDistanceInFootLengths = 3f;
+            var forwardWeight = Mathf.Clamp01((weightOnZ - 1) / maxPitchForwardDistanceInFootLengths);
+            const float maxPitchForwardDistanceAngle = 70f;
+            pitch2 += forwardWeight * maxPitchForwardDistanceAngle;
+        }
+        else if (weightOnZ < 0)
+        {
+            const float maxPitchBackwardCancelInFootLengths = 1f;
+            var backwardWeight = Mathf.Clamp01((-weightOnZ) / maxPitchBackwardCancelInFootLengths);
+            const float maxPitchBackwardDistanceAngle = 70f;
+            pitch2 -= backwardWeight * maxPitchBackwardDistanceAngle;
+        }
+        if (overHeight > 0f)
+        {
+            const float overHeightImpactOnPitch = 480f;
+            pitch2 += overHeight * overHeightImpactOnPitch;
+        }
+        else if (crouchingRatio > 0f)
+        {
+            const float crouchRatioImpactOnPitch = 50f;
+            pitch2 += crouchingRatio * crouchRatioImpactOnPitch;
+        }
+
+        const float maxPitch = 85f;
+        pitch2 = Mathf.Clamp(pitch2, basePitch, maxPitch);
+
+        var controlPosition = heelPosition.RotatePointAroundPivot(toePosition, Quaternion.Euler(pitch2, 0, 0));
+
+        /*
+        if (footControl.name == "lFootControl")
+        {
+            SuperController.singleton.ClearMessages();
+            SuperController.LogMessage($"{weightOnZ:0.000} {pitch2} vs {footFloorDistance}");
+            if (weightOnZ > 1)
+            {
+                SuperController.LogMessage($"Push forward: {weightOnZ - 1:0.000}");
+            }
+        }
+        */
+
+        // TODO: In reality the heel is further behind than the control
+        footControl.control.position = controlPosition + new Vector3(0, floorOffset, 0);
+        footControl.control.rotation = yaw * Quaternion.Euler(pitch2, 0, 0);
+
+        return;
+        #warning Previous code
+
         // TODO: Multiple hardcoded numbers that could be configurable
         const float maxOverHeight = 0.09f;
         const float maxPlantarFlexionAngle = 65f;
@@ -273,9 +338,10 @@ public class FootController : MonoBehaviour
 
     private void SetToCurrent()
     {
-        var footPosition = footControl.control.position;
+        var footPosition = _footBone.worldPosition;
+        var toePosition = _toeBone.worldPosition;
         // TODO: Cancel the forward movement when feet are higher
-        floorPosition = new Vector3(footPosition.x, 0f, footPosition.z);
+        floorPosition = new Vector3((footPosition.x + toePosition.x) / 2f, 0f, (footPosition.z + toePosition.z) / 2f);
         _startFloorPosition = floorPosition;
         _setYaw = Quaternion.Euler(0, footControl.control.rotation.eulerAngles.y, 0);
         _startYaw = _setYaw;
