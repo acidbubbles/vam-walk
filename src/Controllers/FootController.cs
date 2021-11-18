@@ -11,13 +11,13 @@ public class FootController : MonoBehaviour
     public FootStateVisualizer visualizer;
 
     private WalkConfiguration _config;
-    private FootConfiguration _footConfiguration;
+    private FootConfiguration _footConfig;
     private DAZBone _footBone;
     private DAZBone _toeBone;
 
     public Vector3 floorPosition { get; private set; }
 
-    public float inverse => _footConfiguration.inverse;
+    public float inverse => _footConfig.inverse;
 
     public float speed = 1f;
     // TODO: Get this from HeadingTracking and cache in Update instead of weirdly populating
@@ -54,7 +54,7 @@ public class FootController : MonoBehaviour
         FootStateVisualizer visualizer)
     {
         _config = style;
-        _footConfiguration = footConfiguration;
+        _footConfig = footConfiguration;
         _footBone = footBone;
         _toeBone = toeBone;
         this.footControl = footControl;
@@ -66,16 +66,24 @@ public class FootController : MonoBehaviour
         SyncHitFloorTime();
     }
 
+    public bool HasTarget() => !ReferenceEquals(_footConfig.target, null);
+
+    public Vector3 GetTargetFloorPosition()
+    {
+        var targetPosition = _footConfig.target.control.position;
+        return new Vector3(targetPosition.x, 0, targetPosition.z);
+    }
+
     public Vector3 GetFootPositionRelativeToBody(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
-        var finalPosition = toPosition + (toRotation * _footConfiguration.footStandingPositionFloorOffset) * (1 - standToWalkRatio) + (toRotation * _footConfiguration.footWalkingPositionFloorOffset) * standToWalkRatio;
+        var finalPosition = toPosition + (toRotation * _footConfig.footStandingPositionFloorOffset) * (1 - standToWalkRatio) + (toRotation * _footConfig.footWalkingPositionFloorOffset) * standToWalkRatio;
         finalPosition.y = 0;
         return finalPosition;
     }
 
     public Quaternion GetFootRotationRelativeToBody(Quaternion toRotation, float standToWalkRatio)
     {
-        return toRotation * Quaternion.Slerp(_footConfiguration.footStandingRotationOffset, _footConfiguration.footWalkingRotationOffset, standToWalkRatio);
+        return toRotation * Quaternion.Slerp(_footConfig.footStandingRotationOffset, _footConfig.footWalkingRotationOffset, standToWalkRatio);
     }
 
     public void StartCourse()

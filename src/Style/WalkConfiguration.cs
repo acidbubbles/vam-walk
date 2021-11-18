@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class WalkConfiguration
@@ -68,9 +70,15 @@ public class WalkConfiguration
 
     public readonly JSONStorableFloat jumpTriggerDistance = new JSONStorableFloat("Jump Trigger Distance", 1.5f, 0, 10f, true);
 
-    public readonly UnityEvent footOffsetChanged = new UnityEvent();
+    public readonly JSONStorableStringChooser lFootTarget = new JSONStorableStringChooser("Left Foot Target", new List<string>(), "", "Left Foot Target");
+    public readonly JSONStorableStringChooser rFootTarget = new JSONStorableStringChooser("Right Foot Target", new List<string>(), "", "Right Foot Target");
+
+    public readonly UnityEvent footConfigChanged = new UnityEvent();
     public class UnityEventBool : UnityEvent<bool> { }
     public readonly UnityEventBool visualizersEnabledChanged = new UnityEventBool();
+
+    public Atom lFootTargetAtom;
+    public Atom rFootTargetAtom;
 
     public WalkConfiguration()
     {
@@ -118,11 +126,26 @@ public class WalkConfiguration
             if (val < midSwingTimeRatio.val + ratioEpsilon) midSwingTimeRatio.val = val - ratioEpsilon;
             heelStrikeTimeRatio.valNoCallback = val;
         };
+
+        lFootTarget.popupOpenCallback = () => lFootTarget.choices = new[] { "" }.Concat(SuperController.singleton.GetAtoms().Where(a => a.type == "Empty").Select(a => a.uid)).ToList();
+        rFootTarget.popupOpenCallback = () => rFootTarget.choices = new[] { "" }.Concat(SuperController.singleton.GetAtoms().Where(a => a.type == "Empty").Select(a => a.uid)).ToList();
+
+        lFootTarget.setCallbackFunction = val =>
+        {
+            lFootTargetAtom = SuperController.singleton.GetAtomByUid(val);
+            footConfigChanged.Invoke();
+        };
+
+        rFootTarget.setCallbackFunction = val =>
+        {
+            rFootTargetAtom = SuperController.singleton.GetAtomByUid(val);
+            footConfigChanged.Invoke();
+        };
     }
 
     private void OnFootOffsetChanged(float _)
     {
-        footOffsetChanged.Invoke();
+        footConfigChanged.Invoke();
     }
 
     private void OnVisualizersEnabledChanged(bool val)

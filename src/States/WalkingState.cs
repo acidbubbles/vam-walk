@@ -82,7 +82,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         // TODO: We get the foot position relative to the body _twice_
         var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _config.halfStepDistance);
 
-        var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
+        var toPosition = foot.HasTarget() ? foot.GetTargetFloorPosition() : ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
 
         _gait.currentFoot.SetContactPosition(toPosition, _heading.GetYaw(), standToWalkRatio);
     }

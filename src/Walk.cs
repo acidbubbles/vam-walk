@@ -59,7 +59,7 @@ public class Walk : MVRScript
 
         var lFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             config,
-            new FootConfiguration(config, -1),
+            new FootConfiguration(config, -1, cfg => cfg.lFootTargetAtom != null ? cfg.lFootTargetAtom.freeControllers[0] : null),
             bones.FirstOrDefault(fc => fc.name == "lFoot"),
             bones.FirstOrDefault(fc => fc.name == "lToe"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
@@ -75,7 +75,7 @@ public class Walk : MVRScript
 
         var rFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             config,
-            new FootConfiguration(config, 1),
+            new FootConfiguration(config, 1, cfg => cfg.rFootTargetAtom != null ? cfg.rFootTargetAtom.freeControllers[0] : null),
             bones.FirstOrDefault(fc => fc.name == "rFoot"),
             bones.FirstOrDefault(fc => fc.name == "rToe"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
@@ -215,6 +215,8 @@ public class Walk : MVRScript
 
         ui.AddHeader("Behavior", 1);
         ui.AddBool(config.allowWalk);
+        ui.AddStringChooser(config.lFootTarget);
+        ui.AddStringChooser(config.rFootTarget);
 
         ui.AddHeader("Debugging", 1);
         ui.AddBool(config.visualizersEnabled);

@@ -46,6 +46,11 @@ public class UI
         _plugin.CreateToggle(jsf, rightSide);
     }
 
+    public void AddStringChooser(JSONStorableStringChooser jssc, bool rightSide = false)
+    {
+        _plugin.CreatePopup(jssc, rightSide);
+    }
+
     public void AddAction(string label, bool rightSide, UnityAction action)
     {
         _plugin.CreateButton(label, rightSide).button.onClick.AddListener(action);
