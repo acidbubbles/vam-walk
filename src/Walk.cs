@@ -19,15 +19,15 @@ public class Walk : MVRScript
             return;
         }
 
-        var style = new WalkConfiguration();
-        style.RegisterStorables(this);
+        var config = new WalkConfiguration();
+        config.RegisterStorables(this);
 
         var ui = new UI(this);
-        InitUI(ui, style);
+        InitUI(ui, config);
 
         try
         {
-            SetupDependencyTree(style);
+            SetupDependencyTree(config);
         }
         catch (Exception exc)
         {
@@ -156,7 +156,7 @@ public class Walk : MVRScript
         });
     }
 
-    private void InitUI(UI ui, WalkConfiguration style)
+    private void InitUI(UI ui, WalkConfiguration config)
     {
         ui.AddHeader("Control", 1);
         ui.AddAction("Refresh Measurements", false, () =>
@@ -213,7 +213,82 @@ public class Walk : MVRScript
             SuperController.LogMessage("Profiles are not yet implemented");
         });
 
-        style.SetupUI(ui);
+        ui.AddHeader("Behavior", 1);
+        ui.AddBool(config.allowWalk);
+
+        ui.AddHeader("Debugging", 1);
+        ui.AddBool(config.visualizersEnabled);
+
+        ui.AddHeader("Foot Position", 1);
+        ui.AddFloat(config.footFloorDistance);
+        ui.AddFloat(config.footBackOffset);
+        ui.AddFloat(config.footPitch);
+        ui.AddFloat(config.footRoll);
+
+        ui.AddHeader("While Standing", 2);
+        ui.AddFloat(config.footStandingOutOffset);
+        ui.AddFloat(config.footStandingYaw);
+
+        ui.AddHeader("While Walking", 2);
+        ui.AddFloat(config.footWalkingOutOffset);
+        ui.AddFloat(config.footWalkingYaw);
+
+        ui.AddHeader("Step Configuration", 1);
+        ui.AddFloat(config.stepDuration);
+        ui.AddFloat(config.stepDistance);
+        ui.AddFloat(config.stepHeight);
+        ui.AddFloat(config.minStepHeightRatio);
+        ui.AddFloat(config.kneeForwardForce);
+        ui.AddFloat(config.passingDistance);
+
+        ui.AddHeader("Prediction", 1);
+        ui.AddFloat(config.predictionStrength);
+
+        ui.AddHeader("Late Acceleration", 1);
+        ui.AddFloat(config.lateAccelerateSpeedToStepRatio);
+        ui.AddFloat(config.lateAccelerateMaxSpeed);
+
+        ui.AddHeader("Animation Curve", 1, true);
+
+        ui.AddHeader("Timing", 2, true);
+        ui.AddFloat(config.toeOffTimeRatio, true);
+        ui.AddFloat(config.midSwingTimeRatio, true);
+        ui.AddFloat(config.heelStrikeTimeRatio, true);
+
+        ui.AddHeader("Height", 2, true);
+        ui.AddFloat(config.toeOffHeightRatio, true);
+        ui.AddFloat(config.midSwingHeightRatio, true);
+        ui.AddFloat(config.heelStrikeHeightRatio, true);
+
+        ui.AddHeader("Distance", 2, true);
+        ui.AddFloat(config.toeOffDistanceRatio, true);
+        ui.AddFloat(config.midSwingDistanceRatio, true);
+        ui.AddFloat(config.heelStrikeDistanceRatio, true);
+
+        ui.AddHeader("Pitch", 2, true);
+        ui.AddFloat(config.toeOffPitch, true);
+        ui.AddFloat(config.midSwingPitch, true);
+        ui.AddFloat(config.heelStrikePitch, true);
+
+        ui.AddHeader("Hip", 1, true);
+
+        ui.AddHeader("While Standing", 2, true);
+        ui.AddFloat(config.hipStandingForward, true);
+        ui.AddFloat(config.hipStandingPitch, true);
+
+        ui.AddHeader("While Crouching", 2, true);
+        ui.AddFloat(config.hipCrouchingUp, true);
+        ui.AddFloat(config.hipCrouchingForward, true);
+        ui.AddFloat(config.hipCrouchingPitch, true);
+
+        ui.AddHeader("While Walking", 2, true);
+        ui.AddFloat(config.hipStepSide, true);
+        ui.AddFloat(config.hipStepRaise, true);
+        ui.AddFloat(config.hipStepYaw, true);
+        ui.AddFloat(config.hipStepRoll, true);
+
+        ui.AddHeader("Misc", 1, true);
+        ui.AddFloat(config.jumpTriggerDistance, true);
     }
 
     private void SetControlOptions(string controlName)
