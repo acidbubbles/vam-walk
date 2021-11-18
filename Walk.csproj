@@ -66,6 +66,7 @@
     <Compile Include="src\Controllers\FootController.cs" />
     <Compile Include="src\Controllers\GaitController.cs" />
     <Compile Include="src\Controllers\HeadingTracker.cs" />
+    <Compile Include="src\States\DisabledState.cs" />
     <Compile Include="src\States\IdleState.cs" />
     <Compile Include="src\States\IState.cs" />
     <Compile Include="src\States\JumpingState.cs" />

@@ -20,7 +20,11 @@ public class IdleState : MonoBehaviour, IWalkState
 
     public void Update()
     {
-        if (!_config.allowWalk.val) return;
+        if (!_config.allowWalk.val)
+        {
+            stateMachine.currentState = stateMachine.disabledState;
+            return;
+        }
 
         if (IsOffBalanceDistance() || IsOffBalanceRotation())
         {

@@ -1,12 +1,13 @@
 src\Controllers\FootController.cs
 src\Controllers\GaitController.cs
 src\Controllers\HeadingTracker.cs
+src\States\DisabledState.cs
 src\States\IdleState.cs
 src\States\IState.cs
 src\States\JumpingState.cs
 src\States\StateMachine.cs
 src\States\WalkingState.cs
-src\Style\GaitFootStyle.cs
+src\Style\FootConfiguration.cs
 src\Style\UI.cs
 src\Style\WalkConfiguration.cs
 src\Utils\CustomPrefabs.cs

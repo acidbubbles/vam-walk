@@ -36,12 +36,12 @@ public class Walk : MVRScript
         }
     }
 
-    private void SetupDependencyTree(WalkConfiguration style)
+    private void SetupDependencyTree(WalkConfiguration config)
     {
         var bones = containingAtom.transform.Find("rescale2").GetComponentsInChildren<DAZBone>();
 
         // TODO: Refresh when style.footFloorDistance changes or when the model changes
-        _personMeasurements = new PersonMeasurements(bones, style);
+        _personMeasurements = new PersonMeasurements(bones, config);
 
         // TODO: Wait for model loaded
         _personMeasurements.Sync();
@@ -54,12 +54,12 @@ public class Walk : MVRScript
         #endif
 
         var lFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => c.Configure(
-            style
+            config
         ), false);
 
         var lFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
-            style,
-            new FootConfiguration(style, -1),
+            config,
+            new FootConfiguration(config, -1),
             bones.FirstOrDefault(fc => fc.name == "lFoot"),
             bones.FirstOrDefault(fc => fc.name == "lToe"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
@@ -70,12 +70,12 @@ public class Walk : MVRScript
         ));
 
         var rFootStateVisualizer = AddWalkComponent<FootStateVisualizer>(nameof(FootStateVisualizer), c => c.Configure(
-            style
+            config
         ), false);
 
         var rFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
-            style,
-            new FootConfiguration(style, 1),
+            config,
+            new FootConfiguration(config, 1),
             bones.FirstOrDefault(fc => fc.name == "rFoot"),
             bones.FirstOrDefault(fc => fc.name == "rToe"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
@@ -86,7 +86,7 @@ public class Walk : MVRScript
         ));
 
         var heading = AddWalkComponent<HeadingTracker>(nameof(HeadingTracker), c => c.Configure(
-            style,
+            config,
             _personMeasurements,
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "headControl"),
             containingAtom.rigidbodies.FirstOrDefault(fc => fc.name == "head"),
@@ -95,10 +95,10 @@ public class Walk : MVRScript
 
         var gaitVisualizer = AddWalkComponent<GaitVisualizer>(nameof(GaitVisualizer), c => c.Configure(
             containingAtom.rigidbodies.FirstOrDefault(rb => rb.name == "hip")
-        ), style.visualizersEnabled.val);
+        ), config.visualizersEnabled.val);
 
         var gait = AddWalkComponent<GaitController>(nameof(GaitController), c => c.Configure(
-            style,
+            config,
             heading,
             _personMeasurements,
             lFootController,
@@ -107,10 +107,15 @@ public class Walk : MVRScript
             gaitVisualizer
         ));
 
+        var disabledState = AddWalkComponent<DisabledState>(nameof(DisabledState), c => c.Configure(
+            config,
+            gait
+        ), false);
+
         var idleStateVisualizer = AddWalkComponent<IdleStateVisualizer>(nameof(IdleStateVisualizer), c => { }, false);
 
         var idleState = AddWalkComponent<IdleState>(nameof(IdleState), c => c.Configure(
-            style,
+            config,
             gait,
             heading,
             idleStateVisualizer
@@ -119,7 +124,7 @@ public class Walk : MVRScript
         var walkingStateVisualizer = AddWalkComponent<WalkingStateVisualizer>(nameof(WalkingStateVisualizer), c => { }, false);
 
         var walkingState = AddWalkComponent<WalkingState>(nameof(WalkingState), c => c.Configure(
-            style,
+            config,
             heading,
             gait,
             walkingStateVisualizer
@@ -128,19 +133,20 @@ public class Walk : MVRScript
         var jumpingStateVisualizer = AddWalkComponent<JumpingStateVisualizer>(nameof(JumpingStateVisualizer), c => { }, false);
 
         var jumpingState = AddWalkComponent<JumpingState>(nameof(JumpingState), c => c.Configure(
-            style,
+            config,
             gait,
             heading,
             jumpingStateVisualizer
         ), false);
 
         _stateMachine = AddWalkComponent<StateMachine>(nameof(StateMachine), c => c.Configure(
+            disabledState,
             idleState,
             walkingState,
             jumpingState
         ));
 
-        style.visualizersEnabledChanged.AddListener(val =>
+        config.visualizersEnabledChanged.AddListener(val =>
         {
             #if(VIZ_MEASUREMENTS)
             measurementsVisualizer.gameObject.SetActive(val);

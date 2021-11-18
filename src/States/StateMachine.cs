@@ -13,14 +13,22 @@ public class StateMachine : MonoBehaviour
         }
     }
 
+    public IWalkState disabledState { get; private set; }
     public IWalkState idleState { get; private set; }
     public IWalkState walkingState { get; private set; }
     public IWalkState jumpingState { get; private set; }
 
     private IWalkState _currentState;
 
-    public void Configure(IWalkState idleState, IWalkState walkingState, IWalkState jumpingState)
+    public void Configure(
+        IWalkState disabledState,
+        IWalkState idleState,
+        IWalkState walkingState,
+        IWalkState jumpingState)
     {
+        disabledState.stateMachine = this;
+        this.disabledState = disabledState;
+
         idleState.stateMachine = this;
         this.idleState = idleState;
 
