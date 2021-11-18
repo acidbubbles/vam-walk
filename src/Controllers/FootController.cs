@@ -10,14 +10,14 @@ public class FootController : MonoBehaviour
     public HashSet<Collider> colliders;
     public FootStateVisualizer visualizer;
 
-    private GaitStyle _style;
-    private GaitFootStyle _footStyle;
+    private WalkConfiguration _config;
+    private FootConfiguration _footConfiguration;
     private DAZBone _footBone;
     private DAZBone _toeBone;
 
     public Vector3 floorPosition { get; private set; }
 
-    public float inverse => _footStyle.inverse;
+    public float inverse => _footConfiguration.inverse;
 
     public float speed = 1f;
     // TODO: Get this from HeadingTracking and cache in Update instead of weirdly populating
@@ -25,13 +25,13 @@ public class FootController : MonoBehaviour
     public float overHeight;
     public Vector3 gravityCenter;
 
-    private float stepTime => _style.stepDuration.val;
-    private float toeOffTime => _style.stepDuration.val * _style.toeOffTimeRatio.val;
-    private float midSwingTime => _style.stepDuration.val * _style.midSwingTimeRatio.val;
-    private float heelStrikeTime => _style.stepDuration.val * _style.heelStrikeTimeRatio.val;
-    private float toeOffHeight => _style.stepHeight.val * _style.toeOffHeightRatio.val;
-    private float midSwingHeight => _style.stepHeight.val * _style.midSwingHeightRatio.val;
-    private float heelStrikeHeight => _style.stepHeight.val * _style.heelStrikeHeightRatio.val;
+    private float stepTime => _config.stepDuration.val;
+    private float toeOffTime => _config.stepDuration.val * _config.toeOffTimeRatio.val;
+    private float midSwingTime => _config.stepDuration.val * _config.midSwingTimeRatio.val;
+    private float heelStrikeTime => _config.stepDuration.val * _config.heelStrikeTimeRatio.val;
+    private float toeOffHeight => _config.stepHeight.val * _config.toeOffHeightRatio.val;
+    private float midSwingHeight => _config.stepHeight.val * _config.midSwingHeightRatio.val;
+    private float heelStrikeHeight => _config.stepHeight.val * _config.heelStrikeHeightRatio.val;
 
     private readonly FootPath _path = new FootPath();
     private Quaternion _setYaw;
@@ -43,8 +43,8 @@ public class FootController : MonoBehaviour
     private Quaternion _startYaw;
 
     public void Configure(
-        GaitStyle style,
-        GaitFootStyle footStyle,
+        WalkConfiguration style,
+        FootConfiguration footConfiguration,
         DAZBone footBone,
         DAZBone toeBone,
         FreeControllerV3 footControl,
@@ -53,8 +53,8 @@ public class FootController : MonoBehaviour
         HashSet<Collider> colliders,
         FootStateVisualizer visualizer)
     {
-        _style = style;
-        _footStyle = footStyle;
+        _config = style;
+        _footConfiguration = footConfiguration;
         _footBone = footBone;
         _toeBone = toeBone;
         this.footControl = footControl;
@@ -68,14 +68,14 @@ public class FootController : MonoBehaviour
 
     public Vector3 GetFootPositionRelativeToBody(Vector3 toPosition, Quaternion toRotation, float standToWalkRatio)
     {
-        var finalPosition = toPosition + (toRotation * _footStyle.footStandingPositionFloorOffset) * (1 - standToWalkRatio) + (toRotation * _footStyle.footWalkingPositionFloorOffset) * standToWalkRatio;
+        var finalPosition = toPosition + (toRotation * _footConfiguration.footStandingPositionFloorOffset) * (1 - standToWalkRatio) + (toRotation * _footConfiguration.footWalkingPositionFloorOffset) * standToWalkRatio;
         finalPosition.y = 0;
         return finalPosition;
     }
 
     public Quaternion GetFootRotationRelativeToBody(Quaternion toRotation, float standToWalkRatio)
     {
-        return toRotation * Quaternion.Slerp(_footStyle.footStandingRotationOffset, _footStyle.footWalkingRotationOffset, standToWalkRatio);
+        return toRotation * Quaternion.Slerp(_footConfiguration.footStandingRotationOffset, _footConfiguration.footWalkingRotationOffset, standToWalkRatio);
     }
 
     public void StartCourse()
@@ -97,11 +97,11 @@ public class FootController : MonoBehaviour
         // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
         var controlPosition = footControl.control.position;
         var forwardRatio = Vector3.Dot(targetFloorPosition - controlPosition, footControl.control.forward);
-        var yaw = Quaternion.Euler(0, Mathf.Lerp(_style.footStandingYaw.val, _style.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
+        var yaw = Quaternion.Euler(0, Mathf.Lerp(_config.footStandingYaw.val, _config.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
         // TODO: Passing offset here (last argument)
         SyncPath(targetFloorPosition, yaw, forwardRatio, Vector3.zero);
         // TODO: Also animate the toes
-        if (_style.visualizersEnabled.val)
+        if (_config.visualizersEnabled.val)
         {
             visualizer.Sync(_path);
             visualizer.gameObject.SetActive(true);
@@ -123,22 +123,22 @@ public class FootController : MonoBehaviour
     {
         var startPosition = _startFloorPosition;
         // var startRotation = _startRotation;
-        var up = Vector3.up * Mathf.Clamp(_standToWalkRatio, _style.minStepHeightRatio.val, 1f);
+        var up = Vector3.up * Mathf.Clamp(_standToWalkRatio, _config.minStepHeightRatio.val, 1f);
 
         // TODO: Check diff before this, there was a time ratio multiplication, validate if it was OK to remove
-        var toeOffPosition = Vector3.Lerp(startPosition, toPosition, _style.toeOffDistanceRatio.val) + up * toeOffHeight;
-        var midSwingPosition = Vector3.Lerp(startPosition, toPosition, _style.midSwingDistanceRatio.val) + up * midSwingHeight;
-        var heelStrikePosition = Vector3.Lerp(startPosition, toPosition, _style.heelStrikeDistanceRatio.val) + up * heelStrikeHeight;
+        var toeOffPosition = Vector3.Lerp(startPosition, toPosition, _config.toeOffDistanceRatio.val) + up * toeOffHeight;
+        var midSwingPosition = Vector3.Lerp(startPosition, toPosition, _config.midSwingDistanceRatio.val) + up * midSwingHeight;
+        var heelStrikePosition = Vector3.Lerp(startPosition, toPosition, _config.heelStrikeDistanceRatio.val) + up * heelStrikeHeight;
 
-        // var toeOffRotation = Quaternion.Euler( * _standToWalkRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.toeOffTimeRatio.val);
-        // var midSwingRotation = Quaternion.Euler(_style.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.midSwingTimeRatio.val);
-        // var heelStrikeRotation = Quaternion.Euler(_style.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(startRotation, toRotation, _style.heelStrikeTimeRatio.val);
+        // var toeOffRotation = Quaternion.Euler( * _standToWalkRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _config.toeOffTimeRatio.val);
+        // var midSwingRotation = Quaternion.Euler(_config.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _config.midSwingTimeRatio.val);
+        // var heelStrikeRotation = Quaternion.Euler(_config.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(startRotation, toRotation, _config.heelStrikeTimeRatio.val);
 
         _path.Set(0,
             0f,
             startPosition,
             _startYaw,
-            _style.footPitch.val,
+            _config.footPitch.val,
             0f,
             0f
         );
@@ -146,7 +146,7 @@ public class FootController : MonoBehaviour
             toeOffTime,
             toeOffPosition,
             _startYaw,
-            Mathf.Lerp(_style.footPitch.val, _style.toeOffPitch.val, _standToWalkRatio),
+            Mathf.Lerp(_config.footPitch.val, _config.toeOffPitch.val, _standToWalkRatio),
             1f,
             0f
         );
@@ -154,7 +154,7 @@ public class FootController : MonoBehaviour
             midSwingTime,
             midSwingPosition,
             Quaternion.Lerp(_startYaw, yaw, 0.5f),
-            Mathf.Lerp(_style.footPitch.val, _style.midSwingPitch.val, _standToWalkRatio),
+            Mathf.Lerp(_config.footPitch.val, _config.midSwingPitch.val, _standToWalkRatio),
             1f,
             5f * _standToWalkRatio
         );
@@ -162,7 +162,7 @@ public class FootController : MonoBehaviour
             heelStrikeTime,
             heelStrikePosition,
             yaw,
-            Mathf.Lerp(_style.footPitch.val, _style.heelStrikePitch.val, _standToWalkRatio),
+            Mathf.Lerp(_config.footPitch.val, _config.heelStrikePitch.val, _standToWalkRatio),
             1f,
             10f * _standToWalkRatio
         );
@@ -170,7 +170,7 @@ public class FootController : MonoBehaviour
             stepTime,
             toPosition,
             yaw,
-            _style.footPitch.val,
+            _config.footPitch.val,
             0f,
             0f
         );
@@ -188,7 +188,7 @@ public class FootController : MonoBehaviour
 
         if (!_animationActive)
         {
-            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f, 0f);
+            AssignFootPositionAndRotation(floorPosition, _setYaw, _config.footPitch.val, 0f, 0f);
             return;
         }
 
@@ -196,20 +196,20 @@ public class FootController : MonoBehaviour
         if (_time >= stepTime)
         {
             CancelCourse();
-            AssignFootPositionAndRotation(floorPosition, _setYaw, _style.footPitch.val, 0f, 0f);
+            AssignFootPositionAndRotation(floorPosition, _setYaw, _config.footPitch.val, 0f, 0f);
             return;
         }
 
         Sample(_time);
         var footForward = Vector3.ProjectOnPlane(footControl.control.forward, Vector3.up).normalized + (Vector3.up * 0.2f);
-        kneeControl.followWhenOffRB.AddForce(footForward * (_style.kneeForwardForce.val * GetMidSwingStrength()));
+        kneeControl.followWhenOffRB.AddForce(footForward * (_config.kneeForwardForce.val * GetMidSwingStrength()));
     }
 
     private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float footPitch, float pitchWeight, float toePitch)
     {
         // TODO: This should be configurable, and validate the value
         const float floorOffset = 0.0175f;
-        var footFloorDistance = _style.footFloorDistance.val - floorOffset;
+        var footFloorDistance = _config.footFloorDistance.val - floorOffset;
 
         var footBoneLength = Vector3.Distance(_footBone.worldPosition, _toeBone.worldPosition);
         var toePosition = floorPosition + yaw * new Vector3(0, 0, footBoneLength / 2f);
@@ -278,14 +278,14 @@ public class FootController : MonoBehaviour
         var plantarFlexionRatio = Mathf.Clamp01(plantarFlexionHeight / maxOverHeight);
         var plantarFlexionAngle = plantarFlexionRatio * maxPlantarFlexionAngle;
 
-        footControl.control.position = toPosition + yaw * new Vector3(0f, _style.footFloorDistance.val + plantarFlexionHeight, plantarFlexionRatio * maxPlantarFlexionForward);
+        footControl.control.position = toPosition + yaw * new Vector3(0f, _config.footFloorDistance.val + plantarFlexionHeight, plantarFlexionRatio * maxPlantarFlexionForward);
 
         // TODO: Reduce outside rotation (toe point straight)
         #warning Replace by calculating toes position and finding back where the feet should be
-        var footRotate = Quaternion.Euler(Mathf.Lerp(_style.footPitch.val + plantarFlexionAngle, footPitch, pitchWeight), 0f, 0f);
+        var footRotate = Quaternion.Euler(Mathf.Lerp(_config.footPitch.val + plantarFlexionAngle, footPitch, pitchWeight), 0f, 0f);
         footControl.control.rotation = yaw * footRotate;
 
-        if (_style.visualizersEnabled.val)
+        if (_config.visualizersEnabled.val)
             visualizer.Sync(footControl.control.position, footControl.control.rotation);
 
         if (toePitch > 0)

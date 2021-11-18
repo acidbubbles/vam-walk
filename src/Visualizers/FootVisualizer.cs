@@ -45,7 +45,7 @@ public class FootStateVisualizer : MonoBehaviour
         return new Color(0.8f + 0.2f * progress, 0.5f - 0.5f * progress, 0.1f - 0.1f * progress, 0.5f);
     }
 
-    public void Configure(GaitStyle style)
+    public void Configure(WalkConfiguration style)
     {
         _endSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
     }

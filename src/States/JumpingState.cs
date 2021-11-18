@@ -5,14 +5,14 @@ public class JumpingState : MonoBehaviour, IWalkState
     public StateMachine stateMachine { get; set; }
     MonoBehaviour IWalkState.visualizer => _visualizer;
 
-    private GaitStyle _style;
+    private WalkConfiguration _config;
     private GaitController _gait;
     private HeadingTracker _heading;
     private JumpingStateVisualizer _visualizer;
 
-    public void Configure(GaitStyle style, GaitController gait, HeadingTracker heading, JumpingStateVisualizer visualizer)
+    public void Configure(WalkConfiguration style, GaitController gait, HeadingTracker heading, JumpingStateVisualizer visualizer)
     {
-        _style = style;
+        _config = style;
         _gait = gait;
         _heading = heading;
         _visualizer = visualizer;
@@ -42,7 +42,7 @@ public class JumpingState : MonoBehaviour, IWalkState
         _gait.lFoot.gameObject.SetActive(false);
         _gait.rFoot.gameObject.SetActive(false);
         _gait.speed = 1f;
-        if (_style.visualizersEnabled.val)
+        if (_config.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
     }
 

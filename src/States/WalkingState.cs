@@ -7,14 +7,14 @@ public class WalkingState : MonoBehaviour, IWalkState
     public StateMachine stateMachine { get; set; }
     MonoBehaviour IWalkState.visualizer => _visualizer;
 
-    private GaitStyle _style;
+    private WalkConfiguration _config;
     private HeadingTracker _heading;
     private GaitController _gait;
     private WalkingStateVisualizer _visualizer;
 
-    public void Configure(GaitStyle style, HeadingTracker heading, GaitController gait, WalkingStateVisualizer visualizer)
+    public void Configure(WalkConfiguration style, HeadingTracker heading, GaitController gait, WalkingStateVisualizer visualizer)
     {
-        _style = style;
+        _config = style;
         _heading = heading;
         _gait = gait;
         _visualizer = visualizer;
@@ -26,7 +26,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         _gait.SelectStartFoot(bodyCenter);
         _gait.currentFoot.StartCourse();
         SyncFootCourse();
-        if(_style.visualizersEnabled.val)
+        if(_config.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
     }
 
@@ -40,16 +40,16 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         var distanceFromExpected = Vector3.Distance(_heading.GetGravityCenter(), _gait.GetCurrentFloorFeetCenter());
 
-        if (distanceFromExpected > _style.jumpTriggerDistance.val)
+        if (distanceFromExpected > _config.jumpTriggerDistance.val)
         {
             stateMachine.currentState = stateMachine.jumpingState;
             return;
         }
 
-        var stepsToTarget = distanceFromExpected / _style.halfStepDistance * 2f;
-        _gait.speed = Mathf.Clamp(_gait.speed + (stepsToTarget - 1f) * _style.lateAccelerateSpeedToStepRatio.val * Time.deltaTime, 1f, _style.lateAccelerateMaxSpeed.val);
+        var stepsToTarget = distanceFromExpected / _config.halfStepDistance * 2f;
+        _gait.speed = Mathf.Clamp(_gait.speed + (stepsToTarget - 1f) * _config.lateAccelerateSpeedToStepRatio.val * Time.deltaTime, 1f, _config.lateAccelerateMaxSpeed.val);
 
-        _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition(), _gait.speed / _style.lateAccelerateMaxSpeed.val);
+        _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition(), _gait.speed / _config.lateAccelerateMaxSpeed.val);
 
         // TODO: Here we should also detect whenever the current step is going too far because of sudden stop; cancel the course in that case.
 
@@ -80,7 +80,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         // TODO: Sometimes it looks like the feet is stuck at zero? To confirm (try circle walk and reset home, reload Walk)
         // TODO: We get the foot position relative to the body _twice_
-        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _style.halfStepDistance);
+        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _config.halfStepDistance);
 
         var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
 
@@ -97,7 +97,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         // TODO: Sometimes it looks like the feet is stuck at zero? To confirm (try circle walk and reset home, reload Walk)
         // TODO: We get the foot position relative to the body _twice_
-        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _style.halfStepDistance);
+        var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _config.halfStepDistance);
 
         var toPosition = ComputeDesiredFootEndPosition(projectedCenter, toRotation, standToWalkRatio);
         toPosition = ResolveAvailableArrivalPosition(foot, fromPosition, toPosition);
@@ -114,16 +114,16 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         // Determine where the feet should land based on the current speed
         var directionUnit = _heading.GetPlanarVelocity().normalized;
-        var projectedStepCenter = projectedCenter + directionUnit * _style.halfStepDistance * standToWalkRatio;
+        var projectedStepCenter = projectedCenter + directionUnit * _config.halfStepDistance * standToWalkRatio;
 
         // Move foot where it should end up
         var toPosition = _gait.currentFoot.GetFootPositionRelativeToBody(projectedStepCenter, toRotation, standToWalkRatio);
 
        // Make sure we can always catch up within the next step distance
        var resultingDistanceBetweenFeet = Vector3.Distance(_gait.otherFoot.floorPosition, toPosition);
-       if (resultingDistanceBetweenFeet <= _style.halfStepDistance) return toPosition;
+       if (resultingDistanceBetweenFeet <= _config.halfStepDistance) return toPosition;
 
-       var extraDistance = resultingDistanceBetweenFeet - _style.halfStepDistance;
+       var extraDistance = resultingDistanceBetweenFeet - _config.halfStepDistance;
        toPosition = Vector3.MoveTowards(
            toPosition,
            _gait.currentFoot.floorPosition,
@@ -136,12 +136,12 @@ public class WalkingState : MonoBehaviour, IWalkState
     private readonly Collider[] _colliders = new Collider[4];
     private Vector3 ResolveAvailableArrivalPosition(FootController foot, Vector3 fromPosition, Vector3 toPosition)
     {
-        var collisionHeightOffset = new Vector3(0, _style.footCollisionRadius, 0);
+        var collisionHeightOffset = new Vector3(0, _config.footCollisionRadius, 0);
 
         var endConflictPosition = toPosition + collisionHeightOffset;
-        if (_style.visualizersEnabled.val)
+        if (_config.visualizersEnabled.val)
             foot.visualizer.SyncEndConflictCheck(endConflictPosition);
-        var collidersCount = Physics.OverlapSphereNonAlloc(endConflictPosition, _style.footCollisionRadius, _colliders, _layerMask);
+        var collidersCount = Physics.OverlapSphereNonAlloc(endConflictPosition, _config.footCollisionRadius, _colliders, _layerMask);
 
         if (collidersCount == 0) return toPosition;
 
@@ -150,9 +150,9 @@ public class WalkingState : MonoBehaviour, IWalkState
             var collider = _colliders[hitIndex];
             if (!foot.colliders.Contains(collider)) continue;
             var collisionPoint = collider.ClosestPoint(fromPosition);
-            if (_style.visualizersEnabled.val)
+            if (_config.visualizersEnabled.val)
                 foot.visualizer.SyncConflict(collisionPoint);
-            var travelDistanceDelta = Vector3.Distance(fromPosition, collisionPoint) - _style.footCollisionRecedeDistance;
+            var travelDistanceDelta = Vector3.Distance(fromPosition, collisionPoint) - _config.footCollisionRecedeDistance;
             // SuperController.LogMessage($"Collision end: {foot.footControl.name} -> {Explain(collider)}, reduce from {Vector3.Distance(floorPosition, toPosition):0.00} to {Vector3.Distance(floorPosition, Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta)):0.00}");
             toPosition = Vector3.MoveTowards(fromPosition, toPosition, travelDistanceDelta);
             break;
@@ -167,17 +167,17 @@ public class WalkingState : MonoBehaviour, IWalkState
         const int maxIterations = 5;
         const float distanceIncreasePerIteration = 0.05f;
 
-        var collisionHeightOffset = new Vector3(0, _style.footCollisionRadius, 0);
+        var collisionHeightOffset = new Vector3(0, _config.footCollisionRadius, 0);
         var passingCheckStart = fromPosition + collisionHeightOffset;
 
         // TODO: When going backwards we don't want as much passing, see: var forwardRatioAbs = Mathf.Abs(forwardRatio);
         // TODO: Do we really need base passing?
-        var passingOffset = Vector3.zero; // Vector3.right * (foot.inverse * _style.passingDistance.val * standToWalkRatio);
+        var passingOffset = Vector3.zero; // Vector3.right * (foot.inverse * _config.passingDistance.val * standToWalkRatio);
         // TODO: Linear iterations is costly, maybe instead do bisect?
         for (var i = 0; i < maxIterations; i++)
         {
             var passingCenter = (fromPosition + toPosition) / 2f;
-            passingCenter.y = _style.stepHeight.val;
+            passingCenter.y = _config.stepHeight.val;
             passingCenter += passingOffset;
 
             if (CheckPassingCollisionFree(i, foot, passingCheckStart, passingCenter))
@@ -202,7 +202,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         var hitsCount = Physics.SphereCastNonAlloc(
             checkOrigin,
-            _style.footCollisionRadius,
+            _config.footCollisionRadius,
             passingDirection,
             _hits,
             passingDistance * 0.4f,
@@ -215,7 +215,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         {
             var hit = _hits[hitIndex];
             if (!foot.colliders.Contains(hit.collider)) continue;
-            if (_style.visualizersEnabled.val)
+            if (_config.visualizersEnabled.val)
             {
                 // SuperController.LogMessage($"Collision path [Iter {i}] {foot.footControl.name} will hit {hit.collider.transform.Identify()} at {hit.point}");
                 foot.visualizer.SyncCollisionAvoidance(i, checkOrigin, checkOrigin + passingDirection * (passingDistance * 0.5f), hit.point);

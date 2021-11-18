@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class GaitStyle
+public class WalkConfiguration
 {
     // TODO: Should we move all constants here? Make them configurable?
     public readonly float footCollisionRadius = 0.1f;
@@ -25,6 +25,7 @@ public class GaitStyle
     public readonly JSONStorableFloat footWalkingYaw = new JSONStorableFloat("Foot Walking Yaw", 1.5f, -45f, 45f, false);
 
     public readonly JSONStorableFloat stepDuration = new JSONStorableFloat("Step Duration", 0.7f, 0f, 1f, false);
+    // ReSharper disable once MemberCanBePrivate.Global
     public readonly JSONStorableFloat stepDistance = new JSONStorableFloat("Step Distance", 0.75f, 0f, 3f, false);
     public readonly JSONStorableFloat stepHeight = new JSONStorableFloat("Step Height", 0.15f, 0f, 1f, false);
     public readonly JSONStorableFloat minStepHeightRatio = new JSONStorableFloat("Min Step Height Ratio", 0.2f, 0f, 1f, true);
@@ -35,7 +36,6 @@ public class GaitStyle
 
     public readonly JSONStorableFloat predictionStrength = new JSONStorableFloat("Prediction Strength", 0.72f, 0f, 2f, false);
 
-    public readonly JSONStorableFloat lateAccelerateRate = new JSONStorableFloat("Late Accelerate Rate", 0.001f, 0f, 0.1f, true);
     public readonly JSONStorableFloat lateAccelerateSpeedToStepRatio = new JSONStorableFloat("Late Accelerate Speed-To-Step Ratio", 1.1f, 1f, 5f, true);
     public readonly JSONStorableFloat lateAccelerateMaxSpeed = new JSONStorableFloat("Late Accelerate Max Speed", 3f, 1f, 10f, true);
 
@@ -72,7 +72,7 @@ public class GaitStyle
     public class UnityEventBool : UnityEvent<bool> { }
     public readonly UnityEventBool visualizersEnabledChanged = new UnityEventBool();
 
-    public GaitStyle()
+    public WalkConfiguration()
     {
         footFloorDistance.setCallbackFunction = OnFootOffsetChanged;
         footBackOffset.setCallbackFunction = OnFootOffsetChanged;

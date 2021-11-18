@@ -4,17 +4,17 @@ using UnityEngine;
 public class PersonMeasurements
 {
     private readonly DAZBone[] _bones;
-    private readonly GaitStyle _style;
+    private readonly WalkConfiguration _config;
     private readonly DAZBone _hipBone;
 
     public float floorToHip { get; private set; }
     public float hipToHead { get; private set; }
     public float floorToHead { get; private set; }
 
-    public PersonMeasurements(DAZBone[] bones, GaitStyle style)
+    public PersonMeasurements(DAZBone[] bones, WalkConfiguration style)
     {
         _bones = bones;
-        _style = style;
+        _config = style;
         _hipBone = _bones.First(b => b.name == "hip");
     }
 
@@ -22,7 +22,7 @@ public class PersonMeasurements
     {
         const float feetToHipHeightRatio = 0.992f;
         const float hipToHeadHeightRatio = 0.926f;
-        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * feetToHipHeightRatio + _style.footFloorDistance.val;
+        floorToHip = ((MeasureToHip("lFoot") + MeasureToHip("rFoot")) / 2f) * feetToHipHeightRatio + _config.footFloorDistance.val;
         var upper = MeasureToHip("head") * hipToHeadHeightRatio;
         floorToHead = floorToHip + upper;
         hipToHead = floorToHead - floorToHip;

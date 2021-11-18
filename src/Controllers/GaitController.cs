@@ -2,7 +2,7 @@
 
 public class GaitController : MonoBehaviour
 {
-    private GaitStyle _style;
+    private WalkConfiguration _config;
     private HeadingTracker _heading;
     private PersonMeasurements _personMeasurements;
     private FreeControllerV3 _hipControl;
@@ -27,7 +27,7 @@ public class GaitController : MonoBehaviour
     }
 
     public void Configure(
-        GaitStyle style,
+        WalkConfiguration style,
         HeadingTracker heading,
         PersonMeasurements personMeasurements,
         FootController lFoot,
@@ -35,7 +35,7 @@ public class GaitController : MonoBehaviour
         FreeControllerV3 hipControl,
         GaitVisualizer visualizer)
     {
-        _style = style;
+        _config = style;
         _heading = heading;
         _personMeasurements = personMeasurements;
         this.lFoot = lFoot;
@@ -46,15 +46,15 @@ public class GaitController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        var hipHeightCrouchingAdjust = _style.hipCrouchingUp.val;
-        var hipForwardCrouching = _style.hipCrouchingForward.val;
-        var hipForwardStanding = _style.hipStandingForward.val;
-        var hipStepSide = _style.hipStepSide.val;
-        var hipStepRaise = _style.hipStepRaise.val;
-        var hipPitchStanding = _style.hipStandingPitch.val;
-        var hipPitchCrouching = _style.hipCrouchingPitch.val;
-        var hipStepYaw = _style.hipStepYaw.val;
-        var hipStepRoll = _style.hipStepRoll.val;
+        var hipHeightCrouchingAdjust = _config.hipCrouchingUp.val;
+        var hipForwardCrouching = _config.hipCrouchingForward.val;
+        var hipForwardStanding = _config.hipStandingForward.val;
+        var hipStepSide = _config.hipStepSide.val;
+        var hipStepRaise = _config.hipStepRaise.val;
+        var hipPitchStanding = _config.hipStandingPitch.val;
+        var hipPitchCrouching = _config.hipCrouchingPitch.val;
+        var hipStepYaw = _config.hipStepYaw.val;
+        var hipStepRoll = _config.hipStepRoll.val;
 
         var headingRotation = _heading.GetPlanarRotation();
         var standingRatio = _heading.GetStandingRatio();
@@ -177,7 +177,7 @@ public class GaitController : MonoBehaviour
 
     public void OnEnable()
     {
-        if (_style.visualizersEnabled.val)
+        if (_config.visualizersEnabled.val)
             _visualizer.gameObject.SetActive(true);
     }
 

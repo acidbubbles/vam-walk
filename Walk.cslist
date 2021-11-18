@@ -7,8 +7,8 @@ src\States\JumpingState.cs
 src\States\StateMachine.cs
 src\States\WalkingState.cs
 src\Style\GaitFootStyle.cs
-src\Style\GaitStyle.cs
 src\Style\UI.cs
+src\Style\WalkConfiguration.cs
 src\Utils\CustomPrefabs.cs
 src\Utils\FixedAnimationCurve.cs
 src\Utils\FloatExtensions.cs

@@ -19,7 +19,7 @@ public class Walk : MVRScript
             return;
         }
 
-        var style = new GaitStyle();
+        var style = new WalkConfiguration();
         style.RegisterStorables(this);
 
         var ui = new UI(this);
@@ -36,7 +36,7 @@ public class Walk : MVRScript
         }
     }
 
-    private void SetupDependencyTree(GaitStyle style)
+    private void SetupDependencyTree(WalkConfiguration style)
     {
         var bones = containingAtom.transform.Find("rescale2").GetComponentsInChildren<DAZBone>();
 
@@ -59,7 +59,7 @@ public class Walk : MVRScript
 
         var lFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
-            new GaitFootStyle(style, -1),
+            new FootConfiguration(style, -1),
             bones.FirstOrDefault(fc => fc.name == "lFoot"),
             bones.FirstOrDefault(fc => fc.name == "lToe"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "lFootControl"),
@@ -75,7 +75,7 @@ public class Walk : MVRScript
 
         var rFootController = AddWalkComponent<FootController>(nameof(FootController), c => c.Configure(
             style,
-            new GaitFootStyle(style, 1),
+            new FootConfiguration(style, 1),
             bones.FirstOrDefault(fc => fc.name == "rFoot"),
             bones.FirstOrDefault(fc => fc.name == "rToe"),
             containingAtom.freeControllers.FirstOrDefault(fc => fc.name == "rFootControl"),
@@ -150,7 +150,7 @@ public class Walk : MVRScript
         });
     }
 
-    private void InitUI(UI ui, GaitStyle style)
+    private void InitUI(UI ui, WalkConfiguration style)
     {
         ui.AddHeader("Control", 1);
         ui.AddAction("Refresh Measurements", false, () =>

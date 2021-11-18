@@ -71,9 +71,9 @@
     <Compile Include="src\States\JumpingState.cs" />
     <Compile Include="src\States\StateMachine.cs" />
     <Compile Include="src\States\WalkingState.cs" />
-    <Compile Include="src\Style\GaitFootStyle.cs" />
-    <Compile Include="src\Style\GaitStyle.cs" />
+    <Compile Include="src\Style\FootConfiguration.cs" />
     <Compile Include="src\Style\UI.cs" />
+    <Compile Include="src\Style\WalkConfiguration.cs" />
     <Compile Include="src\Utils\CustomPrefabs.cs" />
     <Compile Include="src\Utils\FixedAnimationCurve.cs" />
     <Compile Include="src\Utils\FloatExtensions.cs" />

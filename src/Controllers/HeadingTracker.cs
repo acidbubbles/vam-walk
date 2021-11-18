@@ -4,7 +4,7 @@ public class HeadingTracker : MonoBehaviour
 {
     public FreeControllerV3 headControl;
 
-    private GaitStyle _style;
+    private WalkConfiguration _config;
     private PersonMeasurements _personMeasurements;
     private Rigidbody _headRB;
     private DAZBone _headBone;
@@ -16,9 +16,9 @@ public class HeadingTracker : MonoBehaviour
     private readonly Vector3[] _lastVelocities = new Vector3[_velocityFrames];
     private int _currentVelocityIndex;
 
-    public void Configure(GaitStyle style, PersonMeasurements personMeasurements, FreeControllerV3 headControl, Rigidbody headRB, DAZBone headBone)
+    public void Configure(WalkConfiguration style, PersonMeasurements personMeasurements, FreeControllerV3 headControl, Rigidbody headRB, DAZBone headBone)
     {
-        _style = style;
+        _config = style;
         _personMeasurements = personMeasurements;
         this.headControl = headControl;
         _headRB = headRB;
@@ -38,12 +38,12 @@ public class HeadingTracker : MonoBehaviour
     }
 
     /// <summary>
-    /// Where is <see cref="GetGravityCenter"/> expected to be in <see cref="GaitStyle.stepDuration"/> seconds
+    /// Where is <see cref="GetGravityCenter"/> expected to be in <see cref="WalkConfiguration.stepDuration"/> seconds
     /// </summary>
     public Vector3 GetProjectedPosition()
     {
         var velocity = GetPlanarVelocity();
-        var finalPosition = GetGravityCenter() + velocity * (_style.stepDuration.val * _style.predictionStrength.val);
+        var finalPosition = GetGravityCenter() + velocity * (_config.stepDuration.val * _config.predictionStrength.val);
         return finalPosition;
     }
 
@@ -82,7 +82,7 @@ public class HeadingTracker : MonoBehaviour
         headPosition = new Vector3(headPosition.x, 0, headPosition.z);
         // Offset for expected feet position
         var bodyForward = GetBodyForward();
-        var standingFloorCenter = headPosition + bodyForward * -_style.footBackOffset.val;
+        var standingFloorCenter = headPosition + bodyForward * -_config.footBackOffset.val;
         var crouchingRatio = 1f - GetStandingRatio();
         // TODO: Variable
         // TODO: Head looking down pushes the body center backwards, this should be fine but to think through
