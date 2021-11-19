@@ -13,7 +13,7 @@ public class WalkConfiguration
 
     // TODO: When toggled, fire an event so visualizers can update themselves
     public readonly JSONStorableBool visualizersEnabled = new JSONStorableBool("Visualizers Enabled", true);
-    public readonly JSONStorableBool allowWalk = new JSONStorableBool("Allow Walk", false);
+    public readonly JSONStorableBool allowWalk = new JSONStorableBool("Allow Walk", true);
 
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);
     public readonly JSONStorableFloat footBackOffset = new JSONStorableFloat("Foot Back Offset", 0.03f, -0.1f, 0.1f, false);
