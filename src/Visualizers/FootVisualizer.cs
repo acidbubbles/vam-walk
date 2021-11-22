@@ -56,7 +56,7 @@ public class FootStateVisualizer : MonoBehaviour
         _footLineRenderer.SetPosition(1, position + rotation * Vector3.forward * 0.2f);
     }
 
-    public void Sync(FootPath path)
+    public void Sync(FootAnimationCurve<Vector3> path)
     {
         var duration = path.duration;
 
@@ -64,7 +64,7 @@ public class FootStateVisualizer : MonoBehaviour
         for (var i = 0; i < _footPathLineRenderer.positionCount; i++)
         {
             var t = i * step;
-            _footPathLineRenderer.SetPosition(i, path.EvaluatePosition(t));
+            _footPathLineRenderer.SetPosition(i, path.Evaluate(t));
         }
 
         // SyncCueLine(_toeAngleLineRenderer, path.GetPositionAtIndex(1), path.GetRotationAtIndex(1));

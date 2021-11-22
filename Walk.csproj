@@ -78,7 +78,7 @@
     <Compile Include="src\Utils\CustomPrefabs.cs" />
     <Compile Include="src\Utils\FixedAnimationCurve.cs" />
     <Compile Include="src\Utils\FloatExtensions.cs" />
-    <Compile Include="src\Utils\FootPath.cs" />
+    <Compile Include="src\Utils\FootAnimationCurve.cs" />
     <Compile Include="src\Utils\LineRendererExtensions.cs" />
     <Compile Include="src\Utils\PersonMeasurements.cs" />
     <Compile Include="src\Utils\QuaternionExtensions.cs" />

@@ -20,7 +20,7 @@ public class WalkingStateVisualizer : MonoBehaviour
         _projectedPositionLineRenderer = transform.CreateVisualizerLineRenderer(2, Color.black);
     }
 
-    public void Sync(Vector3 bodyCenter, Vector3 projectedCenter, float late)
+    public void Sync(Vector3 gravityCenter, Vector3 projectedCenter, float late)
     {
         _gradientColorKeys[0] = new GradientColorKey(Color.Lerp(Color.green, Color.red, late), 0f);
         _colorGradient.SetKeys(_gradientColorKeys, _gradientAlphaKeys);
@@ -31,7 +31,7 @@ public class WalkingStateVisualizer : MonoBehaviour
         _projectedPositionLineRenderer.SetPositions(new[]
         {
             projectedCenter,
-            bodyCenter + Vector3.up * 0.1f
+            gravityCenter + Vector3.up * 0.1f
         });
         _projectedPositionLineRenderer.colorGradient = _colorGradient;
     }

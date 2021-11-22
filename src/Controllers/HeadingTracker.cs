@@ -24,13 +24,13 @@ public class HeadingTracker : MonoBehaviour
         _headRB = headRB;
         _headBone = headBone;
         _neckBone = headBone.parentBone;
-        _lastVelocityMeasurePoint = _neckBone.transform.position;
+        _lastVelocityMeasurePoint = headControl.transform.position;
     }
 
 
     public void Update()
     {
-        var velocityMeasurePoint = _neckBone.transform.position;
+        var velocityMeasurePoint = headControl.control.position;
         _lastVelocities[_currentVelocityIndex] = velocityMeasurePoint - _lastVelocityMeasurePoint;
         _lastDeltaTimes[_currentVelocityIndex] = Time.deltaTime;
         if (++_currentVelocityIndex == _lastVelocities.Length) _currentVelocityIndex = 0;
@@ -77,7 +77,7 @@ public class HeadingTracker : MonoBehaviour
 
     public Vector3 GetGravityCenter()
     {
-        var headPosition = _neckBone.transform.position;
+        var headPosition = headControl.control.position;
         // Find the floor level
         headPosition = new Vector3(headPosition.x, 0, headPosition.z);
         // Offset for expected feet position
