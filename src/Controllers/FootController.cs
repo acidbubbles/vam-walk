@@ -30,21 +30,19 @@ public class FootController : MonoBehaviour
     private float toeOffTime => _config.stepDuration.val * _config.toeOffTimeRatio.val;
     private float midSwingTime => _config.stepDuration.val * _config.midSwingTimeRatio.val;
     private float heelStrikeTime => _config.stepDuration.val * _config.heelStrikeTimeRatio.val;
+    private float stepHeight => _config.stepHeight.val;
     private float toeOffHeight => _config.stepHeight.val * _config.toeOffHeightRatio.val;
-    private float midSwingHeight => _config.stepHeight.val * _config.midSwingHeightRatio.val;
-    private float heelStrikeHeight => _config.stepHeight.val * _config.heelStrikeHeightRatio.val;
 
-    private readonly FootAnimationCurve<float> _pathY = new FootAnimationCurve<float>(3, Mathf.SmoothStep);
-    private readonly FootAnimationCurve<Quaternion> _pathYaw = new FootAnimationCurve<Quaternion>(3, Quaternion.Slerp);
-    private readonly FootAnimationCurve<float> _pathFootPitch = new FootAnimationCurve<float>(3, Mathf.SmoothStep);
-    private readonly FootAnimationCurve<float> _pathFootPitchWeight = new FootAnimationCurve<float>(3, Mathf.SmoothStep);
-    private readonly FootAnimationCurve<float> _pathToePitch = new FootAnimationCurve<float>(3, Mathf.SmoothStep);
+    private const int _stepStepsCount = 5;
+    private readonly FootAnimationCurve<float> _pathY = new FootAnimationCurve<float>(_stepStepsCount, Mathf.SmoothStep);
+    private readonly FootAnimationCurve<Quaternion> _pathYaw = new FootAnimationCurve<Quaternion>(_stepStepsCount, Quaternion.Slerp);
+    private readonly FootAnimationCurve<float> _pathFootPitch = new FootAnimationCurve<float>(_stepStepsCount, Mathf.SmoothStep);
+    private readonly FootAnimationCurve<float> _pathFootPitchWeight = new FootAnimationCurve<float>(_stepStepsCount, Mathf.SmoothStep);
+    private readonly FootAnimationCurve<float> _pathToePitch = new FootAnimationCurve<float>(_stepStepsCount, Mathf.SmoothStep);
     private Quaternion _setYaw;
     private float _time;
-    private float _hitFloorTime;
     private bool _animationActive;
     private float _standToWalkRatio;
-    private Vector3 _startFloorPosition;
     private Quaternion _startYaw;
     private Vector3 _velocity;
 
@@ -68,8 +66,6 @@ public class FootController : MonoBehaviour
         this.toeControl = toeControl;
         this.colliders = colliders;
         this.visualizer = visualizer;
-
-        SyncHitFloorTime();
     }
 
     public bool HasTarget() => !ReferenceEquals(_footConfig.target, null);
@@ -95,10 +91,6 @@ public class FootController : MonoBehaviour
     public void StartCourse()
     {
         _time = 0;
-        _velocity = Vector3.zero;
-        SyncHitFloorTime();
-        // TODO: This should always be floor position/rotation. Remove setFloorPosition and project rotation onto the xz plane
-        _startFloorPosition = targetFloorPosition;
         _startYaw = _setYaw;
         _animationActive = true;
     }
@@ -112,17 +104,6 @@ public class FootController : MonoBehaviour
         var yaw = Quaternion.Euler(0, Mathf.Lerp(_config.footStandingYaw.val, _config.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
         // TODO: Passing offset here (last argument)
         SyncPath(targetFloorPosition, yaw, forwardRatio, Vector3.zero);
-        // TODO: Also animate the toes
-        if (_config.visualizersEnabled.val)
-        {
-            #warning Temporary code
-            var tmp = new FootAnimationCurve<Vector3>(3, Vector3.Lerp);
-            tmp.Set(0, 0, _startFloorPosition);
-            tmp.Set(1, stepTime / 2f, currentFloorPosition);
-            tmp.Set(2, stepTime, this.targetFloorPosition);
-            visualizer.Sync(tmp);
-            visualizer.gameObject.SetActive(true);
-        }
 
         visualizer.SyncArrival(targetFloorPosition, yaw);
 
@@ -130,88 +111,40 @@ public class FootController : MonoBehaviour
         _setYaw = yaw;
     }
 
-    private void SyncHitFloorTime()
-    {
-        // TODO: Find a better way to find that, this should be pretty close though
-        _hitFloorTime = Mathf.Max((stepTime + heelStrikeTime) / 2f, 0.01f);
-    }
-
     private void SyncPath(Vector3 toPosition, Quaternion yaw, float forwardRatio, Vector3 passingOffset)
     {
-        var startPosition = _startFloorPosition;
-        // var startRotation = _startRotation;
-        var up = Vector3.up * Mathf.Clamp(_standToWalkRatio, _config.minStepHeightRatio.val, 1f);
-
-        // TODO: Check diff before this, there was a time ratio multiplication, validate if it was OK to remove
-        var toeOffPosition = Vector3.Lerp(startPosition, toPosition, _config.toeOffDistanceRatio.val) + up * toeOffHeight;
-        var midSwingPosition = Vector3.Lerp(startPosition, toPosition, _config.midSwingDistanceRatio.val) + up * midSwingHeight;
-        var heelStrikePosition = Vector3.Lerp(startPosition, toPosition, _config.heelStrikeDistanceRatio.val) + up * heelStrikeHeight;
-
-        // var toeOffRotation = Quaternion.Euler( * _standToWalkRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _config.toeOffTimeRatio.val);
-        // var midSwingRotation = Quaternion.Euler(_config.midSwingPitch.val * _standToWalkRatio * forwardRatio, 0, 0) * Quaternion.Slerp(startRotation, toRotation, _config.midSwingTimeRatio.val);
-        // var heelStrikeRotation = Quaternion.Euler(_config.heelStrikePitch.val * _standToWalkRatio * Mathf.Clamp01(forwardRatio), 0, 0) * Quaternion.Slerp(startRotation, toRotation, _config.heelStrikeTimeRatio.val);
+        var clampedStandToWalkRatio = Mathf.Clamp(_standToWalkRatio, 0.1f, 1f);
+        var forwardOnlyRatio = Mathf.Clamp01(forwardRatio);
 
         _pathYaw.Set(0, 0f, _startYaw);
-        _pathYaw.Set(1, midSwingTime, Quaternion.Lerp(_startYaw, yaw, 0.5f));
-        _pathYaw.Set(2, stepTime, yaw);
+        _pathYaw.Set(1, toeOffTime, _startYaw);
+        _pathYaw.Set(2, midSwingTime, Quaternion.Lerp(_startYaw, yaw, _config.midSwingTimeRatio.val));
+        _pathYaw.Set(3, heelStrikeTime, yaw);
+        _pathYaw.Set(4, stepTime, yaw);
 
         _pathY.Set(0, 0f, 0);
-        _pathY.Set(1, midSwingTime, _config.stepHeight.val * _standToWalkRatio);
-        _pathY.Set(2, stepTime, 0f);
+        _pathY.Set(1, toeOffTime, toeOffHeight * clampedStandToWalkRatio);
+        _pathY.Set(2, midSwingTime, stepHeight * clampedStandToWalkRatio);
+        _pathY.Set(3, heelStrikeTime, 0);
+        _pathY.Set(4, stepTime, 0f);
 
-        _pathFootPitch.Set(0, 0f, 0);
-        _pathFootPitch.Set(1, midSwingTime, _config.midSwingPitch.val);
-        _pathFootPitch.Set(2, stepTime, _config.heelStrikePitch.val);
+        _pathFootPitch.Set(0, 0f, _config.footPitch.val);
+        _pathFootPitch.Set(1, 0f, _config.footPitch.val);
+        _pathFootPitch.Set(2, midSwingTime, _config.midSwingPitch.val * forwardOnlyRatio);
+        _pathFootPitch.Set(3, heelStrikeTime, _config.heelStrikePitch.val * forwardOnlyRatio);
+        _pathFootPitch.Set(4, stepTime, _config.footPitch.val);
 
         _pathFootPitchWeight.Set(0, 0f, 0);
-        _pathFootPitchWeight.Set(1, midSwingTime, _standToWalkRatio);
-        _pathFootPitchWeight.Set(2, stepTime, 1f); // For now there's no post heel strike interpolation
+        _pathFootPitchWeight.Set(1, 0f, 0);
+        _pathFootPitchWeight.Set(2, midSwingTime, _standToWalkRatio * forwardOnlyRatio);
+        _pathFootPitchWeight.Set(3, heelStrikeTime, 1f * forwardOnlyRatio); // For now there's no post heel strike interpolation
+        _pathFootPitchWeight.Set(4, stepTime, 0); // For now there's no post heel strike interpolation
 
         _pathToePitch.Set(0, 0f, 0);
-        _pathToePitch.Set(1, midSwingTime, 5f * _standToWalkRatio);
-        _pathToePitch.Set(2, stepTime, 10 * _standToWalkRatio);
-/*
-        _path.Set(0,
-            0f,
-            startPosition,
-            _startYaw,
-            _config.footPitch.val,
-            0f,
-            0f
-        );
-        _path.Set(1,
-            toeOffTime,
-            toeOffPosition,
-            _startYaw,
-            Mathf.Lerp(_config.footPitch.val, _config.toeOffPitch.val, _standToWalkRatio),
-            1f,
-            0f
-        );
-        _path.Set(2,
-            midSwingTime,
-            midSwingPosition,
-            Quaternion.Lerp(_startYaw, yaw, 0.5f),
-            Mathf.Lerp(_config.footPitch.val, _config.midSwingPitch.val, _standToWalkRatio),
-            1f,
-            5f * _standToWalkRatio
-        );
-        _path.Set(3,
-            heelStrikeTime,
-            heelStrikePosition,
-            yaw,
-            Mathf.Lerp(_config.footPitch.val, _config.heelStrikePitch.val, _standToWalkRatio),
-            1f,
-            10f * _standToWalkRatio
-        );
-        _path.Set(4,
-            stepTime,
-            toPosition,
-            yaw,
-            _config.footPitch.val,
-            0f,
-            0f
-        );
-        */
+        _pathToePitch.Set(1, 0f, 0);
+        _pathToePitch.Set(2, midSwingTime, 5f * _standToWalkRatio);
+        _pathToePitch.Set(3, heelStrikeTime, 10 * _standToWalkRatio);
+        _pathToePitch.Set(4, stepTime, 0);
     }
 
     public void CancelCourse()
@@ -224,16 +157,9 @@ public class FootController : MonoBehaviour
     {
         if (footControl.isGrabbing) return;
 
-        #warning Temp
-        // if (footControl.name == "lFootControl")
-        // {
-        //     SuperController.singleton.ClearMessages();
-        //     SuperController.LogMessage($"{_animationActive} {_time} / {stepTime} v {_velocity}");
-        // }
-
         if (!_animationActive)
         {
-            AssignFootPositionAndRotation(targetFloorPosition, _setYaw, 0f, _config.footPitch.val, 0f, 0f);
+            AssignFootPositionAndRotation(currentFloorPosition, _setYaw, 0f, _config.footPitch.val, 0f, 0f);
             return;
         }
 
@@ -241,6 +167,8 @@ public class FootController : MonoBehaviour
         if (_time >= stepTime)
         {
             CancelCourse();
+            currentFloorPosition = targetFloorPosition;
+            _velocity = Vector3.zero;
             AssignFootPositionAndRotation(targetFloorPosition, _setYaw, 0f, _config.footPitch.val, 0f, 0f);
             return;
         }
@@ -250,123 +178,15 @@ public class FootController : MonoBehaviour
         kneeControl.followWhenOffRB.AddForce(footForward * (_config.kneeForwardForce.val * GetMidSwingStrength()));
     }
 
-    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float footHeight, float footPitch, float pitchWeight, float toePitch)
-    {
-        // TODO: This should be configurable, and validate the value
-        const float floorOffset = 0.0175f;
-        var footFloorDistance = _config.footFloorDistance.val - floorOffset;
-
-        var footBoneLength = Vector3.Distance(_footBone.worldPosition, _toeBone.worldPosition);
-        var toePosition = toPosition + yaw * new Vector3(0, 0, footBoneLength / 2f);
-        var heelPosition = toPosition + yaw * new Vector3(0, 0, -footBoneLength / 2f);
-        var weightOnZ = gravityCenter.GetPercentageAlong(heelPosition, toePosition);
-
-        var basePitch = 90f - (Mathf.Acos(footFloorDistance / footBoneLength) * Mathf.Rad2Deg);
-        var pitch2 = basePitch;
-
-        if (weightOnZ > 1)
-        {
-            const float maxPitchForwardDistanceInFootLengths = 3f;
-            var forwardWeight = Mathf.Clamp01((weightOnZ - 1) / maxPitchForwardDistanceInFootLengths);
-            const float maxPitchForwardDistanceAngle = 70f;
-            pitch2 += forwardWeight * maxPitchForwardDistanceAngle;
-        }
-        else if (weightOnZ < 0)
-        {
-            const float maxPitchBackwardCancelInFootLengths = 1f;
-            var backwardWeight = Mathf.Clamp01((-weightOnZ) / maxPitchBackwardCancelInFootLengths);
-            const float maxPitchBackwardDistanceAngle = 70f;
-            pitch2 -= backwardWeight * maxPitchBackwardDistanceAngle;
-        }
-
-        var adjustedOverHeight = Math.Max(overHeight, footHeight);
-        if (adjustedOverHeight > 0f)
-        {
-            const float overHeightImpactOnPitch = 480f;
-            pitch2 += overHeight * overHeightImpactOnPitch;
-        }
-        else if (crouchingRatio > 0f)
-        {
-            const float crouchRatioImpactOnPitch = 50f;
-            pitch2 += crouchingRatio * crouchRatioImpactOnPitch;
-        }
-
-        const float maxPitch = 85f;
-        pitch2 = Mathf.Clamp(pitch2, basePitch, maxPitch);
-
-        var floorPosition = heelPosition.RotatePointAroundPivot(toePosition, Quaternion.Euler(pitch2, 0, 0));
-
-        /*
-        if (footControl.name == "lFootControl")
-        {
-            SuperController.singleton.ClearMessages();
-            SuperController.LogMessage($"{weightOnZ:0.000} {pitch2} vs {footFloorDistance}");
-            if (weightOnZ > 1)
-            {
-                SuperController.LogMessage($"Push forward: {weightOnZ - 1:0.000}");
-            }
-        }
-        */
-
-        // TODO: In reality the heel is further behind than the control
-        footControl.control.position = floorPosition + new Vector3(0, floorOffset + footHeight, 0);
-        footControl.control.rotation = yaw * Quaternion.Euler(pitch2, 0, 0);
-
-        return;
-        #warning Previous code
-
-        // TODO: Multiple hardcoded numbers that could be configurable
-        const float maxOverHeight = 0.09f;
-        const float maxPlantarFlexionAngle = 65f;
-        // TODO: Instead of doing a linear interpolation, use a sin interpolation so the angle does a circle around the toes (calculate the bone length and cancel the base height)
-        const float maxPlantarFlexionForward = 0.10f;
-
-        var plantarFlexionHeight = Mathf.Min(Mathf.Max(crouchingRatio * maxOverHeight, overHeight), maxOverHeight);
-        var plantarFlexionRatio = Mathf.Clamp01(plantarFlexionHeight / maxOverHeight);
-        var plantarFlexionAngle = plantarFlexionRatio * maxPlantarFlexionAngle;
-
-        footControl.control.position = toPosition + yaw * new Vector3(0f, _config.footFloorDistance.val + plantarFlexionHeight, plantarFlexionRatio * maxPlantarFlexionForward);
-
-        // TODO: Reduce outside rotation (toe point straight)
-        #warning Replace by calculating toes position and finding back where the feet should be
-        var footRotate = Quaternion.Euler(Mathf.Lerp(_config.footPitch.val + plantarFlexionAngle, footPitch, pitchWeight), 0f, 0f);
-        footControl.control.rotation = yaw * footRotate;
-
-        if (_config.visualizersEnabled.val)
-            visualizer.Sync(footControl.control.position, footControl.control.rotation);
-
-        if (toePitch > 0)
-        {
-            // toeControl.followWhenOffRB.AddRelativeTorque(-45f * Time.deltaTime, 0, 0);
-            var toeRotation = toeControl.followWhenOffRB.transform.localRotation.eulerAngles;
-            toeControl.followWhenOffRB.transform.localRotation = Quaternion.Euler(toeRotation + new Vector3(-toePitch, 0, 0));
-        }
-
-        // if (_footBone.name == "rFoot")
-        // {
-        //     SuperController.singleton.ClearMessages();
-        //     SuperController.LogMessage($"{floorDistance:0.000} ({floorDistanceRatio:0.000}) - {toeControl.control.localRotation.eulerAngles.x:0.00}");
-        // }
-    }
-
-    public float GetMidSwingStrength()
-    {
-        // TODO: This is not adjusted for mid swing, but rather for mid anim. Also, potentially bad code.
-        if (!_animationActive) return 0f;
-        var midSwingRatio = _time / (_hitFloorTime / 2f);
-        if (midSwingRatio > 1) midSwingRatio = 2f - midSwingRatio;
-        return midSwingRatio * _standToWalkRatio;
-    }
-
     private void Sample(float t)
     {
         if (!_animationActive) throw new InvalidOperationException("Cannot sample foot animation because it is currently inactive.");
 
-        currentFloorPosition = Vector3.SmoothDamp(currentFloorPosition, targetFloorPosition, ref _velocity, _pathY.duration - t);
-        // var current = Vector3.Slerp(_startFloorPosition, targetFloorPosition,  t / _pathY.duration);
-
-        // SuperController.singleton.ClearMessages();
-        // SuperController.LogMessage($"{t:0.0} {footControl.control.position.z:0.00} -> {current.z:0.00} -> {floorPosition.z:0.00} ({_velocity.z:0.00})");
+        if (t > toeOffTime && t < heelStrikeTime)
+        {
+            var timeLeft = heelStrikeTime - t;
+            currentFloorPosition = Vector3.SmoothDamp(currentFloorPosition, targetFloorPosition, ref _velocity, timeLeft);
+        }
 
         AssignFootPositionAndRotation(
             currentFloorPosition,
@@ -378,9 +198,77 @@ public class FootController : MonoBehaviour
         );
     }
 
+    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float footHeight, float footPitch, float footPitchWeight, float toePitch)
+    {
+        // TODO: This should be configurable, and validate the value
+        const float floorOffset = 0.0175f;
+        var footFloorDistance = _config.footFloorDistance.val - floorOffset;
+
+        var footBoneLength = Vector3.Distance(_footBone.worldPosition, _toeBone.worldPosition);
+        var toePosition = toPosition + yaw * new Vector3(0, 0, footBoneLength / 2f);
+        var heelPosition = toPosition + yaw * new Vector3(0, 0, -footBoneLength / 2f);
+        var weightOnZ = gravityCenter.GetPercentageAlong(heelPosition, toePosition);
+
+        var basePitch = 90f - (Mathf.Acos(footFloorDistance / footBoneLength) * Mathf.Rad2Deg);
+        var pitch = basePitch;
+
+        if (weightOnZ > 1)
+        {
+            const float maxPitchForwardDistanceInFootLengths = 3f;
+            var forwardWeight = Mathf.Clamp01((weightOnZ - 1) / maxPitchForwardDistanceInFootLengths);
+            const float maxPitchForwardDistanceAngle = 70f;
+            pitch += forwardWeight * maxPitchForwardDistanceAngle;
+        }
+        else if (weightOnZ < 0)
+        {
+            const float maxPitchBackwardCancelInFootLengths = 1f;
+            var backwardWeight = Mathf.Clamp01((-weightOnZ) / maxPitchBackwardCancelInFootLengths);
+            const float maxPitchBackwardDistanceAngle = 70f;
+            pitch -= backwardWeight * maxPitchBackwardDistanceAngle;
+        }
+
+        var adjustedOverHeight = Math.Max(overHeight, footHeight);
+        if (adjustedOverHeight > 0f)
+        {
+            const float overHeightImpactOnPitch = 480f;
+            pitch += overHeight * overHeightImpactOnPitch;
+        }
+        else if (crouchingRatio > 0f)
+        {
+            const float crouchRatioImpactOnPitch = 50f;
+            pitch += crouchingRatio * crouchRatioImpactOnPitch;
+        }
+
+        const float maxPitch = 85f;
+        pitch = Mathf.Clamp(pitch, basePitch, maxPitch);
+        pitch = Mathf.Lerp(pitch, footPitch, footPitchWeight);
+
+        var floorPosition = heelPosition.RotatePointAroundPivot(pitch > 0 ? toePosition : heelPosition, Quaternion.Euler(pitch, 0, 0));
+
+        // TODO: In reality the heel is further behind than the control
+        footControl.control.position = floorPosition + new Vector3(0, floorOffset + footHeight, 0);
+        footControl.control.rotation = yaw * Quaternion.Euler(pitch, 0, 0);
+
+        if (toePitch > 0)
+        {
+            // toeControl.followWhenOffRB.AddRelativeTorque(-45f * Time.deltaTime, 0, 0);
+            var toeRotation = toeControl.followWhenOffRB.transform.localRotation.eulerAngles;
+            toeControl.followWhenOffRB.transform.localRotation = Quaternion.Euler(toeRotation + new Vector3(-toePitch, 0, 0));
+        }
+    }
+
+    public float GetMidSwingStrength()
+    {
+        // TODO: This is not adjusted for mid swing, but rather for mid anim. Also, potentially bad code.
+        if (!_animationActive) return 0f;
+        var midSwingRatio = _time / (heelStrikeTime / 2f);
+        if (midSwingRatio > 1) midSwingRatio = 2f - midSwingRatio;
+        return midSwingRatio * _standToWalkRatio;
+    }
+
     public bool FloorContact()
     {
-        return !_animationActive || _time >= _hitFloorTime;
+        return !_animationActive || _time >= heelStrikeTime;
     }
 
     public void OnEnable()
@@ -392,12 +280,11 @@ public class FootController : MonoBehaviour
 
     private void SetToCurrent()
     {
-        var footPosition = _footBone.worldPosition;
-        var toePosition = _toeBone.worldPosition;
-        // TODO: Cancel the forward movement when feet are higher
+        var footPosition = _footBone.transform.position;
+        var toePosition = _toeBone.transform.position;
+        _velocity = Vector3.zero;
         currentFloorPosition = new Vector3((footPosition.x + toePosition.x) / 2f, 0f, (footPosition.z + toePosition.z) / 2f);
         targetFloorPosition = currentFloorPosition;
-        _startFloorPosition = currentFloorPosition;
         _setYaw = Quaternion.Euler(0, footControl.control.rotation.eulerAngles.y, 0);
         _startYaw = _setYaw;
 

@@ -152,6 +152,8 @@ public class Walk : MVRScript
             measurementsVisualizer.gameObject.SetActive(val);
             #endif
             gaitVisualizer.gameObject.SetActive(val);
+            lFootStateVisualizer.gameObject.SetActive(val);
+            rFootStateVisualizer.gameObject.SetActive(val);
             _stateMachine.currentState.visualizer.gameObject.SetActive(val);
         });
     }
@@ -259,8 +261,6 @@ public class Walk : MVRScript
 
         ui.AddHeader("Height", 2, true);
         ui.AddFloat(config.toeOffHeightRatio, true);
-        ui.AddFloat(config.midSwingHeightRatio, true);
-        ui.AddFloat(config.heelStrikeHeightRatio, true);
 
         ui.AddHeader("Distance", 2, true);
         ui.AddFloat(config.toeOffDistanceRatio, true);

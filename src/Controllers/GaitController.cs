@@ -95,8 +95,8 @@ public class GaitController : MonoBehaviour
         var currentPosition = _heading.GetGravityCenter();
         var forwardRatio = Vector3.Dot(toPosition - currentPosition, GetFeetForward());
 
-        var lFootDistance = lFoot.targetFloorPosition.PlanarDistance(currentPosition);
-        var rFootDistance = rFoot.targetFloorPosition.PlanarDistance(currentPosition);
+        var lFootDistance = lFoot.currentFloorPosition.PlanarDistance(currentPosition);
+        var rFootDistance = rFoot.currentFloorPosition.PlanarDistance(currentPosition);
 
         if(Mathf.Abs(forwardRatio) > 0.2)
         {
@@ -144,7 +144,7 @@ public class GaitController : MonoBehaviour
 
     public Vector3 GetFloorFeetCenter()
     {
-        return (lFoot.targetFloorPosition + rFoot.targetFloorPosition) / 2f;
+        return (lFoot.currentFloorPosition + rFoot.currentFloorPosition) / 2f;
     }
 
     public Vector3 GetCurrentFloorFeetCenter()
@@ -157,7 +157,7 @@ public class GaitController : MonoBehaviour
     public Vector3 GetFeetForward()
     {
         // TODO: Cheap plane to get a perpendicular direction to the feet line, there is surely a better method
-        return Vector3.Cross(rFoot.targetFloorPosition - lFoot.targetFloorPosition, Vector3.up).normalized;
+        return Vector3.Cross(rFoot.currentFloorPosition - lFoot.currentFloorPosition, Vector3.up).normalized;
     }
 
     public bool FeetAreStable()
@@ -171,7 +171,7 @@ public class GaitController : MonoBehaviour
     {
         // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
         const float footDistanceEpsilon = 0.02f;
-        var footDistance = Vector3.Distance(foot.targetFloorPosition, foot.GetFootPositionRelativeToBody(floorCenter, bodyRotation, 0f));
+        var footDistance = Vector3.Distance(foot.currentFloorPosition, foot.GetFootPositionRelativeToBody(floorCenter, bodyRotation, 0f));
         return footDistance < footDistanceEpsilon;
     }
 

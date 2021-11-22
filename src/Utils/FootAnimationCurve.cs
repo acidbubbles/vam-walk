@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class FootAnimationCurve<T>
 {
@@ -23,6 +24,8 @@ public class FootAnimationCurve<T>
 
     public T Evaluate(float t)
     {
+        t = Mathf.Clamp(t, 0f, duration);
+
         for (var i = 1; i < _values.Length; i++)
         {
             if (t < _times[i])

@@ -38,7 +38,7 @@ public class WalkConfiguration
 
     public readonly JSONStorableFloat predictionStrength = new JSONStorableFloat("Prediction Strength", 0.72f, 0f, 2f, false);
 
-    public readonly JSONStorableFloat lateAccelerateSpeedToStepRatio = new JSONStorableFloat("Late Accelerate Speed-To-Step Ratio", 1.1f, 1f, 5f, true);
+    public readonly JSONStorableFloat lateAccelerateSpeedToStepRatio = new JSONStorableFloat("Late Accelerate Speed-To-Step Ratio", 1.6f, 1f, 5f, true);
     public readonly JSONStorableFloat lateAccelerateMaxSpeed = new JSONStorableFloat("Late Accelerate Max Speed", 3f, 1f, 10f, true);
 
     public readonly JSONStorableFloat toeOffTimeRatio = new JSONStorableFloat("ToeOffTimeRatio", 0.2f, 0f, 1f, true);
@@ -46,8 +46,6 @@ public class WalkConfiguration
     public readonly JSONStorableFloat heelStrikeTimeRatio = new JSONStorableFloat("HeelStrikeTimeRatio", 0.82f, 0f, 1f, true);
 
     public readonly JSONStorableFloat toeOffHeightRatio = new JSONStorableFloat("ToeOffHeightRatio", 0.45f, 0f, 1f, true);
-    public readonly JSONStorableFloat midSwingHeightRatio = new JSONStorableFloat("MidSwingHeightRatio", 1f, 0f, 1f, true);
-    public readonly JSONStorableFloat heelStrikeHeightRatio = new JSONStorableFloat("HeelStrikeHeightRatio", 0.2f, 0f, 1f, true);
 
     public readonly JSONStorableFloat toeOffDistanceRatio = new JSONStorableFloat("ToeOffDistanceRatio", 0.05f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingDistanceRatio = new JSONStorableFloat("MidSwingDistanceRatio", 0.4f, 0f, 1f, true);
@@ -180,8 +178,6 @@ public class WalkConfiguration
         plugin.RegisterFloat(heelStrikeTimeRatio);
 
         plugin.RegisterFloat(toeOffHeightRatio);
-        plugin.RegisterFloat(midSwingHeightRatio);
-        plugin.RegisterFloat(heelStrikeHeightRatio);
 
         plugin.RegisterFloat(toeOffDistanceRatio);
         plugin.RegisterFloat(midSwingDistanceRatio);
