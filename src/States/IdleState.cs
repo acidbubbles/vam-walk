@@ -26,7 +26,11 @@ public class IdleState : MonoBehaviour, IWalkState
             return;
         }
 
-        if (IsOffBalanceDistance() || IsOffBalanceRotation())
+        if (_gait.lFoot.HasTarget() && _gait.rFoot.HasTarget())
+        {
+            #warning Not implemented
+        }
+        else if (IsOffBalanceDistance() || IsOffBalanceRotation())
         {
             stateMachine.currentState = stateMachine.walkingState;
             return;
