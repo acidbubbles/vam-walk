@@ -38,8 +38,8 @@ public class WalkConfiguration
 
     public readonly JSONStorableFloat predictionStrength = new JSONStorableFloat("Prediction Strength", 0.72f, 0f, 2f, false);
 
-    public readonly JSONStorableFloat lateAccelerateSpeedToStepRatio = new JSONStorableFloat("Late Accelerate Speed-To-Step Ratio", 1.6f, 1f, 5f, true);
-    public readonly JSONStorableFloat lateAccelerateMaxSpeed = new JSONStorableFloat("Late Accelerate Max Speed", 3f, 1f, 10f, true);
+    public readonly JSONStorableFloat lateAccelerateSpeedToStepRatio = new JSONStorableFloat("Late Accelerate Speed-To-Step Ratio", 1.4f, 1f, 5f, true);
+    public readonly JSONStorableFloat lateAccelerateMaxSpeed = new JSONStorableFloat("Late Accelerate Max Speed", 2.2f, 1f, 10f, true);
 
     public readonly JSONStorableFloat toeOffTimeRatio = new JSONStorableFloat("ToeOffTimeRatio", 0.2f, 0f, 1f, true);
     public readonly JSONStorableFloat midSwingTimeRatio = new JSONStorableFloat("MidSwingTimeRatio", 0.55f, 0f, 1f, true);
