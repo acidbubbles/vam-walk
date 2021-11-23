@@ -59,7 +59,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         if (!_gait.currentFoot.FloorContact()) return;
 
         // TODO: There's a lot of small steps at the end of a movement, can we avoid that?
-        if (_gait.FeetAreStable())
+        if (FeetAreStable())
         {
             stateMachine.currentState = stateMachine.idleState;
             return;
@@ -69,6 +69,13 @@ public class WalkingState : MonoBehaviour, IWalkState
         _gait.currentFoot.StartCourse();
         SyncFootCourse();
         //PlotFootCourse();
+    }
+
+    private bool FeetAreStable()
+    {
+        var floorCenter = _heading.GetGravityCenter();
+        var bodyRotation = _heading.GetPlanarRotation();
+        return _gait.currentFoot.FootIsStable(floorCenter, bodyRotation) && _gait.otherFoot.FootIsStable(floorCenter, bodyRotation);
     }
 
     private void SyncFootCourse()

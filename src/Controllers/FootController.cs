@@ -88,6 +88,14 @@ public class FootController : MonoBehaviour
         return toRotation * Quaternion.Slerp(_footConfig.footStandingRotationOffset, _footConfig.footWalkingRotationOffset, standToWalkRatio);
     }
 
+    public bool FootIsStable(Vector3 floorPosition, Quaternion yaw)
+    {
+        // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
+        const float footDistanceEpsilon = 0.025f;
+        var footDistance = Vector3.Distance(targetFloorPosition, HasTarget() ? GetTargetFloorPosition() : GetFootPositionRelativeToBody(floorPosition, yaw, 0f));
+        return footDistance < footDistanceEpsilon;
+    }
+
     public void StartCourse()
     {
         _time = 0;

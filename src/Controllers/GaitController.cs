@@ -160,21 +160,6 @@ public class GaitController : MonoBehaviour
         return Vector3.Cross(rFoot.currentFloorPosition - lFoot.currentFloorPosition, Vector3.up).normalized;
     }
 
-    public bool FeetAreStable()
-    {
-        var floorCenter = _heading.GetGravityCenter();
-        var bodyRotation = _heading.GetPlanarRotation();
-        return FootIsStable(floorCenter, bodyRotation, currentFoot) && FootIsStable(floorCenter, bodyRotation, otherFoot);
-    }
-
-    private bool FootIsStable(Vector3 floorCenter, Quaternion bodyRotation, FootController foot)
-    {
-        // TODO: This should be configurable, how much distance is allowed before we move to the full stabilization pass.
-        const float footDistanceEpsilon = 0.025f;
-        var footDistance = Vector3.Distance(foot.targetFloorPosition, foot.HasTarget() ? foot.GetTargetFloorPosition() : foot.GetFootPositionRelativeToBody(floorCenter, bodyRotation, 0f));
-        return footDistance < footDistanceEpsilon;
-    }
-
     public void OnEnable()
     {
         if (_config.visualizersEnabled.val)
