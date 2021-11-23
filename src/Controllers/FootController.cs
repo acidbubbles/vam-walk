@@ -206,15 +206,16 @@ public class FootController : MonoBehaviour
         );
     }
 
-    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float footHeight, float footPitch, float footPitchWeight, float toePitch)
+    private void AssignFootPositionAndRotation(Vector3 toPosition, Quaternion yaw, float footY, float footPitch, float footPitchWeight, float toePitch)
     {
         // TODO: This should be configurable, and validate the value
         const float floorOffset = 0.0175f;
         var footFloorDistance = _config.footFloorDistance.val - floorOffset;
 
         var footBoneLength = Vector3.Distance(_footBone.worldPosition, _toeBone.worldPosition);
-        var toePosition = toPosition + yaw * new Vector3(0, 0, footBoneLength / 2f);
-        var heelPosition = toPosition + yaw * new Vector3(0, 0, -footBoneLength / 2f);
+        var toePosition = toPosition + yaw * new Vector3(0, 0, footBoneLength * 0.5f);
+        var controlPosition = toPosition + yaw * new Vector3(0, 0, -footBoneLength * 0.5f);
+        var heelPosition = toPosition + yaw * new Vector3(0, 0, -footBoneLength * 0.7f);
         var weightOnZ = gravityCenter.GetPercentageAlong(heelPosition, toePosition);
 
         var basePitch = 90f - (Mathf.Acos(footFloorDistance / footBoneLength) * Mathf.Rad2Deg);
@@ -235,26 +236,26 @@ public class FootController : MonoBehaviour
             pitch -= backwardWeight * maxPitchBackwardDistanceAngle;
         }
 
-        var adjustedOverHeight = Math.Max(overHeight, footHeight);
+        var adjustedOverHeight = Math.Max(overHeight, footY);
         if (adjustedOverHeight > 0f)
         {
             const float overHeightImpactOnPitch = 480f;
             pitch += overHeight * overHeightImpactOnPitch;
         }
-        else if (crouchingRatio > 0f)
+        if (crouchingRatio > 0f)
         {
             const float crouchRatioImpactOnPitch = 50f;
             pitch += crouchingRatio * crouchRatioImpactOnPitch;
         }
 
-        const float maxPitch = 85f;
+        const float maxPitch = 88f;
         pitch = Mathf.Clamp(pitch, basePitch, maxPitch);
         pitch = Mathf.Lerp(pitch, footPitch, footPitchWeight);
 
-        var floorPosition = heelPosition.RotatePointAroundPivot(pitch > 0 ? toePosition : heelPosition, Quaternion.Euler(pitch, 0, 0));
+        var floorPosition = controlPosition.RotatePointAroundPivot(pitch > 0 ? toePosition : heelPosition, Quaternion.Euler(pitch, 0, 0));
 
         // TODO: In reality the heel is further behind than the control
-        footControl.control.position = floorPosition + new Vector3(0, floorOffset + footHeight, 0);
+        footControl.control.position = floorPosition + new Vector3(0, floorOffset + footY, 0);
         footControl.control.rotation = yaw * Quaternion.Euler(pitch, 0, 0);
 
         if (toePitch > 0)
