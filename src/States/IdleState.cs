@@ -28,12 +28,11 @@ public class IdleState : MonoBehaviour, IWalkState
 
         if (_gait.lFoot.HasTarget() && _gait.rFoot.HasTarget())
         {
-            #warning Not implemented
+            // TODO: No triggers when both feet have targets, must manually force walk
         }
         else if (IsOffBalanceDistance() || IsOffBalanceRotation())
         {
             stateMachine.currentState = stateMachine.walkingState;
-            return;
         }
     }
 

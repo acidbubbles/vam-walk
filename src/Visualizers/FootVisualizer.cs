@@ -43,7 +43,7 @@ public class FootStateVisualizer : MonoBehaviour
 
     public void Configure(WalkConfiguration style)
     {
-        _endSphere.transform.localScale = Vector3.one * style.footCollisionRadius;
+        _endSphere.transform.localScale = Vector3.one * WalkConfiguration.footCollisionRadius;
     }
 
     public void SyncEndConflictCheck(Vector3 position)

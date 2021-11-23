@@ -6,13 +6,13 @@ using UnityEngine.Events;
 public class WalkConfiguration
 {
     // TODO: Should we move all constants here? Make them configurable?
-    public readonly float footCollisionRadius = 0.1f;
-    public readonly float footCollisionRecedeDistance = 0.04f;
+    public const float footCollisionRadius = 0.1f;
+    public const float footCollisionRecedeDistance = 0.04f;
 
     public float halfStepDistance => stepDistance.val / 2f;
 
     // TODO: When toggled, fire an event so visualizers can update themselves
-    public readonly JSONStorableBool visualizersEnabled = new JSONStorableBool("Visualizers Enabled", true);
+    public readonly JSONStorableBool visualizersEnabled = new JSONStorableBool("Visualizers Enabled", false);
     public readonly JSONStorableBool allowWalk = new JSONStorableBool("Allow Walk", true);
 
     public readonly JSONStorableFloat footFloorDistance = new JSONStorableFloat("Foot Floor Distance", 0.054f, 0f, 0.2f, false);

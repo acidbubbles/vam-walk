@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class DisabledState : MonoBehaviour, IWalkState
 {
@@ -20,7 +19,6 @@ public class DisabledState : MonoBehaviour, IWalkState
         if (_config.allowWalk.val)
         {
             stateMachine.currentState = stateMachine.idleState;
-            return;
         }
     }
 

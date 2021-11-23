@@ -105,23 +105,21 @@ public class FootController : MonoBehaviour
 
     public void SetContactPosition(Vector3 targetFloorPosition, Quaternion headingYaw, float standToWalkRatio)
     {
-        // TODO: Does this need to be a member?
         _standToWalkRatio = standToWalkRatio;
-        // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
-        var forwardRatio = Vector3.Dot(targetFloorPosition - currentFloorPosition, footControl.control.forward);
-        var yaw = Quaternion.Euler(0, Mathf.Lerp(_config.footStandingYaw.val, _config.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
-        // TODO: Passing offset here (last argument)
-        SyncPath(targetFloorPosition, yaw, forwardRatio, Vector3.zero);
-
-        visualizer.SyncArrival(targetFloorPosition, yaw);
-
+        _setYaw = Quaternion.Euler(0, Mathf.Lerp(_config.footStandingYaw.val, _config.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
         this.targetFloorPosition = targetFloorPosition;
-        _setYaw = yaw;
+
+        SyncPath(targetFloorPosition, _setYaw);
+
+        visualizer.SyncArrival(targetFloorPosition, _setYaw);
     }
 
-    private void SyncPath(Vector3 toPosition, Quaternion yaw, float forwardRatio, Vector3 passingOffset)
+    private void SyncPath(Vector3 toPosition, Quaternion yaw)
     {
+        // TODO: Walking backwards doesn't use the same foot angles at all. Maybe a whole different animation?
+        // TODO: Passing offset
         var clampedStandToWalkRatio = Mathf.Clamp(_standToWalkRatio, 0.1f, 1f);
+        var forwardRatio = Vector3.Dot(toPosition - currentFloorPosition, footControl.control.forward);
         var forwardOnlyRatio = Mathf.Clamp01(forwardRatio);
 
         _pathYaw.Set(0, 0f, _startYaw);

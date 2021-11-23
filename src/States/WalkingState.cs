@@ -51,9 +51,6 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition(), _gait.speed / _config.lateAccelerateMaxSpeed.val);
 
-        // TODO: Here we should also detect whenever the current step is going too far because of sudden stop; cancel the course in that case.
-
-        #warning This is what we want
         SyncFootCourse();
 
         if (!_gait.currentFoot.FloorContact()) return;
@@ -68,7 +65,6 @@ public class WalkingState : MonoBehaviour, IWalkState
         _gait.SwitchFoot();
         _gait.currentFoot.StartCourse();
         SyncFootCourse();
-        //PlotFootCourse();
     }
 
     private bool FeetAreStable()
@@ -83,9 +79,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         var foot = _gait.currentFoot;
         var projectedCenter = _heading.GetProjectedPosition();
         var toRotation = _heading.GetPlanarRotation();
-        var fromPosition = foot.targetFloorPosition;
 
-        // TODO: Sometimes it looks like the feet is stuck at zero? To confirm (try circle walk and reset home, reload Walk)
         // TODO: We get the foot position relative to the body _twice_
         var standToWalkRatio = Mathf.Clamp01(Vector3.Distance(_heading.GetGravityCenter(), projectedCenter) / _config.halfStepDistance);
 
@@ -121,7 +115,7 @@ public class WalkingState : MonoBehaviour, IWalkState
     {
         // Determine where the feet should land based on the current speed
         var directionUnit = _heading.GetPlanarVelocity().normalized;
-        var projectedStepCenter = projectedCenter + directionUnit * _config.halfStepDistance * standToWalkRatio;
+        var projectedStepCenter = projectedCenter + directionUnit * (_config.halfStepDistance * standToWalkRatio);
 
         // Move foot where it should end up
         var toPosition = _gait.currentFoot.GetFootPositionRelativeToBody(projectedStepCenter, toRotation, standToWalkRatio);
@@ -143,12 +137,12 @@ public class WalkingState : MonoBehaviour, IWalkState
     private readonly Collider[] _colliders = new Collider[4];
     private Vector3 ResolveAvailableArrivalPosition(FootController foot, Vector3 fromPosition, Vector3 toPosition)
     {
-        var collisionHeightOffset = new Vector3(0, _config.footCollisionRadius, 0);
+        var collisionHeightOffset = new Vector3(0, WalkConfiguration.footCollisionRadius, 0);
 
         var endConflictPosition = toPosition + collisionHeightOffset;
         if (_config.visualizersEnabled.val)
             foot.visualizer.SyncEndConflictCheck(endConflictPosition);
-        var collidersCount = Physics.OverlapSphereNonAlloc(endConflictPosition, _config.footCollisionRadius, _colliders, _layerMask);
+        var collidersCount = Physics.OverlapSphereNonAlloc(endConflictPosition, WalkConfiguration.footCollisionRadius, _colliders, _layerMask);
 
         if (collidersCount == 0) return toPosition;
 
@@ -159,7 +153,7 @@ public class WalkingState : MonoBehaviour, IWalkState
             var collisionPoint = collider.ClosestPoint(fromPosition);
             if (_config.visualizersEnabled.val)
                 foot.visualizer.SyncConflict(collisionPoint);
-            var travelDistanceDelta = Vector3.Distance(fromPosition, collisionPoint) - _config.footCollisionRecedeDistance;
+            var travelDistanceDelta = Vector3.Distance(fromPosition, collisionPoint) - WalkConfiguration.footCollisionRecedeDistance;
             // SuperController.LogMessage($"Collision end: {foot.footControl.name} -> {Explain(collider)}, reduce from {Vector3.Distance(floorPosition, toPosition):0.00} to {Vector3.Distance(floorPosition, Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta)):0.00}");
             toPosition = Vector3.MoveTowards(fromPosition, toPosition, travelDistanceDelta);
             break;
@@ -174,7 +168,7 @@ public class WalkingState : MonoBehaviour, IWalkState
         const int maxIterations = 5;
         const float distanceIncreasePerIteration = 0.05f;
 
-        var collisionHeightOffset = new Vector3(0, _config.footCollisionRadius, 0);
+        var collisionHeightOffset = new Vector3(0, WalkConfiguration.footCollisionRadius, 0);
         var passingCheckStart = fromPosition + collisionHeightOffset;
 
         // TODO: When going backwards we don't want as much passing, see: var forwardRatioAbs = Mathf.Abs(forwardRatio);
@@ -209,7 +203,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         var hitsCount = Physics.SphereCastNonAlloc(
             checkOrigin,
-            _config.footCollisionRadius,
+            WalkConfiguration.footCollisionRadius,
             passingDirection,
             _hits,
             passingDistance * 0.4f,
