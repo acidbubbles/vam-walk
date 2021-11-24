@@ -51,6 +51,7 @@ public class WalkingState : MonoBehaviour, IWalkState
 
         _visualizer.Sync(_heading.GetGravityCenter(), _heading.GetProjectedPosition(), _gait.speed / _config.lateAccelerateMaxSpeed.val);
 
+        // TODO: We don't need to run that every single frame, especially with collision detection
         SyncFootCourse();
 
         if (!_gait.currentFoot.FloorContact()) return;
@@ -122,39 +123,46 @@ public class WalkingState : MonoBehaviour, IWalkState
 
        // Make sure we can always catch up within the next step distance
        var resultingDistanceBetweenFeet = Vector3.Distance(_gait.otherFoot.targetFloorPosition, toPosition);
-       if (resultingDistanceBetweenFeet <= _config.halfStepDistance) return toPosition;
+       if (resultingDistanceBetweenFeet > _config.halfStepDistance)
+       {
+           var extraDistance = resultingDistanceBetweenFeet - _config.halfStepDistance;
+           toPosition = Vector3.MoveTowards(
+               toPosition,
+               _gait.currentFoot.targetFloorPosition,
+               extraDistance
+           );
+       }
 
-       var extraDistance = resultingDistanceBetweenFeet - _config.halfStepDistance;
-       toPosition = Vector3.MoveTowards(
-           toPosition,
-           _gait.currentFoot.targetFloorPosition,
-           extraDistance
-       );
+       toPosition = ResolveAvailableArrivalPosition(_gait.currentFoot, toPosition);
 
         return toPosition;
     }
 
-    private readonly Collider[] _colliders = new Collider[4];
-    private Vector3 ResolveAvailableArrivalPosition(FootController foot, Vector3 fromPosition, Vector3 toPosition)
+    private readonly Collider[] _colliderHits = new Collider[4];
+    private Vector3 ResolveAvailableArrivalPosition(FootController foot, Vector3 toPosition)
     {
-        var collisionHeightOffset = new Vector3(0, WalkConfiguration.footCollisionRadius, 0);
-
-        var endConflictPosition = toPosition + collisionHeightOffset;
+        var endConflictPosition = toPosition + new Vector3(0, WalkConfiguration.footCollisionRadius, 0);
+        SuperController.singleton.ClearMessages();
         if (_config.visualizersEnabled.val)
-            foot.visualizer.SyncEndConflictCheck(endConflictPosition);
-        var collidersCount = Physics.OverlapSphereNonAlloc(endConflictPosition, WalkConfiguration.footCollisionRadius, _colliders, _layerMask);
-
-        if (collidersCount == 0) return toPosition;
-
-        for (var hitIndex = 0; hitIndex < collidersCount; hitIndex++)
         {
-            var collider = _colliders[hitIndex];
+            foot.visualizer.SyncEndConflictCheck(endConflictPosition);
+            SuperController.LogMessage($"[{Time.frameCount}] {endConflictPosition}");
+        }
+
+        var hitsCount = Physics.OverlapSphereNonAlloc(endConflictPosition, WalkConfiguration.footCollisionRadius, _colliderHits, _layerMask);
+
+        if (hitsCount == 0) return toPosition;
+
+        var fromPosition = _gait.currentFoot.currentFloorPosition;
+
+        for (var hitIndex = 0; hitIndex < hitsCount; hitIndex++)
+        {
+            var collider = _colliderHits[hitIndex];
             if (!foot.colliders.Contains(collider)) continue;
             var collisionPoint = collider.ClosestPoint(fromPosition);
             if (_config.visualizersEnabled.val)
                 foot.visualizer.SyncConflict(collisionPoint);
             var travelDistanceDelta = Vector3.Distance(fromPosition, collisionPoint) - WalkConfiguration.footCollisionRecedeDistance;
-            // SuperController.LogMessage($"Collision end: {foot.footControl.name} -> {Explain(collider)}, reduce from {Vector3.Distance(floorPosition, toPosition):0.00} to {Vector3.Distance(floorPosition, Vector3.MoveTowards(floorPosition, toPosition, travelDistanceDelta)):0.00}");
             toPosition = Vector3.MoveTowards(fromPosition, toPosition, travelDistanceDelta);
             break;
         }

@@ -48,6 +48,7 @@ public class FootStateVisualizer : MonoBehaviour
 
     public void SyncEndConflictCheck(Vector3 position)
     {
+        _conflictSphere.SetActive(false);
         _endSphere.SetActive(true);
         _endSphere.transform.position = position;
     }
