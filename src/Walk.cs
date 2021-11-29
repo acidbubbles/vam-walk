@@ -152,8 +152,6 @@ public class Walk : MVRScript
             measurementsVisualizer.gameObject.SetActive(val);
             #endif
             gaitVisualizer.gameObject.SetActive(val);
-            lFootStateVisualizer.gameObject.SetActive(val);
-            rFootStateVisualizer.gameObject.SetActive(val);
             _stateMachine.currentState.visualizer.gameObject.SetActive(val);
         });
     }

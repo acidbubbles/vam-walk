@@ -50,7 +50,8 @@ public class HeadingTracker : MonoBehaviour
     public float GetStandingRatio()
     {
         // NOTE: We use the head control instead of the head bone because otherwise the hip can pull the head, forcing the model to a crouching position
-        var headHeightRatio = headControl.transform.position.y / _personMeasurements.floorToHead;
+        var headRotationCancel = _neckBone.startingLocalPosition.y - (Quaternion.Inverse(headControl.transform.rotation) * _neckBone.startingLocalPosition).y;
+        var headHeightRatio = (headControl.transform.position.y + headRotationCancel) / _personMeasurements.floorToHead;
         // TODO: Configurable?
         var standingRatio = Mathf.Clamp01((headHeightRatio * 1.02f - 0.7f) / 0.3f);
         return standingRatio;
@@ -85,11 +86,16 @@ public class HeadingTracker : MonoBehaviour
         var standingFloorCenter = headPosition + bodyForward * -_config.footBackOffset.val;
         var crouchingRatio = 1f - GetStandingRatio();
         // TODO: Variable
-        // TODO: Head looking down pushes the body center backwards, this should be fine but to think through
         // TODO: The floor center could be calculated at the same time as the hips? Where is the weight?
+        var headBendForwardRatio = GetHeadBendForwardRatio();
+        return standingFloorCenter + bodyForward * Mathf.Max(-0.22f * crouchingRatio, -0.25f * headBendForwardRatio);
+    }
+
+    private float GetHeadBendForwardRatio()
+    {
         var headBendForwardAngle = headControl.control.localRotation.eulerAngles.x;
         var headBendForwardRatio = Mathf.Clamp01((headBendForwardAngle > 90 ? 0 : headBendForwardAngle) / 45f);
-        return standingFloorCenter + bodyForward * Mathf.Max(-0.22f * crouchingRatio, -0.15f * headBendForwardRatio);
+        return headBendForwardRatio;
     }
 
     public Quaternion GetPlanarRotation()
@@ -101,7 +107,8 @@ public class HeadingTracker : MonoBehaviour
     public Quaternion GetYaw()
     {
         var headRBTransform = _headRB.transform;
-        return Quaternion.LookRotation(headRBTransform.forward, headRBTransform.up);
+        var forward = Vector3.Cross(Vector3.up, headRBTransform.right * -1).normalized;
+        return Quaternion.LookRotation(forward);
     }
 
     public Vector3 GetBodyForward()

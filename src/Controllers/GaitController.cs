@@ -83,11 +83,10 @@ public class GaitController : MonoBehaviour
 
         // TODO: This is a hip raise ratio, it should go lower after feet hit the floor, and get back into natural position after
         var lrRatio = -lFoot.GetMidSwingStrength() + rFoot.GetMidSwingStrength();
-        _hipControl.control.SetPositionAndRotation(
-            bodyCenter + headingRotation * new Vector3(lrRatio * hipStepSide, lrRatio * hipStepRaise, 0),
-            // TODO: Moving backwards should also reverse hips rotation! Either use forwardRatio or check which feet is forward
-            headingRotation * Quaternion.Euler(hipPitchStanding + (crouchingRatio * hipPitchCrouching), lrRatio * hipStepYaw, lrRatio * hipStepRoll)
-        );
+        var hipPosition = bodyCenter + headingRotation * new Vector3(lrRatio * hipStepSide, lrRatio * hipStepRaise, 0);
+        // TODO: Moving backwards should also reverse hips rotation! Either use forwardRatio or check which feet is forward
+        var hipRotation = headingRotation * Quaternion.Euler(hipPitchStanding + (crouchingRatio * hipPitchCrouching), lrRatio * hipStepYaw, lrRatio * hipStepRoll);
+        _hipControl.control.SetPositionAndRotation(hipPosition, hipRotation);
     }
 
     public void SelectStartFoot(Vector3 toPosition)

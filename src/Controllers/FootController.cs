@@ -101,11 +101,14 @@ public class FootController : MonoBehaviour
         _time = 0;
         _startYaw = _setYaw;
         _animationActive = true;
+        if (_config.visualizersEnabled.val)
+            visualizer.gameObject.SetActive(true);
     }
 
     public void SetContactPosition(Vector3 targetFloorPosition, Quaternion headingYaw, float standToWalkRatio)
     {
         _standToWalkRatio = standToWalkRatio;
+
         _setYaw = Quaternion.Euler(0, Mathf.Lerp(_config.footStandingYaw.val, _config.footWalkingYaw.val, standToWalkRatio) * inverse, 0) * headingYaw;
         this.targetFloorPosition = targetFloorPosition;
 
@@ -208,12 +211,13 @@ public class FootController : MonoBehaviour
     {
         // TODO: This should be configurable, and validate the value
         const float floorOffset = 0.0175f;
+        const float controlFloorOffset = 0.05f;
         var footFloorDistance = _config.footFloorDistance.val - floorOffset;
 
         var footBoneLength = Vector3.Distance(_footBone.worldPosition, _toeBone.worldPosition);
-        var toePosition = toPosition + yaw * new Vector3(0, 0, footBoneLength * 0.5f);
-        var controlPosition = toPosition + yaw * new Vector3(0, 0, -footBoneLength * 0.5f);
-        var heelPosition = toPosition + yaw * new Vector3(0, 0, -footBoneLength * 0.7f);
+        var toePosition = toPosition + yaw * new Vector3(0, floorOffset, footBoneLength * 0.35f);
+        var controlPosition = toPosition + yaw * new Vector3(0, floorOffset, -footBoneLength * 0.5f);
+        var heelPosition = toPosition + yaw * new Vector3(0, floorOffset, -footBoneLength * 0.7f);
         var weightOnZ = gravityCenter.GetPercentageAlong(heelPosition, toePosition);
 
         var basePitch = 90f - (Mathf.Acos(footFloorDistance / footBoneLength) * Mathf.Rad2Deg);
@@ -253,13 +257,14 @@ public class FootController : MonoBehaviour
         var floorPosition = controlPosition.RotatePointAroundPivot(pitch > 0 ? toePosition : heelPosition, Quaternion.Euler(pitch, 0, 0));
 
         // TODO: In reality the heel is further behind than the control
-        footControl.control.position = floorPosition + new Vector3(0, floorOffset + footY, 0);
+        footControl.control.position = floorPosition + new Vector3(0, footY, 0);
         footControl.control.rotation = yaw * Quaternion.Euler(pitch, 0, 0);
 
         if (toePitch > 0)
         {
             // toeControl.followWhenOffRB.AddRelativeTorque(-45f * Time.deltaTime, 0, 0);
             var toeRotation = toeControl.followWhenOffRB.transform.localRotation.eulerAngles;
+            // TODO: toe pitch should have a weight
             toeControl.followWhenOffRB.transform.localRotation = Quaternion.Euler(toeRotation + new Vector3(-toePitch, 0, 0));
         }
     }

@@ -142,11 +142,9 @@ public class WalkingState : MonoBehaviour, IWalkState
     private Vector3 ResolveAvailableArrivalPosition(FootController foot, Vector3 toPosition)
     {
         var endConflictPosition = toPosition + new Vector3(0, WalkConfiguration.footCollisionRadius, 0);
-        SuperController.singleton.ClearMessages();
         if (_config.visualizersEnabled.val)
         {
             foot.visualizer.SyncEndConflictCheck(endConflictPosition);
-            SuperController.LogMessage($"[{Time.frameCount}] {endConflictPosition}");
         }
 
         var hitsCount = Physics.OverlapSphereNonAlloc(endConflictPosition, WalkConfiguration.footCollisionRadius, _colliderHits, _layerMask);
@@ -226,7 +224,6 @@ public class WalkingState : MonoBehaviour, IWalkState
             if (!foot.colliders.Contains(hit.collider)) continue;
             if (_config.visualizersEnabled.val)
             {
-                // SuperController.LogMessage($"Collision path [Iter {i}] {foot.footControl.name} will hit {hit.collider.transform.Identify()} at {hit.point}");
                 foot.visualizer.SyncCollisionAvoidance(i, checkOrigin, checkOrigin + passingDirection * (passingDistance * 0.5f), hit.point);
             }
             return false;
